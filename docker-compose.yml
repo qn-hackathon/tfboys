@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: tfboys-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - tfboys-network
+
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: tfboys-api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - AI_SERVICE_URL=http://ai-service:8001
+    depends_on:
+      - redis
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: tfboys-ai-service
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./backend/ai-service/.env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - VIDEO_SERVICE_URL=http://video-service:8002
+    depends_on:
+      - redis
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+  ai-worker:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: tfboys-ai-worker
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/ai-service/.env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - ai-service
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+  video-service:
+    build:
+      context: ./backend/video-service
+      dockerfile: Dockerfile
+    container_name: tfboys-video-service
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./backend/video-service/.env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+  video-worker:
+    build:
+      context: ./backend/video-service
+      dockerfile: Dockerfile
+    container_name: tfboys-video-worker
+    command: celery -A app.workers.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/video-service/.env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - video-service
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tfboys-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - tfboys-network
+    restart: unless-stopped
+
+networks:
+  tfboys-network:
+    driver: bridge
+
+volumes:
+  redis-data:

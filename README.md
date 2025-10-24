@@ -1,2 +1,151 @@
-# tfboys
-Token Free Boys
+# TFBoys - 文字生成视频系统
+
+Token Free Boys - 基于大模型的小说文字转动漫视频系统
+
+## 项目简介
+
+本项目实现了一个自动化的文字生成视频系统,可以将小说文字自动转换为动漫风格的视频。视频由图片、文字和配音三部分组成,并保证角色的视觉一致性。
+
+### 核心特性
+
+- 🎨 **角色一致性**: 使用Midjourney的--cref参数保证角色在不同场景的视觉一致性
+- 🤖 **AI驱动**: 基于GPT-4/Claude进行文本分析,Midjourney生成图像,阿里云TTS生成配音
+- 🎬 **自动化视频合成**: 使用FFmpeg自动合成图片、字幕和音频
+- 📦 **Monorepo架构**: 前后端代码在同一仓库,便于管理和部署
+- 🐳 **Docker支持**: 完整的Docker配置,一键启动所有服务
+
+## 技术栈
+
+### 前端
+- React + TypeScript
+- Vite
+- Ant Design
+- Axios
+
+### 后端
+- Python + FastAPI
+- Celery + Redis (异步任务队列)
+- OpenAI GPT-4 / Claude 3.5 (文本分析)
+- Midjourney API (图像生成)
+- 阿里云TTS (配音生成)
+- FFmpeg (视频合成)
+
+## 快速开始
+
+### 方式一: Docker Compose (推荐)
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/qn-hackathon/tfboys.git
+cd tfboys
+
+# 2. 配置环境变量
+cp backend/ai-service/.env.example backend/ai-service/.env
+cp backend/video-service/.env.example backend/video-service/.env
+# 编辑.env文件,填入API密钥
+
+# 3. 启动所有服务
+make up
+
+# 4. 访问应用
+open http://localhost:3000
+```
+
+### 方式二: 本地开发
+
+```bash
+# 1. 安装依赖
+make install
+
+# 2. 启动Redis
+docker-compose up -d redis
+
+# 3. 启动后端服务(需要3个终端)
+cd backend/api-gateway && uvicorn app.main:app --reload --port 8000
+cd backend/ai-service && uvicorn app.main:app --reload --port 8001
+cd backend/video-service && uvicorn app.main:app --reload --port 8002
+
+# 4. 启动前端
+cd frontend && npm run dev
+```
+
+## 项目结构
+
+```
+tfboys/
+├── frontend/              # 前端应用(React)
+├── backend/               # 后端服务
+│   ├── api-gateway/      # API网关
+│   ├── ai-service/       # AI处理服务
+│   └── video-service/    # 视频合成服务
+├── shared/                # 共享代码
+├── docs/                  # 文档
+├── scripts/               # 工具脚本
+└── docker/                # Docker配置
+```
+
+详细的目录结构说明请查看 [DIRECTORY_STRUCTURE.md](./DIRECTORY_STRUCTURE.md)
+
+## 文档
+
+- [技术方案设计](./DESIGN.md)
+- [系统架构设计](./docs/ARCHITECTURE.md)
+- [API接口文档](./docs/API.md)
+- [代码目录结构](./DIRECTORY_STRUCTURE.md)
+
+## 开发指南
+
+### 3人协作模式
+
+本项目设计为3人并行开发:
+
+| 角色 | 负责模块 | 工作目录 |
+|------|----------|----------|
+| 前端工程师 | Web UI | `frontend/` |
+| AI工程师 | 文本分析、图像生成、配音 | `backend/ai-service/` |
+| 视频工程师 | 视频合成 | `backend/video-service/` |
+
+### 常用命令
+
+```bash
+make help      # 查看所有可用命令
+make install   # 安装依赖
+make dev       # 启动开发环境
+make build     # 构建Docker镜像
+make test      # 运行测试
+make clean     # 清理临时文件
+```
+
+## API文档
+
+- API Gateway: http://localhost:8000/docs
+- AI Service: http://localhost:8001/docs
+- Video Service: http://localhost:8002/docs
+
+## 环境变量
+
+各服务需要配置以下环境变量:
+
+### AI Service (.env)
+```env
+OPENAI_API_KEY=sk-xxx
+MIDJOURNEY_API_KEY=xxx
+ALIYUN_TTS_ACCESS_KEY=xxx
+ALIYUN_TTS_SECRET_KEY=xxx
+OSS_ENDPOINT=xxx
+OSS_BUCKET=xxx
+```
+
+### Video Service (.env)
+```env
+OSS_ENDPOINT=xxx
+OSS_BUCKET=xxx
+```
+
+## License
+
+MIT
+
+## 贡献
+
+欢迎提交Issue和Pull Request!
