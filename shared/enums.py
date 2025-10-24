@@ -6,7 +6,10 @@ from enum import Enum
 
 class TaskStatus(str, Enum):
     PENDING = "pending"
-    PROCESSING = "processing"
+    ANALYZING = "analyzing"
+    GENERATING_IMAGES = "generating_images"
+    GENERATING_AUDIO = "generating_audio"
+    SYNTHESIZING_VIDEO = "synthesizing_video"
     COMPLETED = "completed"
     FAILED = "failed"
 
