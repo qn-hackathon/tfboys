@@ -1,0 +1,153 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #f5f5f5; }
+      .header { fill: #ffffff; }
+      .primary-btn { fill: #1890ff; }
+      .secondary-btn { fill: #ffffff; stroke: #d9d9d9; stroke-width: 1; }
+      .card { fill: #ffffff; stroke: #e8e8e8; stroke-width: 1; }
+      .input { fill: #ffffff; stroke: #d9d9d9; stroke-width: 1; }
+      .tab-active { fill: #1890ff; }
+      .tab-inactive { fill: #ffffff; stroke: #d9d9d9; stroke-width: 1; }
+      .style-card { fill: #ffffff; stroke: #d9d9d9; stroke-width: 2; }
+      .style-card-active { fill: #e6f7ff; stroke: #1890ff; stroke-width: 2; }
+      .text-title { font-family: Arial, sans-serif; font-size: 28px; font-weight: bold; fill: #262626; }
+      .text-section { font-family: Arial, sans-serif; font-size: 20px; font-weight: bold; fill: #262626; }
+      .text-normal { font-family: Arial, sans-serif; font-size: 14px; fill: #262626; }
+      .text-btn { font-family: Arial, sans-serif; font-size: 16px; font-weight: 500; fill: #ffffff; }
+      .text-hint { font-family: Arial, sans-serif; font-size: 12px; fill: #8c8c8c; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect class="bg" width="1200" height="1600"/>
+  
+  <!-- Header -->
+  <rect class="header" width="1200" height="64" rx="0"/>
+  <text x="40" y="42" class="text-title" font-size="24">🎬 TFBoys AI</text>
+  <text x="1080" y="42" class="text-normal" text-anchor="middle">我的任务</text>
+  
+  <!-- Page Title -->
+  <text x="600" y="140" class="text-title" text-anchor="middle">📝 创建视频任务</text>
+  
+  <!-- Input Section -->
+  <g transform="translate(100, 180)">
+    <rect class="card" width="1000" height="480" rx="8"/>
+    
+    <!-- Section Title -->
+    <text x="30" y="40" class="text-section">1️⃣ 输入小说内容</text>
+    
+    <!-- Tab Bar -->
+    <g transform="translate(30, 60)">
+      <rect class="tab-active" width="120" height="40" rx="4"/>
+      <text x="60" y="27" class="text-btn" text-anchor="middle">直接输入</text>
+      
+      <rect class="tab-inactive" x="140" width="120" height="40" rx="4"/>
+      <text x="200" y="27" class="text-normal" text-anchor="middle">上传文件</text>
+      
+      <rect class="tab-inactive" x="280" width="120" height="40" rx="4"/>
+      <text x="340" y="27" class="text-normal" text-anchor="middle">粘贴URL</text>
+    </g>
+    
+    <!-- Text Input Area -->
+    <rect class="input" x="30" y="120" width="940" height="280" rx="4"/>
+    <text x="50" y="150" class="text-hint">请输入或粘贴小说内容...</text>
+    <text x="50" y="180" class="text-normal" fill="#8c8c8c">春天的早晨，校园里樱花盛开。</text>
+    <text x="50" y="210" class="text-normal" fill="#8c8c8c">少年背着书包走进校门，阳光洒在他的脸上...</text>
+    
+    <!-- Character Count -->
+    <text x="940" y="390" class="text-hint" text-anchor="end">字数统计: 2,500 字</text>
+    
+    <!-- Example Button -->
+    <rect class="secondary-btn" x="30" y="420" width="140" height="36" rx="4"/>
+    <text x="100" y="444" class="text-normal" text-anchor="middle">使用示例</text>
+  </g>
+  
+  <!-- Configuration Section -->
+  <g transform="translate(100, 700)">
+    <rect class="card" width="1000" height="600" rx="8"/>
+    
+    <!-- Section Title -->
+    <text x="30" y="40" class="text-section">2️⃣ 配置视频参数</text>
+    
+    <!-- Video Style -->
+    <text x="30" y="80" class="text-normal" font-weight="bold">视频风格:</text>
+    
+    <!-- Style Cards -->
+    <g transform="translate(30, 100)">
+      <!-- Ancient Style -->
+      <rect class="style-card-active" width="180" height="140" rx="8"/>
+      <text x="90" y="50" class="text-title" text-anchor="middle" font-size="48">🏮</text>
+      <text x="90" y="90" class="text-normal" text-anchor="middle" font-weight="bold">古风</text>
+      <text x="90" y="115" class="text-hint" text-anchor="middle">水墨画风格</text>
+      
+      <!-- Modern Style -->
+      <rect class="style-card" x="200" width="180" height="140" rx="8"/>
+      <text x="290" y="50" class="text-title" text-anchor="middle" font-size="48">🏙️</text>
+      <text x="290" y="90" class="text-normal" text-anchor="middle" font-weight="bold">现代都市</text>
+      <text x="290" y="115" class="text-hint" text-anchor="middle">写实风格</text>
+      
+      <!-- Anime Style -->
+      <rect class="style-card" x="400" width="180" height="140" rx="8"/>
+      <text x="490" y="50" class="text-title" text-anchor="middle" font-size="48">🎨</text>
+      <text x="490" y="90" class="text-normal" text-anchor="middle" font-weight="bold">日系动漫</text>
+      <text x="490" y="115" class="text-hint" text-anchor="middle">二次元风格</text>
+      
+      <!-- Fantasy Style -->
+      <rect class="style-card" x="600" width="180" height="140" rx="8"/>
+      <text x="690" y="50" class="text-title" text-anchor="middle" font-size="48">✨</text>
+      <text x="690" y="90" class="text-normal" text-anchor="middle" font-weight="bold">奇幻世界</text>
+      <text x="690" y="115" class="text-hint" text-anchor="middle">魔幻风格</text>
+      
+      <!-- 3D Cartoon -->
+      <rect class="style-card" x="800" width="180" height="140" rx="8"/>
+      <text x="890" y="50" class="text-title" text-anchor="middle" font-size="48">🎬</text>
+      <text x="890" y="90" class="text-normal" text-anchor="middle" font-weight="bold">3D卡通</text>
+      <text x="890" y="115" class="text-hint" text-anchor="middle">皮克斯风格</text>
+    </g>
+    
+    <!-- Voice Type -->
+    <text x="30" y="290" class="text-normal" font-weight="bold">配音类型:</text>
+    <g transform="translate(30, 310)">
+      <circle fill="#1890ff" cx="10" cy="0" r="6"/>
+      <text x="25" y="5" class="text-normal">女声 (柔和)</text>
+      <text x="160" y="5" class="text-hint">试听 🔊</text>
+      
+      <circle fill="none" stroke="#d9d9d9" stroke-width="2" cx="280" cy="0" r="6"/>
+      <text x="295" y="5" class="text-normal">男声 (低沉)</text>
+      <text x="430" y="5" class="text-hint">试听 🔊</text>
+      
+      <circle fill="none" stroke="#d9d9d9" stroke-width="2" cx="550" cy="0" r="6"/>
+      <text x="565" y="5" class="text-normal">童声 (活泼)</text>
+      <text x="700" y="5" class="text-hint">试听 🔊</text>
+    </g>
+    
+    <!-- Resolution -->
+    <text x="30" y="380" class="text-normal" font-weight="bold">视频分辨率:</text>
+    <g transform="translate(30, 400)">
+      <circle fill="#1890ff" cx="10" cy="0" r="6"/>
+      <text x="25" y="5" class="text-normal">1080p (高清)</text>
+      <text x="160" y="5" class="text-hint">预计5分钟</text>
+      
+      <circle fill="none" stroke="#d9d9d9" stroke-width="2" cx="280" cy="0" r="6"/>
+      <text x="295" y="5" class="text-normal">720p (标清)</text>
+      <text x="430" y="5" class="text-hint">预计3分钟</text>
+    </g>
+    
+    <!-- Estimate Info -->
+    <g transform="translate(0, 470)">
+      <rect fill="#e6f7ff" x="30" width="940" height="60" rx="4"/>
+      <text x="50" y="25" class="text-normal" fill="#1890ff">💡 温馨提示</text>
+      <text x="50" y="48" class="text-hint">预计生成时间: ~5分钟 | 预计场景数: 10-12个 | 预计视频时长: 2-3分钟</text>
+    </g>
+  </g>
+  
+  <!-- Action Buttons -->
+  <g transform="translate(100, 1360)">
+    <rect class="secondary-btn" width="140" height="48" rx="4"/>
+    <text x="70" y="32" class="text-normal" text-anchor="middle">取消</text>
+    
+    <rect class="primary-btn" x="860" width="140" height="48" rx="4"/>
+    <text x="930" y="32" class="text-btn" text-anchor="middle">提交生成</text>
+  </g>
+</svg>
