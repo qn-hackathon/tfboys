@@ -3,7 +3,7 @@ from typing import List
 import httpx
 from app.models.task import CreateTaskRequest, TaskResponse
 from app.config import settings
-from app.services.redis_client import redis_client
+from shared.clients import redis_client
 
 router = APIRouter()
 

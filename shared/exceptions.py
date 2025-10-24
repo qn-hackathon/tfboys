@@ -36,3 +36,48 @@ class VideoSynthesisException(TFBoysException):
             message=f"Video synthesis failed: {message}",
             code="VIDEO_SYNTHESIS_FAILED"
         )
+
+
+class TextAnalysisException(TFBoysException):
+    """文本分析失败"""
+    def __init__(self, message: str):
+        super().__init__(
+            message=f"Text analysis failed: {message}",
+            code="TEXT_ANALYSIS_FAILED"
+        )
+
+
+class ImageGenerationException(TFBoysException):
+    """图像生成失败"""
+    def __init__(self, message: str):
+        super().__init__(
+            message=f"Image generation failed: {message}",
+            code="IMAGE_GENERATION_FAILED"
+        )
+
+
+class VoiceGenerationException(TFBoysException):
+    """配音生成失败"""
+    def __init__(self, message: str):
+        super().__init__(
+            message=f"Voice generation failed: {message}",
+            code="VOICE_GENERATION_FAILED"
+        )
+
+
+class CharacterManagementException(TFBoysException):
+    """角色管理失败"""
+    def __init__(self, message: str):
+        super().__init__(
+            message=f"Character management failed: {message}",
+            code="CHARACTER_MANAGEMENT_FAILED"
+        )
+
+
+class OSSException(TFBoysException):
+    """OSS操作失败"""
+    def __init__(self, message: str):
+        super().__init__(
+            message=f"OSS operation failed: {message}",
+            code="OSS_OPERATION_FAILED"
+        )
