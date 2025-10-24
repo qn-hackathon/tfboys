@@ -30,6 +30,31 @@ Token Free Boys - 基于大模型的小说文字转动漫视频系统
 - 阿里云TTS (配音生成)
 - FFmpeg (视频合成)
 
+## 系统架构
+
+### 工作流程
+
+```
+用户上传小说 → API Gateway → AI Service (异步处理)
+                                  ├─ 文本分析 (GPT-4)
+                                  ├─ 角色提取与设定图生成
+                                  ├─ 场景图像生成 (Midjourney + --cref)
+                                  ├─ 配音生成 (阿里云 TTS)
+                                  └─ 提交到 Video Service
+                                        ↓
+                                  视频合成 (FFmpeg)
+                                        ↓
+                                  更新任务状态 → 用户查询结果
+```
+
+### 角色一致性技术
+
+使用 Midjourney 的 `--cref` (Character Reference) 参数确保同一角色在不同场景中保持视觉一致性:
+
+1. **首次生成**: 为每个角色创建设定图,保存到 Redis 角色库
+2. **后续场景**: 使用 `--cref <角色图URL> --cw 100` 引用角色设定图
+3. **一致性保证**: Character Weight (--cw) 设为 100,严格遵循参考图
+
 ## 快速开始
 
 ### 方式一: Docker Compose (推荐)
@@ -84,14 +109,7 @@ tfboys/
 └── docker/                # Docker配置
 ```
 
-详细的目录结构说明请查看 [DIRECTORY_STRUCTURE.md](./DIRECTORY_STRUCTURE.md)
-
-## 文档
-
-- [技术方案设计](./DESIGN.md)
-- [系统架构设计](./docs/ARCHITECTURE.md)
-- [API接口文档](./docs/API.md)
-- [代码目录结构](./DIRECTORY_STRUCTURE.md)
+详细的开发指南请查看 [CLAUDE.md](./CLAUDE.md)
 
 ## 开发指南
 
