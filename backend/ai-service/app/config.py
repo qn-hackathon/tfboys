@@ -11,11 +11,6 @@ class Settings(BaseSettings):
     qiniu_access_key: str = ""
     qiniu_secret_key: str = ""
     
-    oss_endpoint: str = ""
-    oss_access_key_id: str = ""
-    oss_access_key_secret: str = ""
-    oss_bucket_name: str = "tfboys"
-    
     class Config:
         env_file = ".env"
 
