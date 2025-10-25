@@ -109,8 +109,7 @@ class CharacterManager:
                 character_id=character_id,
                 name=character_name,
                 description=character_desc,
-                reference_image_url=reference_image_url,
-                midjourney_cref_url=reference_image_url
+                reference_image_url=reference_image_url
             )
             
             await redis_client.save_character(character_id, character.model_dump())
@@ -125,7 +124,7 @@ class CharacterManager:
         character_desc: str
     ) -> str:
         """
-        生成角色设定图 (Midjourney, 无 --cref)
+        生成角色设定图 (DALL-E 3)
         
         Args:
             character_name: 角色名称
@@ -136,12 +135,9 @@ class CharacterManager:
         """
         logger.info(f"Generating character design image for {character_name}")
         
-        prompt = f"anime style, character design sheet, {character_name}, {character_desc}, white background"
-        
-        image_url = await self.image_generator.generate_image(
-            prompt=prompt,
-            character_ref_url=None,
-            ar="1:1"
+        image_url = await self.image_generator.generate_character_image(
+            character_name=character_name,
+            character_description=character_desc
         )
         
         logger.info(f"Character image generated: {image_url}")
@@ -152,7 +148,9 @@ class CharacterManager:
         character_names: List[str]
     ) -> Dict[str, str]:
         """
-        批量获取角色参考图 URL (用于场景生成的 --cref)
+        批量获取角色参考图 URL (用于在提示词中描述角色特征)
+        
+        注意: DALL-E 3 不支持 --cref 参数,但我们可以在提示词中使用角色描述
         
         Args:
             character_names: 角色名称列表
