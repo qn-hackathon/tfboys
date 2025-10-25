@@ -73,19 +73,31 @@ docker-compose exec -T video-service python -c "
 import fastapi
 import celery
 import redis
-import oss2
 import PIL
 print('✅ 所有 Python 依赖包正常')
 "
 echo ""
 
-echo "测试 7: 临时目录权限检查"
+echo "测试 7: 本地存储目录权限检查"
 echo "----------------------------------------"
-docker-compose exec -T video-service ls -ld /tmp/video-service
+docker-compose exec -T video-service ls -ld /tmp/tfboys
 if [ $? -eq 0 ]; then
-    echo "✅ 临时目录存在且可访问"
+    echo "✅ 本地存储目录存在且可访问"
+    docker-compose exec -T video-service python -c "
+import os
+storage_dir = '/tmp/tfboys'
+test_file = os.path.join(storage_dir, 'test_write.txt')
+try:
+    with open(test_file, 'w') as f:
+        f.write('test')
+    os.remove(test_file)
+    print('✅ 存储目录可写入')
+except Exception as e:
+    print(f'❌ 存储目录写入失败: {e}')
+    exit(1)
+"
 else
-    echo "❌ 临时目录不存在或无权限"
+    echo "❌ 本地存储目录不存在或无权限"
     exit 1
 fi
 echo ""
