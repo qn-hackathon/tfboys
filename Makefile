@@ -27,7 +27,7 @@ dev:
 	@echo "请在不同终端运行:"
 	@echo "  cd frontend && npm run dev"
 	@echo "  cd backend/api-gateway && uvicorn app.main:app --reload --port 8000"
-	@echo "  cd backend/ai-service && uvicorn app.main:app --reload --port 8001"
+	@echo "  cd backend/ai-service && PYTHONPATH=\$$(pwd)/../.. uvicorn app.main:app --reload --port 8001"
 	@echo "  cd backend/video-service && uvicorn app.main:app --reload --port 8002"
 
 build:

@@ -23,10 +23,6 @@ cp .env.example .env
 # 必需: 七牛 AI Token API Key
 QINIU_API_KEY=your-qiniu-ai-token-api-key
 
-# 可选: 七牛 TTS 服务
-QINIU_ACCESS_KEY=your-qiniu-access-key
-QINIU_SECRET_KEY=your-qiniu-secret-key
-
 # 基础配置
 REDIS_URL=redis://localhost:6379/0
 VIDEO_SERVICE_URL=http://localhost:8002
@@ -267,9 +263,11 @@ python3 test_ai_service_workflow.py --test all
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 
-# 启动服务
-uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+# 启动服务（需要设置 PYTHONPATH 以正确导入 shared 模块）
+PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 ```
+
+**注意:** 由于 ai-service 依赖项目根目录的 `shared` 模块，启动时必须设置 `PYTHONPATH` 环境变量指向项目根目录。
 
 **访问 API 文档:**
 - Swagger UI: http://localhost:8001/docs
@@ -334,7 +332,7 @@ docker run -d -p 6379:6379 redis:latest
 **查看详细日志:**
 ```bash
 # 启动服务时查看日志
-uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
+PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
 ```
 
 ---

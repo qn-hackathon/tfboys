@@ -158,29 +158,29 @@ async def test_voice_generation():
             file_size = os.path.getsize(audio_url_1)
             print(f"   文件大小: {file_size / 1024:.2f} KB")
 
-        # # 测试2: 生成男声配音
-        # print("\n🎵 流程测试 2: 男声配音生成")
-        # print("输入: 文本 + 男声参数 → 输出: 男声语音文件")
-        # test_text_2 = "小明来到教室，同学们已经在座位上了。"
-        # print(f"文本: {test_text_2}")
+        # 测试2: 生成男声配音
+        print("\n🎵 流程测试 2: 男声配音生成")
+        print("输入: 文本 + 男声参数 → 输出: 男声语音文件")
+        test_text_2 = "小明来到教室，同学们已经在座位上了。"
+        print(f"文本: {test_text_2}")
 
-        # audio_url_2, duration_2 = await generator.generate_voice(
-        #     text=test_text_2,
-        #     task_id="test_task",
-        #     scene_id="scene_002",
-        #     voice=TTSVoice.MALE
-        # )
+        audio_url_2, duration_2 = await generator.generate_voice(
+            text=test_text_2,
+            task_id="test_task",
+            scene_id="scene_002",
+            voice=TTSVoice.MALE
+        )
 
-        # print(f"✅ 男声配音生成完成")
-        # print(f"   文件路径: {audio_url_2}")
-        # print(f"   时长: {duration_2:.2f} 秒")
+        print(f"✅ 男声配音生成完成")
+        print(f"   文件路径: {audio_url_2}")
+        print(f"   时长: {duration_2:.2f} 秒")
 
-        # if os.path.exists(audio_url_2):
-        #     file_size = os.path.getsize(audio_url_2)
-        #     print(f"   文件大小: {file_size / 1024:.2f} KB")
+        if os.path.exists(audio_url_2):
+            file_size = os.path.getsize(audio_url_2)
+            print(f"   文件大小: {file_size / 1024:.2f} KB")
 
-        # print("\n✅ 配音生成流程测试完成！")
-        # print(f"\n📁 生成的音频保存在: /tmp/tfboys/audio/")
+        print("\n✅ 配音生成流程测试完成！")
+        print(f"\n📁 生成的音频保存在: /tmp/tfboys/audio/")
 
         return True
 
@@ -230,13 +230,13 @@ async def main():
         results.append(("图像生成", result))
 
     if args.test in ["voice", "all"]:
-        # 检查是否配置了 TTS 密钥
-        if settings.qiniu_access_key and settings.qiniu_secret_key:
+        # 检查是否配置了 TTS API Key
+        if settings.qiniu_api_key:
             result = await test_voice_generation()
             results.append(("配音生成", result))
         else:
-            print("\n⚠️  跳过配音测试: 未配置 QINIU_ACCESS_KEY 和 QINIU_SECRET_KEY")
-            print("    如需测试配音功能，请在 .env 文件中配置七牛云密钥")
+            print("\n⚠️  跳过配音测试: 未配置 QINIU_API_KEY")
+            print("    如需测试配音功能，请在 .env 文件中配置七牛云 API Key")
 
     # 打印测试摘要
     print("\n" + "=" * 60)

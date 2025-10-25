@@ -42,12 +42,14 @@ cp .env.example .env
 ### 启动服务
 
 ```bash
-# 启动 API 服务
-uvicorn app.main:app --reload --port 8001
+# 启动 API 服务（需要设置 PYTHONPATH 以正确导入 shared 模块）
+PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --reload --port 8001
 
 # 启动 Celery Worker
-celery -A app.workers.celery_app worker --loglevel=info
+PYTHONPATH=$(pwd)/../.. celery -A app.workers.celery_app worker --loglevel=info
 ```
+
+**注意:** 由于 ai-service 依赖项目根目录的 `shared` 模块，启动时必须设置 `PYTHONPATH` 环境变量指向项目根目录。
 
 ### 运行测试
 
@@ -66,10 +68,6 @@ python run_tests.py --unit --cov
 ```bash
 # 七牛 AI Token API 配置
 QINIU_API_KEY=your-qiniu-ai-token-api-key
-
-# 七牛 TTS 服务配置
-QINIU_ACCESS_KEY=your-qiniu-access-key
-QINIU_SECRET_KEY=your-qiniu-secret-key
 
 # Redis 配置
 REDIS_URL=redis://localhost:6379/0

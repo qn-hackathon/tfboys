@@ -14,8 +14,7 @@ class TestVoiceGenerator:
     def voice_generator(self):
         """创建VoiceGenerator实例"""
         with patch('app.services.voice_generator.settings') as mock_settings:
-            mock_settings.qiniu_access_key = "test_access_key"
-            mock_settings.qiniu_secret_key = "test_secret_key"
+            mock_settings.qiniu_api_key = "test_api_key"
             generator = VoiceGenerator()
             return generator
     
@@ -65,21 +64,6 @@ class TestVoiceGenerator:
                     task_id="task",
                     scene_id="scene"
                 )
-    
-    def test_generate_qiniu_token(self, voice_generator):
-        """测试七牛云Token生成"""
-        token = voice_generator._generate_qiniu_token(
-            method="POST",
-            path="/voice/v2/tts",
-            query="",
-            content_type="application/json",
-            body='{"test": "data"}'
-        )
-        
-        assert isinstance(token, str)
-        assert ":" in token
-        parts = token.split(":")
-        assert parts[0] == "test_access_key"
     
     @pytest.mark.asyncio
     async def test_call_tts_api_success(self, voice_generator):

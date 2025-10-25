@@ -29,9 +29,9 @@ def _get_storage_client():
     return client
 
 VOICE_MAPPING = {
-    TTSVoice.MALE: "zh-CN-YunxiNeural",
-    TTSVoice.FEMALE: "zh-CN-XiaoxiaoNeural",
-    TTSVoice.CHILD: "zh-CN-YunyangNeural"
+    TTSVoice.MALE: "qiniu_zh_male_whxkxg",
+    TTSVoice.FEMALE: "qiniu_zh_female_xyqxxj",
+    TTSVoice.CHILD: "qiniu_zh_female_segsby"
 }
 
 
