@@ -88,10 +88,9 @@ backend/<service-name>/
 1. **代码注释**: 所有注释必须使用中文
 2. **文档字符串**: 所有 docstring 必须使用中文
 3. **变量命名**: 使用英文命名,但相关注释必须是中文
-4. **提交信息**: Git commit message 必须使用中文
-5. **Pull Request**: PR 标题和描述必须使用中文
-6. **文档**: 所有 Markdown 文档(.md)必须使用中文
-7. **专有名词例外**: 以下技术术语可保留英文:
+4. **Pull Request**: PR 标题和描述必须使用中文
+5. **文档**: 所有 Markdown 文档(.md)必须使用中文
+6. **专有名词例外**: 以下技术术语可保留英文:
    - API 名称 (如 OpenAI API, Claude API, DALL-E 3)
    - 框架名称 (如 FastAPI, React, Redis)
    - 技术术语 (如 HTTP, REST, JSON, Docker)
@@ -129,19 +128,6 @@ async def generate_image(scene_desc: str) -> str:
     # Call DALL-E 3 API to generate image
     response = await openai_client.create_image(scene_desc)
     return response.url
-```
-
-**提交信息示例**:
-```
-✅ 正确:
-feat(ai-service): 添加角色一致性支持
-fix(api-gateway): 修复任务创建超时问题
-docs(readme): 更新安装指南
-
-❌ 错误:
-feat(ai-service): add character consistency support
-fix(api-gateway): resolve task creation timeout
-docs(readme): update installation guide
 ```
 
 ### Python 代码规范
