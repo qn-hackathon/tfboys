@@ -8,9 +8,8 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     anthropic_api_key: str = ""
     
-    aliyun_tts_access_key_id: str = ""
-    aliyun_tts_access_key_secret: str = ""
-    aliyun_tts_app_key: str = ""
+    qiniu_access_key: str = ""
+    qiniu_secret_key: str = ""
     
     oss_endpoint: str = ""
     oss_access_key_id: str = ""

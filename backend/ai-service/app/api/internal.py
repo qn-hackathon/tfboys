@@ -16,6 +16,12 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
     
     接收来自 API Gateway 的任务创建请求,触发 Celery 异步任务
     """
+    if not request.novel_text or not request.novel_text.strip():
+        raise HTTPException(status_code=400, detail="novel_text cannot be empty")
+    
+    if len(request.novel_text) > 50000:
+        raise HTTPException(status_code=400, detail="novel_text exceeds maximum length of 50000 characters")
+    
     task_id = request.task_id if hasattr(request, 'task_id') and request.task_id else str(uuid.uuid4())
     
     task_data = {
@@ -26,10 +32,14 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
         "updated_at": datetime.utcnow().isoformat(),
     }
     
-    if redis_client:
-        await redis_client.save_task(task_id, task_data)
+    if not redis_client:
+        raise HTTPException(status_code=500, detail="Redis client not initialized")
     
-    background_tasks.add_task(process_novel_task.delay, task_id, request.novel_text)
+    try:
+        await redis_client.save_task(task_id, task_data)
+        background_tasks.add_task(process_novel_task.delay, task_id, request.novel_text)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create task: {str(e)}")
     
     return {
         "task_id": task_id,

@@ -12,7 +12,7 @@
 - 数据库: Redis
 - 消息队列: Celery + Redis
 - 对象存储: 阿里云 OSS
-- AI 服务: OpenAI GPT-4/Claude, OpenAI DALL-E 3, 阿里云 TTS
+- AI 服务: OpenAI GPT-4/Claude, OpenAI DALL-E 3, 七牛云 TTS
 
 **架构**: Monorepo (所有服务在一个仓库中)
 
@@ -242,10 +242,9 @@ ANTHROPIC_API_KEY=...
 # DALL-E 3 (使用 OpenAI API)
 # DALL-E 3 图像生成通过 OPENAI_API_KEY 实现，无需额外配置
 
-# 阿里云 TTS
-ALIYUN_TTS_ACCESS_KEY_ID=...
-ALIYUN_TTS_ACCESS_KEY_SECRET=...
-ALIYUN_TTS_APP_KEY=...
+# 七牛云 TTS
+QINIU_ACCESS_KEY=...
+QINIU_SECRET_KEY=...
 
 # 阿里云 OSS
 OSS_ENDPOINT=oss-cn-hangzhou.aliyuncs.com
@@ -293,7 +292,7 @@ AI_SERVICE_URL=http://localhost:8002
    ├─ 3.2 提取角色 → 保存到 Redis 角色库
    ├─ 3.3 生成角色设定图 (DALL-E 3)
    ├─ 3.4 生成场景图像 (DALL-E 3 + 详细提示词)
-   ├─ 3.5 生成配音 (阿里云 TTS)
+   ├─ 3.5 生成配音 (七牛云 TTS)
    └─ 3.6 提交到 Video Service
    ↓
 4. Video Service 合成视频 (FFmpeg)
@@ -509,7 +508,7 @@ ffmpeg_command = [
 ### 4. 如何添加新的配音音色?
 
 1. 在 `shared/enums.py` 中添加新的 `TTSVoice` 枚举值
-2. 在 `backend/ai-service/app/services/voice_generator.py` 中映射到阿里云 TTS 的音色代码
+2. 在 `backend/ai-service/app/services/voice_generator.py` 中映射到七牛云 TTS 的音色ID (7-14)
 
 ---
 
@@ -544,7 +543,7 @@ docker-compose logs -f ai-service
 - [Celery 文档](https://docs.celeryproject.org/)
 - [OpenAI DALL-E 3 文档](https://platform.openai.com/docs/guides/images)
 - [阿里云 OSS 文档](https://help.aliyun.com/product/31815.html)
-- [阿里云 TTS 文档](https://help.aliyun.com/document_detail/84435.html)
+- [七牛云 TTS 文档](https://developer.qiniu.com/dora/8091/speech-synthesis)
 
 ---
 
