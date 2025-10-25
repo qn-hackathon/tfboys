@@ -13,11 +13,22 @@ from mutagen.mp3 import MP3
 
 from app.config import settings
 from app.utils.retry import retry_on_failure
-from shared.clients import local_storage_client
 from shared.exceptions import VoiceGenerationException
 from shared.enums import TTSVoice
 
 logger = logging.getLogger(__name__)
+
+
+def _get_storage_client():
+    """动态获取本地存储客户端"""
+    from shared.clients import get_local_storage_client
+    client = get_local_storage_client()
+    if client is None:
+        raise RuntimeError(
+            "LocalStorageClient not initialized. "
+            "Please call init_local_storage_client() before using VoiceGenerator."
+        )
+    return client
 
 VOICE_MAPPING = {
     TTSVoice.MALE: 9,
@@ -230,24 +241,25 @@ class VoiceGenerator:
             return 5.0
     
     async def _upload_to_oss(
-        self, 
-        audio_bytes: bytes, 
-        task_id: str, 
+        self,
+        audio_bytes: bytes,
+        task_id: str,
         scene_id: str
     ) -> str:
         """
         保存音频到本地存储
-        
+
         Args:
             audio_bytes: 音频文件字节流
             task_id: 任务 ID
             scene_id: 场景 ID
-            
+
         Returns:
             str: 音频文件本地路径
         """
         object_key = f"audio/{task_id}/{scene_id}.mp3"
-        local_path = await local_storage_client.upload_file(audio_bytes, object_key)
+        storage_client = _get_storage_client()
+        local_path = await storage_client.upload_file(audio_bytes, object_key)
         return local_path
 
 
