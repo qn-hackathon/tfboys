@@ -13,7 +13,7 @@ from mutagen.mp3 import MP3
 
 from app.config import settings
 from app.utils.retry import retry_on_failure
-from shared.clients.oss_client import init_oss_client, oss_client
+from shared.clients import local_storage_client
 from shared.exceptions import VoiceGenerationException
 from shared.enums import TTSVoice
 
@@ -40,14 +40,6 @@ class VoiceGenerator:
         self.access_key = settings.qiniu_access_key
         self.secret_key = settings.qiniu_secret_key
         self.api_url = "https://ap-gate-z0.qiniuapi.com/voice/v2/tts"
-        
-        if not oss_client:
-            init_oss_client(
-                access_key_id=settings.oss_access_key_id,
-                access_key_secret=settings.oss_access_key_secret,
-                endpoint=settings.oss_endpoint,
-                bucket_name=settings.oss_bucket_name
-            )
     
     async def generate_voice(
         self,
@@ -244,7 +236,7 @@ class VoiceGenerator:
         scene_id: str
     ) -> str:
         """
-        上传音频到 OSS
+        保存音频到本地存储
         
         Args:
             audio_bytes: 音频文件字节流
@@ -252,11 +244,11 @@ class VoiceGenerator:
             scene_id: 场景 ID
             
         Returns:
-            str: 音频文件 URL
+            str: 音频文件本地路径
         """
         object_key = f"audio/{task_id}/{scene_id}.mp3"
-        url = await oss_client.upload_file(audio_bytes, object_key)
-        return url
+        local_path = await local_storage_client.upload_file(audio_bytes, object_key)
+        return local_path
 
 
 voice_generator = VoiceGenerator()

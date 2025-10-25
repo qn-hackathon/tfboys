@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.api import internal, callbacks
 from app.config import settings
-from shared.clients import init_redis_client, init_oss_client
+from shared.clients import init_redis_client, init_local_storage_client
 from app.services.video_client import init_video_client
 import logging
 
@@ -21,15 +21,10 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize Redis client: {e}")
     
     try:
-        init_oss_client(
-            access_key_id=settings.oss_access_key_id,
-            access_key_secret=settings.oss_access_key_secret,
-            endpoint=settings.oss_endpoint,
-            bucket_name=settings.oss_bucket_name
-        )
-        logger.info("OSS client initialized")
+        init_local_storage_client(base_dir="/tmp/tfboys")
+        logger.info("Local storage client initialized")
     except Exception as e:
-        logger.error(f"Failed to initialize OSS client: {e}")
+        logger.error(f"Failed to initialize local storage client: {e}")
     
     try:
         init_video_client(settings.video_service_url)

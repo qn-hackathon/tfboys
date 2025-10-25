@@ -11,8 +11,8 @@
 - 前端: React + TypeScript
 - 数据库: Redis
 - 消息队列: Celery + Redis
-- 对象存储: 阿里云 OSS
-- AI 服务: OpenAI GPT-4/Claude, Midjourney, 七牛云 TTS
+- 文件存储: 本地文件系统 (/tmp/tfboys)
+- AI 服务: OpenAI GPT-4/Claude, DALL-E 3, 七牛云 TTS
 
 **架构**: Monorepo (所有服务在一个仓库中)
 
@@ -33,7 +33,7 @@ shared/
 │   ├── scene.py     # Scene + Character 模型
 │   └── task.py      # Task 模型
 ├── clients/         # 共享客户端
-│   ├── oss_client.py      # 阿里云 OSS 客户端
+│   ├── local_storage_client.py  # 本地文件存储客户端
 │   └── redis_client.py    # Redis 客户端
 ├── constants.py     # 常量定义
 ├── enums.py         # 枚举类型
@@ -247,10 +247,10 @@ QINIU_ACCESS_KEY=...
 QINIU_SECRET_KEY=...
 
 # 阿里云 OSS
-OSS_ENDPOINT=oss-cn-hangzhou.aliyuncs.com
-OSS_ACCESS_KEY_ID=...
-OSS_ACCESS_KEY_SECRET=...
-OSS_BUCKET_NAME=tfboys
+
+
+
+
 ```
 
 ### Video Service 环境变量
@@ -262,10 +262,10 @@ OSS_BUCKET_NAME=tfboys
 REDIS_URL=redis://localhost:6379/0
 
 # 阿里云 OSS
-OSS_ENDPOINT=oss-cn-hangzhou.aliyuncs.com
-OSS_ACCESS_KEY_ID=...
-OSS_ACCESS_KEY_SECRET=...
-OSS_BUCKET_NAME=tfboys
+
+
+
+
 
 # AI Service (用于回调)
 AI_SERVICE_URL=http://localhost:8002
@@ -290,8 +290,8 @@ AI_SERVICE_URL=http://localhost:8002
 3. AI Service 异步处理:
    ├─ 3.1 文本分析 (GPT-4) → 生成场景列表
    ├─ 3.2 提取角色 → 保存到 Redis 角色库
-   ├─ 3.3 生成角色设定图 (Midjourney)
-   ├─ 3.4 生成场景图像 (Midjourney + --cref)
+   ├─ 3.3 生成角色设定图 (DALL-E 3)
+   ├─ 3.4 生成场景图像 (DALL-E 3 + --cref)
    ├─ 3.5 生成配音 (七牛云 TTS)
    └─ 3.6 提交到 Video Service
    ↓
@@ -306,7 +306,7 @@ AI_SERVICE_URL=http://localhost:8002
 
 **核心原理**: 使用 DALL-E 3 通过详细的角色描述提示词来保持角色一致性
 
-**注意**: DALL-E 3 不支持图像引用参数（如 Midjourney 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
+**注意**: DALL-E 3 不支持图像引用参数（如 DALL-E 3 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
 
 **步骤**:
 
@@ -502,7 +502,7 @@ ffmpeg_command = [
 
 1. 考虑使用 Stable Diffusion + ControlNet (支持图像引用)
 2. 使用专业的角色一致性模型 (如 InsightFace)
-3. 考虑 Midjourney API 代理服务 (支持 --cref 参数)
+3. 考虑 DALL-E 3 API 代理服务 (支持 --cref 参数)
 4. 在 `app/services/character_manager.py` 中实现新算法
 
 ### 4. 如何添加新的配音音色?
