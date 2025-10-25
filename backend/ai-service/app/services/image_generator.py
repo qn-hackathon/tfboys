@@ -7,11 +7,22 @@ import base64
 from typing import Optional
 from openai import AsyncOpenAI
 from app.config import settings
-from shared.clients import local_storage_client
 from shared.exceptions import ImageGenerationException
 from app.utils.retry import retry_on_failure
 
 logger = logging.getLogger(__name__)
+
+
+def _get_storage_client():
+    """动态获取本地存储客户端"""
+    from shared.clients import get_local_storage_client
+    client = get_local_storage_client()
+    if client is None:
+        raise RuntimeError(
+            "LocalStorageClient not initialized. "
+            "Please call init_local_storage_client() before using ImageGenerator."
+        )
+    return client
 
 
 class ImageGenerator:
@@ -183,7 +194,8 @@ class ImageGenerator:
                 raise ImageGenerationException("Invalid response format from Qiniu API")
 
             # 上传到本地存储
-            local_path = await local_storage_client.upload_file(image_bytes, object_key)
+            storage_client = _get_storage_client()
+            local_path = await storage_client.upload_file(image_bytes, object_key)
 
             logger.info(f"Image saved to local storage: {local_path}")
             return local_path

@@ -1,6 +1,6 @@
-# 七牛 AI Token API 功能测试指南
+# AI 服务真实流程测试指南
 
-本指南将帮助您逐步测试迁移到七牛 AI Token API 后的功能。
+本指南将帮助您逐步测试 AI 服务的完整工作流程，包括文本分析、图像生成、配音生成和角色管理等功能。
 
 ## 📋 测试前准备
 
@@ -88,8 +88,8 @@ python3 -m pytest tests/unit/services/test_image_generator.py -v
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 
-# 仅测试文本分析
-python3 test_qiniu_integration.py --test text
+# 仅测试文本分析流程
+python3 test_ai_service_workflow.py --test text
 ```
 
 **测试内容:**
@@ -101,12 +101,12 @@ python3 test_qiniu_integration.py --test text
 
 **预期输出:**
 ```
-🧪 测试文本分析 (七牛 AI 推理 API - DeepSeek-V3)
+📖 测试文本分析流程 (小说文本 → 场景和角色信息)
 ============================================================
 📝 输入文本长度: 234 字符
-正在调用七牛 AI 推理 API...
+🔄 正在执行文本分析流程...
 
-✅ 分析成功！生成了 2 个场景
+✅ 文本分析流程完成！生成了 2 个场景
 
 场景 1:
   描述: 清晨的校园,樱花盛开...
@@ -124,28 +124,111 @@ python3 test_qiniu_integration.py --test text
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 
-# 仅测试图像生成
-python3 test_qiniu_integration.py --test image
+# 仅测试图像生成流程
+python3 test_ai_service_workflow.py --test image
 ```
 
-**测试内容:**
+---
+
+### 步骤 3.5: 功能测试 - 配音生成
+
+测试七牛云 TTS：
+
+```bash
+cd /Users/jiangzhi/repo/tfboys/backend/ai-service
+
+# 仅测试配音生成流程
+python3 test_ai_service_workflow.py --test voice
+```
+
+**测试内容 (配音生成):**
+- ✅ 测试女声配音
+- ✅ 测试男声配音
+- ✅ 测试童声配音
+- ✅ 验证音频时长计算
+- ✅ 保存音频到本地
+
+**预期输出:**
+```
+🎙️  测试配音生成流程 (文本 → 语音文件)
+============================================================
+🎵 流程测试 1: 女声配音生成
+输入: 文本 + 女声参数 → 输出: 女声语音文件
+文本: 春天的早晨，校园里樱花盛开...
+✅ 女声配音生成完成
+   文件路径: /tmp/tfboys/audio/test_task/scene_001.mp3
+   时长: 5.42 秒
+   文件大小: 87.23 KB
+```
+
+---
+
+### 步骤 3.6: 功能测试 - 角色管理
+
+测试角色去重和 Redis 缓存：
+
+```bash
+cd /Users/jiangzhi/repo/tfboys/backend/ai-service
+
+# 仅测试角色管理流程
+python3 test_ai_service_workflow.py --test character
+```
+
+**测试内容 (角色管理):**
+- ✅ 角色 ID 生成 (基于名称 hash)
+- ✅ 角色去重逻辑
+- ✅ 角色设定图生成
+- ✅ Redis 缓存存取
+- ✅ 批量角色处理
+- ✅ 任务角色关联
+
+**预期输出:**
+```
+👥 测试角色管理流程 (角色去重、设定图生成、缓存管理)
+============================================================
+🔑 测试 1: 角色 ID 生成
+小明 ID: char_12345678
+✅ 同名角色 ID 一致
+
+🎨 测试 2: 创建角色并生成设定图
+✅ 角色创建成功
+   角色名称: 测试角色小明
+   设定图路径: /tmp/tfboys/characters/测试角色小明.png
+
+💾 测试 3: 从 Redis 缓存获取角色
+✅ 角色从缓存获取成功（ID 一致）
+✅ 设定图复用成功（URL 一致）
+
+📋 测试 4: 批量处理场景中的角色
+✅ 角色处理完成
+   去重后角色数: 3
+   ✅ 角色去重正确（预期 3 个角色：A、B、C）
+```
+
+---
+
+### 步骤 3 测试内容总结
+
+**图像生成测试:**
 - ✅ 生成角色设定图
 - ✅ 生成场景图像
 - ✅ 测试不同宽高比 (1:1, 16:9, 9:16)
 - ✅ 保存图像到本地
 
-**预期输出:**
+**图像生成预期输出:**
 ```
-🎨 测试图像生成 (七牛文生图 API - Gemini 2.5 Flash)
+🎨 测试图像生成流程 (角色和场景 → 图像文件)
 ============================================================
-📸 测试 1: 生成角色设定图
+📸 流程测试 1: 角色设定图生成
+输入: 角色描述 → 输出: 角色设定图
 角色: 小明 (黑色短发，蓝色眼睛的少年)
-✅ 图像已生成: /tmp/tfboys/characters/小明.png
+✅ 角色设定图生成完成: /tmp/tfboys/characters/小明.png
    文件大小: 245.67 KB
 
-📸 测试 2: 生成场景图像
+📸 流程测试 2: 场景图像生成
+输入: 场景描述 + 角色上下文 → 输出: 场景图像
 场景: 春天的校园，樱花飘落
-✅ 场景图像已生成: /tmp/tfboys/scenes/test_scene_001.png
+✅ 场景图像生成完成: /tmp/tfboys/scenes/test_scene_001.png
    文件大小: 312.45 KB
 
 📁 生成的图像保存在: /tmp/tfboys/
@@ -171,8 +254,8 @@ open /tmp/tfboys/scenes/test_scene_001.png
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 
-# 测试所有功能
-python3 test_qiniu_integration.py --test all
+# 测试完整工作流程
+python3 test_ai_service_workflow.py --test all
 ```
 
 ---
@@ -260,7 +343,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
 
 ### 文本分析功能
 - [ ] 单元测试通过
-- [ ] 功能测试成功调用七牛 API
+- [ ] 功能测试成功调用七牛 API (DeepSeek-V3)
 - [ ] 成功生成场景列表
 - [ ] 角色识别正确
 - [ ] 场景描述合理
@@ -269,8 +352,23 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
 - [ ] 单元测试部分通过
 - [ ] 功能测试成功生成角色图
 - [ ] 功能测试成功生成场景图
-- [ ] 不同宽高比都能生成
+- [ ] 不同宽高比都能生成 (1:1, 16:9, 9:16)
 - [ ] 图像文件正常保存
+
+### 配音生成功能
+- [ ] 功能测试成功生成女声配音
+- [ ] 功能测试成功生成男声配音
+- [ ] 功能测试成功生成童声配音
+- [ ] 音频时长计算正确
+- [ ] 音频文件正常保存
+
+### 角色管理功能
+- [ ] 角色 ID 生成一致性正确
+- [ ] 角色去重逻辑正确
+- [ ] 角色设定图生成成功
+- [ ] Redis 缓存存取正常
+- [ ] 批量角色处理正确
+- [ ] 任务角色关联正确
 
 ### 服务集成
 - [ ] 服务可以正常启动
@@ -286,10 +384,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
 
 ```bash
 # 测试文本分析性能
-time python3 test_qiniu_integration.py --test text
+time python3 test_ai_service_workflow.py --test text
 
 # 测试图像生成性能
-time python3 test_qiniu_integration.py --test image
+time python3 test_ai_service_workflow.py --test image
 ```
 
 ### 并发测试
@@ -311,12 +409,28 @@ ab -n 100 -c 10 http://localhost:8001/health
 
 当以下所有项都完成时，表示迁移测试成功：
 
+### 核心功能测试
 1. ✅ 单元测试: 文本分析 7/7 通过
-2. ✅ 功能测试: 文本分析成功
-3. ✅ 功能测试: 图像生成成功
-4. ✅ 服务启动: 无错误
-5. ✅ API 调用: 正常响应
-6. ✅ 生成结果: 质量符合预期
+2. ✅ 功能测试: 文本分析成功 (DeepSeek-V3)
+3. ✅ 功能测试: 图像生成成功 (七牛文生图 API)
+4. ✅ 功能测试: 配音生成成功 (七牛云 TTS) - 可选
+5. ✅ 功能测试: 角色管理成功 (去重+缓存+图像)
+
+### 服务集成测试
+6. ✅ 服务启动: 无错误
+7. ✅ API 调用: 正常响应
+8. ✅ 生成结果: 质量符合预期
+
+### 快速测试命令
+```bash
+# 测试所有核心功能（不含配音）
+python3 test_ai_service_workflow.py --test text
+python3 test_ai_service_workflow.py --test image
+python3 test_ai_service_workflow.py --test character
+
+# 测试完整工作流程（包含配音，需配置 TTS 密钥）
+python3 test_ai_service_workflow.py --test all
+```
 
 ---
 
