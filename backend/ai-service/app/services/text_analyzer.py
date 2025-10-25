@@ -1,11 +1,10 @@
 """
-文本分析服务 - 使用GPT-4/Claude分析小说文本
+文本分析服务 - 使用七牛 AI 推理 API 分析小说文本
 """
 from typing import List, Dict
 import json
 import logging
-import asyncio
-from anthropic import Anthropic
+from openai import AsyncOpenAI
 from app.config import settings
 from shared.exceptions import TextAnalysisException
 
@@ -13,18 +12,24 @@ logger = logging.getLogger(__name__)
 
 
 class TextAnalyzer:
-    """文本分析器,将小说文本分割为场景并识别角色"""
-    
+    """文本分析器 - 将小说文本分割为场景并识别角色"""
+
     def __init__(self):
-        self.client = Anthropic(api_key=settings.anthropic_api_key)
-    
+        # 使用七牛 AI Token API (OpenAI 兼容接口)
+        self.client = AsyncOpenAI(
+            base_url="https://openai.qiniu.com/v1",
+            api_key=settings.qiniu_api_key
+        )
+        # 使用 deepseek-v3 模型进行文本分析
+        self.model = "deepseek-v3"
+
     async def analyze_novel(self, novel_text: str) -> List[Dict]:
         """
         分析小说文本,分割场景并识别角色
-        
+
         Args:
             novel_text: 小说文本内容
-        
+
         Returns:
             List[Dict]: 场景列表,每个场景包含:
                 - scene_index: 场景索引 (int)
@@ -35,38 +40,69 @@ class TextAnalyzer:
                     - description: 角色外貌特征描述 (str)
         """
         logger.info(f"Analyzing novel text ({len(novel_text)} characters)...")
-        
+
         try:
             prompt = self._build_prompt(novel_text)
-            
-            response = await asyncio.to_thread(
-                self.client.messages.create,
-                model="claude-3-5-sonnet-20241022",
-                max_tokens=4096,
-                temperature=0.7,
+
+            # 调用七牛 AI 推理 API
+            response = await self.client.chat.completions.create(
+                model=self.model,
                 messages=[
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                temperature=0.7,
+                max_tokens=4096,
+                stream=False,
             )
-            
-            result_text = response.content[0].text
+
+            result_text = response.choices[0].message.content
+
+            # 尝试提取 JSON（处理可能的markdown格式）
+            result_text = self._extract_json(result_text)
+
             result = json.loads(result_text)
-            
+
             scenes = result.get("scenes", [])
-            
+
+            # 归一化角色描述，确保同名角色描述一致
             scenes = self._normalize_character_descriptions(scenes)
-            
+
             logger.info(f"Successfully analyzed {len(scenes)} scenes")
-            
+
             return scenes
-            
+
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {str(e)}", exc_info=True)
-            raise TextAnalysisException(f"Invalid JSON response from Claude: {str(e)}")
+            raise TextAnalysisException(f"Invalid JSON response from Qiniu AI: {str(e)}")
         except Exception as e:
             logger.error(f"Failed to analyze novel: {str(e)}", exc_info=True)
             raise TextAnalysisException(str(e))
-    
+
+    def _extract_json(self, text: str) -> str:
+        """
+        从响应中提取 JSON 内容
+        处理可能被包裹在 markdown 代码块中的 JSON
+
+        Args:
+            text: 响应文本
+
+        Returns:
+            str: 提取的 JSON 字符串
+        """
+        text = text.strip()
+
+        # 如果被 markdown 代码块包裹，提取内容
+        if text.startswith("```json"):
+            text = text[7:]  # 去掉 ```json
+            if text.endswith("```"):
+                text = text[:-3]  # 去掉 ```
+        elif text.startswith("```"):
+            text = text[3:]
+            if text.endswith("```"):
+                text = text[:-3]
+
+        return text.strip()
+
     def _build_prompt(self, novel_text: str) -> str:
         """构建分析提示词"""
         text_length = len(novel_text)
@@ -76,7 +112,7 @@ class TextAnalyzer:
             suggested_scenes = "5-10个场景"
         else:
             suggested_scenes = "10-20个场景"
-        
+
         return f"""
 你是一个专业的小说场景分析专家,擅长将小说文本分割为适合视频制作的场景。
 
@@ -117,32 +153,35 @@ class TextAnalyzer:
 - 建议生成{suggested_scenes}
 - 只返回JSON,不要包含其他文字说明
 """
-    
+
     def _normalize_character_descriptions(self, scenes: List[Dict]) -> List[Dict]:
         """
         归一化角色描述,确保同名角色描述一致
-        
+
         Args:
             scenes: 场景列表
-            
+
         Returns:
             List[Dict]: 归一化后的场景列表
         """
+        # 收集所有角色的第一次出现描述
         characters_dict = {}
-        
+
         for scene in scenes:
             for char in scene.get("characters", []):
                 char_name = char.get("name")
                 if char_name and char_name not in characters_dict:
                     characters_dict[char_name] = char.get("description", "")
-        
+
+        # 使用收集到的描述统一所有场景中的角色描述
         for scene in scenes:
             for char in scene.get("characters", []):
                 char_name = char.get("name")
                 if char_name and char_name in characters_dict:
                     char["description"] = characters_dict[char_name]
-        
+
         return scenes
 
 
+# 全局单例
 text_analyzer = TextAnalyzer()

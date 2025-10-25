@@ -36,21 +36,28 @@ def mock_local_storage_client():
 
 
 @pytest.fixture
-def mock_anthropic_client():
-    """Mock Anthropic客户端"""
-    mock_client = MagicMock()
-    mock_response = MagicMock()
-    mock_response.content = [MagicMock(text='{"scenes": []}')]
-    mock_client.messages.create = MagicMock(return_value=mock_response)
+def mock_qiniu_text_client():
+    """Mock 七牛 AI 文本推理客户端"""
+    mock_client = AsyncMock()
+    mock_response = AsyncMock()
+    mock_choice = AsyncMock()
+    mock_message = AsyncMock()
+    mock_message.content = '{"scenes": []}'
+    mock_choice.message = mock_message
+    mock_response.choices = [mock_choice]
+    mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
     return mock_client
 
 
 @pytest.fixture
-def mock_openai_client():
-    """Mock OpenAI客户端"""
+def mock_qiniu_image_client():
+    """Mock 七牛文生图客户端"""
     mock_client = AsyncMock()
     mock_response = AsyncMock()
-    mock_response.data = [AsyncMock(url="https://example.com/image.png")]
+    # 七牛 API 返回 base64 或 URL 格式
+    mock_data = AsyncMock()
+    mock_data.url = "https://example.com/image.png"
+    mock_response.data = [mock_data]
     mock_client.images.generate = AsyncMock(return_value=mock_response)
     mock_client.close = AsyncMock()
     return mock_client
