@@ -12,7 +12,7 @@
 - 数据库: Redis
 - 消息队列: Celery + Redis
 - 对象存储: 阿里云 OSS
-- AI 服务: OpenAI GPT-4/Claude, Midjourney, 阿里云 TTS
+- AI 服务: OpenAI GPT-4/Claude, OpenAI DALL-E 3, 阿里云 TTS
 
 **架构**: Monorepo (所有服务在一个仓库中)
 
@@ -59,7 +59,7 @@ backend/<service-name>/
 ### 3. services/ vs utils/ 的区别
 
 **services/** (业务逻辑层):
-- 调用外部服务的客户端 (GPT-4, Midjourney, Video Service)
+- 调用外部服务的客户端 (GPT-4, DALL-E 3, Video Service)
 - 包含业务逻辑的服务类
 - 示例: `text_analyzer.py`, `image_generator.py`, `video_client.py`
 
@@ -239,9 +239,8 @@ OPENAI_API_KEY=sk-...
 # Anthropic
 ANTHROPIC_API_KEY=...
 
-# Midjourney
-MIDJOURNEY_API_KEY=...
-MIDJOURNEY_API_URL=https://api.midjourney.com/v1
+# DALL-E 3 (使用 OpenAI API)
+# DALL-E 3 图像生成通过 OPENAI_API_KEY 实现，无需额外配置
 
 # 阿里云 TTS
 ALIYUN_TTS_ACCESS_KEY_ID=...
@@ -292,8 +291,8 @@ AI_SERVICE_URL=http://localhost:8002
 3. AI Service 异步处理:
    ├─ 3.1 文本分析 (GPT-4) → 生成场景列表
    ├─ 3.2 提取角色 → 保存到 Redis 角色库
-   ├─ 3.3 生成角色设定图 (Midjourney)
-   ├─ 3.4 生成场景图像 (Midjourney + --cref)
+   ├─ 3.3 生成角色设定图 (DALL-E 3)
+   ├─ 3.4 生成场景图像 (DALL-E 3 + 详细提示词)
    ├─ 3.5 生成配音 (阿里云 TTS)
    └─ 3.6 提交到 Video Service
    ↓
@@ -304,36 +303,47 @@ AI_SERVICE_URL=http://localhost:8002
 6. 用户查询任务状态 → API Gateway → Redis
 ```
 
-### 角色一致性实现 (Midjourney --cref)
+### 角色一致性实现 (DALL-E 3)
 
-**核心原理**: 使用 Midjourney 的 `--cref` 参数确保同一角色在不同场景中保持一致
+**核心原理**: 使用 DALL-E 3 通过详细的角色描述提示词来保持角色一致性
+
+**注意**: DALL-E 3 不支持图像引用参数（如 Midjourney 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
 
 **步骤**:
 
-1. **首次生成角色设定图** (无 --cref):
+1. **首次生成角色设定图**:
 ```python
-prompt = "anime style, character design sheet, 小明, short black hair, blue eyes, white background --ar 1:1 --niji 6"
-character_image_url = await midjourney.generate(prompt)
+prompt = "Anime style character design sheet for 小明. Short black hair, blue eyes, white background, character sheet style, high quality anime illustration."
+character_image_url = await image_generator.generate_character_image(
+    character_name="小明",
+    character_description="short black hair, blue eyes"
+)
 ```
 
 2. **保存角色到 Redis**:
 ```python
 await redis_client.save_character("char_001", {
     "name": "小明",
+    "description": "short black hair, blue eyes",
     "reference_image_url": character_image_url
 })
 ```
 
-3. **生成场景图像时使用 --cref**:
+3. **生成场景图像时使用详细角色描述**:
 ```python
 character_ref = await redis_client.get_character("char_001")
-prompt = "anime style, 小明 standing in a park, sunny day --ar 16:9 --niji 6 --cref " + character_ref["reference_image_url"] + " --cw 100"
-scene_image_url = await midjourney.generate(prompt)
+prompt = f"Anime style scene. 小明 ({character_ref['description']}) standing in a park, sunny day. Cinematic composition, high quality anime illustration."
+scene_image_url = await image_generator.generate_scene_image(
+    scene_description="小明 standing in a park, sunny day",
+    scene_id="scene_001",
+    character_context=f"{character_ref['name']}: {character_ref['description']}"
+)
 ```
 
-**关键参数**:
-- `--cref <URL>`: 角色参考图 URL
-- `--cw 100`: Character Weight (0-100),100表示严格遵循参考图
+**关键策略**:
+- 在每个提示词中包含完整的角色特征描述
+- 保持角色描述的一致性和详细性
+- 使用统一的艺术风格提示（"Anime style", "high quality anime illustration"）
 
 ### Redis Key 命名规范
 
@@ -489,11 +499,12 @@ ffmpeg_command = [
 
 ### 3. 如何扩展角色一致性算法?
 
-当前使用 Midjourney 的 `--cref`,如需更高级的一致性:
+当前使用 DALL-E 3 的详细提示词策略，如需更高级的一致性:
 
-1. 考虑使用 Stable Diffusion + ControlNet
-2. 或使用专业的角色一致性模型 (如 InsightFace)
-3. 在 `app/services/character_manager.py` 中实现新算法
+1. 考虑使用 Stable Diffusion + ControlNet (支持图像引用)
+2. 使用专业的角色一致性模型 (如 InsightFace)
+3. 考虑 Midjourney API 代理服务 (支持 --cref 参数)
+4. 在 `app/services/character_manager.py` 中实现新算法
 
 ### 4. 如何添加新的配音音色?
 
@@ -531,7 +542,7 @@ docker-compose logs -f ai-service
 
 - [FastAPI 文档](https://fastapi.tiangolo.com/)
 - [Celery 文档](https://docs.celeryproject.org/)
-- [Midjourney 文档](https://docs.midjourney.com/)
+- [OpenAI DALL-E 3 文档](https://platform.openai.com/docs/guides/images)
 - [阿里云 OSS 文档](https://help.aliyun.com/product/31815.html)
 - [阿里云 TTS 文档](https://help.aliyun.com/document_detail/84435.html)
 

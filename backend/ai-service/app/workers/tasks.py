@@ -93,16 +93,21 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             
             logger.info(f"Task {task_id}: Processing scene {idx + 1}/{total_scenes}")
             
-            # 3.1 生成场景图(使用--cref)
-            main_char = scene_data["characters"][0] if scene_data["characters"] else None
-            char_ref_url = None
-            if main_char and main_char["name"] in characters_map:
-                char_ref_url = characters_map[main_char["name"]].reference_image_url
+            # 3.1 生成场景图(使用详细角色描述)
+            character_context = None
+            if scene_data["characters"]:
+                char_descriptions = []
+                for char_data in scene_data["characters"]:
+                    if char_data["name"] in characters_map:
+                        char = characters_map[char_data["name"]]
+                        char_descriptions.append(f"{char.name} ({char.description})")
+                if char_descriptions:
+                    character_context = ", ".join(char_descriptions)
             
-            scene_image_url = await image_generator.generate_image(
-                prompt=f"anime style, {scene_data['description']}",
-                character_ref_url=char_ref_url,
-                ar="16:9"
+            scene_image_url = await image_generator.generate_scene_image(
+                scene_description=scene_data['description'],
+                scene_id=scene_id,
+                character_context=character_context
             )
             
             # 3.2 生成配音
@@ -194,14 +199,9 @@ async def _process_characters(task_id: str, scenes_data: List[Dict]) -> Dict[str
                 logger.info(f"Task {task_id}: Generating character design for '{char_name}'")
                 
                 # 首次出现:生成角色设定图
-                char_prompt = (
-                    f"anime style, character design sheet, {char_name}, "
-                    f"{char_data['description']}"
-                )
-                char_ref_url = await image_generator.generate_image(
-                    prompt=char_prompt,
-                    character_ref_url=None,
-                    ar="1:1"
+                char_ref_url = await image_generator.generate_character_image(
+                    character_name=char_name,
+                    character_description=char_data['description']
                 )
                 
                 # 保存角色到 Redis
@@ -209,8 +209,7 @@ async def _process_characters(task_id: str, scenes_data: List[Dict]) -> Dict[str
                     character_id=f"char_{task_id}_{char_name}",
                     name=char_name,
                     description=char_data["description"],
-                    reference_image_url=char_ref_url,
-                    midjourney_cref_url=char_ref_url
+                    reference_image_url=char_ref_url
                 )
                 characters_map[char_name] = character
                 
