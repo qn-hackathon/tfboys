@@ -42,8 +42,12 @@ class LocalStorageClient:
                 with open(local_path, 'wb') as f:
                     f.write(response.content)
         else:
-            if os.path.exists(url_or_path):
-                shutil.copy2(url_or_path, local_path)
+            file_path = url_or_path
+            if url_or_path.startswith('file://'):
+                file_path = url_or_path[7:]
+            
+            if os.path.exists(file_path):
+                shutil.copy2(file_path, local_path)
             else:
                 raise FileNotFoundError(f"File not found: {url_or_path}")
 
