@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Download, Share2, Trash2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
-import { Task } from "@/data/mockData"
+import { Task, mockVideoSlices } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
 interface VideoPreviewDialogProps {
@@ -73,7 +73,7 @@ export function VideoPreviewDialog({
 
             <div className="flex-1 min-h-0">
               <VideoSliceCarousel
-                taskId={task.id}
+                slices={mockVideoSlices}
                 onSliceClick={handleSliceClick}
               />
             </div>

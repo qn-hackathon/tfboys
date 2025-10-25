@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { mockTemplateVideos, mockGeneratedVideo } from "@/data/mockData"
+import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
@@ -385,7 +385,7 @@ export function VideoGenerationPage() {
             {status === "completed" && (
               <Card className="p-6">
                 <VideoSliceCarousel
-                  taskId={mockGeneratedVideo.id}
+                  slices={mockVideoSlices}
                   onSliceClick={handleSliceClick}
                 />
               </Card>
