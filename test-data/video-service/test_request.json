@@ -14,7 +14,7 @@
         }
       ],
       "image_url": "file:///test-data/video-service/scene_1.jpg",
-      "audio_url": "file:///test-data/video-service/scene_1_audio.mp3",
+      "audio_url": "file:///test-data/video-service/scene_1_audio.wav",
       "audio_duration": 3.0,
       "subtitle_text": "在一个阳光明媚的早晨，小明走在上学的路上"
     },
@@ -31,7 +31,7 @@
         }
       ],
       "image_url": "file:///test-data/video-service/scene_2.jpg",
-      "audio_url": "file:///test-data/video-service/scene_2_audio.mp3",
+      "audio_url": "file:///test-data/video-service/scene_2_audio.wav",
       "audio_duration": 4.0,
       "subtitle_text": "突然，他发现前方的桥梁被大雨冲垮了"
     },
@@ -48,7 +48,7 @@
         }
       ],
       "image_url": "file:///test-data/video-service/scene_3.jpg",
-      "audio_url": "file:///test-data/video-service/scene_3_audio.mp3",
+      "audio_url": "file:///test-data/video-service/scene_3_audio.wav",
       "audio_duration": 5.0,
       "subtitle_text": "小明决定绕道而行，最终按时到达了学校"
     }
