@@ -1,29 +1,39 @@
-# TFBoys AI - 前端
+# TFBoys AI - Frontend
 
-本目录包含 TFBoys AI 前端完整产品设计和 UX/UXI 设计以及前端实现
-
----
-
-## 📁 目录结构
-
-```
-docs/
-├── PRODUCT_DESIGN.md            # 完整的产品设计文档
-└── mockups/                     # 页面原型图目录
-    ├── 01-home-page.svg         # 首页原型
-    ├── 02-task-create-page.svg  # 创建任务页原型
-    ├── 03-task-list-page.svg    # 任务列表页原型
-    ├── 04-video-preview-page.svg # 视频预览页原型
-    └── 05-task-history-page.svg  # 任务历史页原型
-```
+TFBoys AI 前端项目 - 小说文本一键生成动漫视频的 Web 应用
 
 ---
 
-## 📄 文档说明
+## 📚 文档导航
 
-### [PRODUCT_DESIGN.md](./docs/PRODUCT_DESIGN.md)
-完整的产品设计文档，包含：
-- 产品概述和定位
-- 核心用户流程详细设计
-- 主要页面的布局和交互设计
-- 页面原型图和说明
+### 核心文档
+
+📖 **[产品设计文档](./docs/PRODUCT_DESIGN.md)** - **必读**
+- 产品经理产出：产品概述、User Story、业务流程图
+- 设计师产出：线框图、原型图、设计系统
+
+### 原型图
+
+🎨 **[原型图目录](./docs/mockups/)**
+- `video-generation-page.svg` - 视频生成页面
+- `my-tasks-page.svg` - 我的任务页面
+- `video-preview-dialog.svg` - 视频预览弹窗
+- `README.md` - 原型图说明
+
+---
+
+## 🎯 产品核心
+
+### 产品定位
+小说文本自动生成动漫视频的 Web 应用
+
+### 核心价值
+- 🤖 **自动化创作** - 将文字转化为视觉内容
+- 🎭 **角色一致性** - AI 保证角色视觉一致性
+- ⚡ **快速生成** - 全自动流程，用户只需等待
+- 🎨 **风格可定制** - 支持多种视频风格
+
+### 目标用户
+- 📚 小说作者 - 为作品制作宣传视频
+- 🎬 内容创作者 - 快速生成视频内容
+- 🌟 二次元爱好者 - 小说片段可视化

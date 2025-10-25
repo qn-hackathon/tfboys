@@ -1,0 +1,111 @@
+<svg width="1200" height="750" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义样式 -->
+  <defs>
+    <style>
+      .overlay { fill: rgba(0, 0, 0, 0.5); }
+      .dialog-bg { fill: #ffffff; }
+      .border { stroke: #e2e8f0; stroke-width: 1; }
+      .text-title { fill: #1e293b; font-size: 16px; font-weight: 600; font-family: Arial, sans-serif; }
+      .text-body { fill: #475569; font-size: 14px; font-family: Arial, sans-serif; }
+      .text-small { fill: #64748b; font-size: 12px; font-family: Arial, sans-serif; }
+      .text-white { fill: #ffffff; font-size: 14px; font-family: Arial, sans-serif; }
+      .button-icon { fill: #64748b; }
+      .button-outline { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+      .card-bg { fill: #f8fafc; }
+      .input-bg { fill: #f8fafc; }
+      .progress-bg { fill: #e2e8f0; }
+      .progress-fill { fill: #3b82f6; }
+    </style>
+  </defs>
+
+  <!-- 背景遮罩 -->
+  <rect class="overlay" x="0" y="0" width="1200" height="750"/>
+  
+  <!-- 弹窗容器 -->
+  <rect class="dialog-bg" x="100" y="50" width="1000" height="650" rx="12" filter="drop-shadow(0 10px 30px rgba(0,0,0,0.3))"/>
+  
+  <!-- 关闭按钮（右上角） -->
+  <circle class="button-outline" cx="1070" cy="80" r="18" fill="white"/>
+  <text x="1064" y="87" font-size="18" fill="#64748b">✕</text>
+  
+  <!-- 左右分栏 -->
+  
+  <!-- 左侧：视频播放区域 -->
+  <g id="left-video-area">
+    <!-- 操作按钮组（右对齐） -->
+    <g id="action-buttons">
+      <!-- 下载按钮 -->
+      <circle class="button-outline" cx="580" cy="125" r="20" fill="white"/>
+      <text x="573" y="132" font-size="18" fill="#3b82f6">⬇️</text>
+      
+      <!-- 分享按钮 -->
+      <circle class="button-outline" cx="625" cy="125" r="20" fill="white"/>
+      <text x="618" y="132" font-size="18" fill="#3b82f6">🔗</text>
+      
+      <!-- 删除按钮 -->
+      <circle class="button-outline" cx="670" cy="125" r="20" fill="white"/>
+      <text x="663" y="132" font-size="18" fill="#ef4444">🗑️</text>
+    </g>
+    
+    <!-- 视频播放器 -->
+    <rect fill="#000000" x="130" y="160" width="560" height="315" rx="8"/>
+    
+    <!-- 播放按钮 -->
+    <circle fill="rgba(255,255,255,0.9)" cx="410" cy="318" r="45"/>
+    <text fill="#000000" x="397" y="336" font-size="42">▶</text>
+    
+    <!-- 播放器控制栏 -->
+    <rect fill="rgba(0,0,0,0.7)" x="130" y="435" width="560" height="40" rx="0 0 8 8"/>
+    
+    <!-- 进度条 -->
+    <rect fill="#64748b" x="150" y="448" width="480" height="4" rx="2"/>
+    <rect fill="#3b82f6" x="150" y="448" width="160" height="4" rx="2"/>
+    <circle fill="#3b82f6" cx="310" cy="450" r="6"/>
+    
+    <!-- 播放时间 -->
+    <text class="text-white" x="150" y="468" font-size="11">00:30 / 02:30</text>
+    
+    <!-- 控制按钮 -->
+    <text class="text-white" x="640" y="468" font-size="16">🔊</text>
+    <text class="text-white" x="660" y="468" font-size="16">⚙️</text>
+    <text class="text-white" x="680" y="468" font-size="16">⛶</text>
+  </g>
+  
+  <!-- 右侧：视频信息区域 -->
+  <g id="right-info-area">
+    <!-- 小说 Prompt 区域 -->
+    <text class="text-title" x="720" y="135">📄 小说 Prompt</text>
+    <rect class="card-bg border" x="720" y="145" width="350" height="120" rx="6"/>
+    <text class="text-small" x="735" y="170" fill="#475569">春天的故事，一个少年与一只流浪</text>
+    <text class="text-small" x="735" y="190" fill="#475569">猫的温暖相遇。在樱花盛开的季</text>
+    <text class="text-small" x="735" y="210" fill="#475569">节，他们一起度过了难忘的时光，</text>
+    <text class="text-small" x="735" y="230" fill="#475569">彼此治愈着对方的心灵...</text>
+    <text class="text-small" x="735" y="255" fill="#94a3b8">（可滚动查看更多内容）</text>
+    
+    <!-- 时长信息 -->
+    <g id="duration-info">
+      <text class="text-body" x="720" y="305">⏱️ 时长：</text>
+      <text class="text-body" x="790" y="305" fill="#1e293b" font-weight="600">2:30</text>
+    </g>
+    
+    <!-- 分辨率信息 -->
+    <g id="resolution-info">
+      <text class="text-body" x="720" y="345">📺 分辨率：</text>
+      <text class="text-body" x="805" y="345" fill="#1e293b" font-weight="600">1080p</text>
+    </g>
+    
+    <!-- 视频横纵比 -->
+    <g id="aspect-ratio-info">
+      <text class="text-body" x="720" y="385">📐 视频横纵比：</text>
+      <text class="text-body" x="845" y="385" fill="#1e293b" font-weight="600">16:9</text>
+    </g>
+    
+    <!-- 分隔线 -->
+    <line x1="720" y1="280" x2="1070" y2="280" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="720" y1="320" x2="1070" y2="320" stroke="#e2e8f0" stroke-width="1"/>
+    <line x1="720" y1="360" x2="1070" y2="360" stroke="#e2e8f0" stroke-width="1"/>
+  </g>
+  
+  <!-- 说明文字（底部） -->
+  <text class="text-small" x="130" y="520" fill="#94a3b8">💡 提示：点击操作按钮可下载、分享或删除视频</text>
+</svg>

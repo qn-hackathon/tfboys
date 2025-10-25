@@ -1,0 +1,160 @@
+<svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义样式 -->
+  <defs>
+    <style>
+      .header-bg { fill: #ffffff; }
+      .sidebar-bg { fill: #f8fafc; }
+      .content-bg { fill: #ffffff; }
+      .card-bg { fill: #ffffff; }
+      .border { stroke: #e2e8f0; stroke-width: 1; }
+      .primary-bg { fill: #3b82f6; }
+      .primary-border { stroke: #3b82f6; stroke-width: 2; }
+      .text-title { fill: #1e293b; font-size: 16px; font-weight: 600; font-family: Arial, sans-serif; }
+      .text-body { fill: #475569; font-size: 14px; font-family: Arial, sans-serif; }
+      .text-small { fill: #64748b; font-size: 12px; font-family: Arial, sans-serif; }
+      .text-white { fill: #ffffff; font-size: 14px; font-family: Arial, sans-serif; }
+      .icon { fill: #64748b; font-size: 18px; }
+      .selected { fill: #eff6ff; }
+      .button { fill: #3b82f6; }
+      .button-outline { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+      .input-bg { fill: #f8fafc; }
+      .progress-bg { fill: #e2e8f0; }
+      .progress-fill { fill: #3b82f6; }
+      .success-bg { fill: #dcfce7; }
+      .error-bg { fill: #fee2e2; }
+    </style>
+  </defs>
+
+  <!-- 顶部栏 -->
+  <rect class="header-bg border" x="0" y="0" width="1400" height="60"/>
+  
+  <!-- Logo 和产品名称 -->
+  <text class="text-title" x="20" y="38">🎬 TFBoys AI</text>
+  
+  <!-- 右侧功能区 -->
+  <text class="text-small" x="1100" y="38">额度: 100 分钟</text>
+  <text class="text-body" x="1210" y="38">👤 用户名 ▼</text>
+  <text class="icon" x="1310" y="38">🌙</text>
+  <text class="icon" x="1350" y="38">🔔</text>
+  
+  <!-- 侧边栏 -->
+  <rect class="sidebar-bg border" x="0" y="60" width="240" height="840"/>
+  
+  <!-- 侧边栏菜单项 -->
+  <!-- 视频生成 -->
+  <rect class="button-outline" x="10" y="80" width="220" height="56" rx="8"/>
+  <text class="text-body" x="30" y="113">📹 视频生成</text>
+  
+  <!-- 我的任务（选中状态） -->
+  <rect class="selected border" x="10" y="150" width="220" height="56" rx="8"/>
+  <text class="text-body" x="30" y="183">📋 我的任务</text>
+  <circle fill="#ef4444" cx="200" cy="170" r="8"/>
+  <text class="text-white" x="196" y="174" font-size="10">3</text>
+  
+  <!-- 内容区域背景 -->
+  <rect class="content-bg" x="240" y="60" width="1160" height="840"/>
+  
+  <!-- 页面标题 -->
+  <text class="text-title" x="270" y="100" font-size="20">📋 我的任务</text>
+  
+  <!-- 筛选和搜索栏 -->
+  <g id="filter-tabs">
+    <rect class="primary-bg" x="270" y="120" width="60" height="36" rx="6"/>
+    <text class="text-white" x="288" y="143">全部</text>
+    
+    <rect class="button-outline" x="340" y="120" width="80" height="36" rx="6"/>
+    <text class="text-body" x="350" y="143">进行中</text>
+    
+    <rect class="button-outline" x="430" y="120" width="80" height="36" rx="6"/>
+    <text class="text-body" x="445" y="143">已完成</text>
+    
+    <rect class="button-outline" x="520" y="120" width="60" height="36" rx="6"/>
+    <text class="text-body" x="538" y="143">失败</text>
+  </g>
+  
+  <!-- 搜索框 -->
+  <rect class="input-bg border" x="1100" y="120" width="270" height="36" rx="6"/>
+  <text class="text-small" x="1115" y="142" fill="#94a3b8">🔍 搜索任务...</text>
+  
+  <!-- 任务卡片 1 - 进行中 -->
+  <rect class="card-bg border" x="270" y="180" width="1100" height="160" rx="8"/>
+  
+  <!-- 任务标题和状态 -->
+  <text class="text-title" x="290" y="210">任务 #001: 春天的故事...</text>
+  <rect fill="#dbeafe" x="1200" y="195" width="80" height="24" rx="12"/>
+  <text class="text-small" x="1210" y="211" fill="#1e40af">🔄 进行中</text>
+  
+  <!-- 状态信息 -->
+  <text class="text-body" x="290" y="235">状态: 图像生成中</text>
+  
+  <!-- 进度条 -->
+  <text class="text-small" x="290" y="260">进度:</text>
+  <rect class="progress-bg" x="340" y="250" width="400" height="12" rx="6"/>
+  <rect class="progress-fill" x="340" y="250" width="240" height="12" rx="6"/>
+  <text class="text-small" x="750" y="260">60%</text>
+  
+  <!-- 详细信息 -->
+  <text class="text-small" x="290" y="285">已处理: 6 / 10 场景</text>
+  <text class="text-small" x="290" y="305">预计剩余时间: 2 分钟</text>
+  
+  <!-- 操作按钮 -->
+  <rect class="button-outline" x="1150" y="300" width="100" height="32" rx="6"/>
+  <text class="text-body" x="1170" y="321">查看详情</text>
+  
+  <rect class="button-outline" x="1260" y="300" width="100" height="32" rx="6"/>
+  <text class="text-body" x="1280" y="321">取消任务</text>
+  
+  <!-- 任务卡片 2 - 已完成 -->
+  <rect class="card-bg border" x="270" y="360" width="1100" height="160" rx="8"/>
+  
+  <!-- 缩略图 -->
+  <rect fill="#cbd5e1" x="290" y="380" width="120" height="90" rx="4"/>
+  <text class="text-small" x="315" y="430" fill="#64748b">视频缩略图</text>
+  
+  <!-- 任务信息 -->
+  <text class="text-title" x="430" y="400">任务 #002: 少年与猫...</text>
+  <rect class="success-bg" x="1200" y="375" width="80" height="24" rx="12"/>
+  <text class="text-small" x="1210" y="391" fill="#15803d">✅ 已完成</text>
+  
+  <text class="text-body" x="430" y="425">时长: 2:30  |  10 个场景  |  45.6 MB</text>
+  <text class="text-small" x="430" y="445">创建时间: 2025-10-23 14:30</text>
+  
+  <!-- 操作按钮 -->
+  <rect class="button" x="430" y="465" width="80" height="32" rx="6"/>
+  <text class="text-white" x="455" y="486">预览</text>
+  
+  <rect class="button-outline" x="520" y="465" width="80" height="32" rx="6"/>
+  <text class="text-body" x="545" y="486">下载</text>
+  
+  <rect class="button-outline" x="610" y="465" width="80" height="32" rx="6"/>
+  <text class="text-body" x="635" y="486">删除</text>
+  
+  <!-- 任务卡片 3 - 失败 -->
+  <rect class="card-bg border" x="270" y="540" width="1100" height="140" rx="8"/>
+  
+  <!-- 任务信息 -->
+  <text class="text-title" x="290" y="570">任务 #003: 星际旅行...</text>
+  <rect class="error-bg" x="1200" y="555" width="80" height="24" rx="12"/>
+  <text class="text-small" x="1218" y="571" fill="#991b1b">❌ 失败</text>
+  
+  <text class="text-body" x="290" y="595" fill="#ef4444">错误原因: 图像生成 API 限流，请稍后重试</text>
+  <text class="text-small" x="290" y="615">创建时间: 2025-10-23 12:15</text>
+  
+  <!-- 操作按钮 -->
+  <rect class="button" x="1150" y="635" width="80" height="32" rx="6"/>
+  <text class="text-white" x="1175" y="656">重试</text>
+  
+  <rect class="button-outline" x="1240" y="635" width="80" height="32" rx="6"/>
+  <text class="text-body" x="1265" y="656">删除</text>
+  
+  <!-- 分页 -->
+  <g id="pagination">
+    <rect class="button-outline" x="550" y="720" width="80" height="36" rx="6"/>
+    <text class="text-body" x="570" y="743">← 上一页</text>
+    
+    <text class="text-body" x="660" y="743">1 / 3</text>
+    
+    <rect class="button-outline" x="730" y="720" width="80" height="36" rx="6"/>
+    <text class="text-body" x="750" y="743">下一页 →</text>
+  </g>
+</svg>
