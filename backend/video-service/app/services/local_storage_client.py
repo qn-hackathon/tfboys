@@ -2,6 +2,7 @@ import os
 import httpx
 import shutil
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 class LocalStorageClient:
@@ -31,7 +32,7 @@ class LocalStorageClient:
         从本地路径或URL下载文件
         
         Args:
-            url_or_path: 源文件路径或URL
+            url_or_path: 源文件路径或URL (支持 http://, https://, file://, 或直接文件路径)
             local_path: 目标本地路径
         """
         if url_or_path.startswith('http://') or url_or_path.startswith('https://'):
@@ -41,6 +42,12 @@ class LocalStorageClient:
                 
                 with open(local_path, 'wb') as f:
                     f.write(response.content)
+        elif url_or_path.startswith('file://'):
+            file_path = urlparse(url_or_path).path
+            if os.path.exists(file_path):
+                shutil.copy2(file_path, local_path)
+            else:
+                raise FileNotFoundError(f"File not found: {url_or_path} (resolved to: {file_path})")
         else:
             if os.path.exists(url_or_path):
                 shutil.copy2(url_or_path, local_path)
