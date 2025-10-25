@@ -10,9 +10,9 @@ from shared.exceptions import ImageGenerationException
 @pytest.mark.unit
 class TestImageGenerator:
     @pytest.fixture
-    def image_generator(self, mock_openai_client):
+    def image_generator(self, mock_qiniu_image_client):
         """创建ImageGenerator实例"""
-        with patch('app.services.image_generator.AsyncOpenAI', return_value=mock_openai_client):
+        with patch('app.services.image_generator.AsyncOpenAI', return_value=mock_qiniu_image_client):
             generator = ImageGenerator()
             return generator
     
