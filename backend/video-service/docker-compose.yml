@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: video-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - video-service-network
+
+  video-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: video-service
+    ports:
+      - "8003:8003"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OSS_ENDPOINT=${OSS_ENDPOINT:-https://oss-cn-hangzhou.aliyuncs.com}
+      - OSS_ACCESS_KEY=${OSS_ACCESS_KEY}
+      - OSS_SECRET_KEY=${OSS_SECRET_KEY}
+      - OSS_BUCKET=${OSS_BUCKET:-tfboys}
+      - TEMP_DIR=/tmp/video-service
+      - FFMPEG_THREADS=${FFMPEG_THREADS:-4}
+      - CHINESE_FONT_PATH=/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
+      - AI_SERVICE_CALLBACK_URL=${AI_SERVICE_CALLBACK_URL:-http://ai-service:8002/callbacks/video-completed}
+    volumes:
+      - ./app:/app/app
+      - video_temp:/tmp/video-service
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - video-service-network
+    restart: unless-stopped
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: video-service-celery-worker
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OSS_ENDPOINT=${OSS_ENDPOINT:-https://oss-cn-hangzhou.aliyuncs.com}
+      - OSS_ACCESS_KEY=${OSS_ACCESS_KEY}
+      - OSS_SECRET_KEY=${OSS_SECRET_KEY}
+      - OSS_BUCKET=${OSS_BUCKET:-tfboys}
+      - TEMP_DIR=/tmp/video-service
+      - FFMPEG_THREADS=${FFMPEG_THREADS:-4}
+      - CHINESE_FONT_PATH=/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
+      - AI_SERVICE_CALLBACK_URL=${AI_SERVICE_CALLBACK_URL:-http://ai-service:8002/callbacks/video-completed}
+    volumes:
+      - ./app:/app/app
+      - video_temp:/tmp/video-service
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - video-service-network
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  video_temp:
+
+networks:
+  video-service-network:
+    driver: bridge
