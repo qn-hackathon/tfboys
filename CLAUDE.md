@@ -30,7 +30,7 @@
 ```
 shared/
 ├── models/          # 共享数据模型
-│   ├── scene.py     # Scene + Character 模型
+│   ├── scene.py     # Scene 模型
 │   └── task.py      # Task 模型
 ├── clients/         # 共享客户端
 │   ├── local_storage_client.py  # 本地文件存储客户端
@@ -138,13 +138,12 @@ async def generate_image(scene_desc: str) -> str:
 4. **文档字符串**: 使用 Google 风格的 docstring (中文)
 
 ```python
-async def generate_image(scene_desc: str, character_refs: List[str]) -> str:
+async def generate_image(scene_desc: str) -> str:
     """
     生成场景图像
     
     Args:
         scene_desc: 场景描述
-        character_refs: 角色参考图 URL 列表
         
     Returns:
         str: 生成的图像 URL
@@ -180,7 +179,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 
 # 3. 共享模块
-from shared.models import Scene, Character
+from shared.models import Scene
 from shared.clients import redis_client
 
 # 4. 本地模块
@@ -328,11 +327,9 @@ AI_SERVICE_URL=http://localhost:8002
    ↓
 3. AI Service 异步处理:
    ├─ 3.1 文本分析 (DeepSeek-V3) → 生成场景列表
-   ├─ 3.2 提取角色 → 保存到 Redis 角色库
-   ├─ 3.3 生成角色设定图 (七牛文生图 API)
-   ├─ 3.4 生成场景图像 (七牛文生图 API + --cref)
-   ├─ 3.5 生成配音 (七牛 AI Token API TTS)
-   └─ 3.6 提交到 Video Service
+   ├─ 3.2 生成场景图像 (七牛文生图 API)
+   ├─ 3.3 生成配音 (七牛 AI Token API TTS)
+   └─ 3.4 提交到 Video Service
    ↓
 4. Video Service 合成视频 (FFmpeg)
    ↓
@@ -341,62 +338,17 @@ AI_SERVICE_URL=http://localhost:8002
 6. 用户查询任务状态 → API Gateway → Redis
 ```
 
-### 角色一致性实现 (七牛文生图 API)
-
-**核心原理**: 使用 七牛文生图 API 通过详细的角色描述提示词来保持角色一致性
-
-**注意**: 七牛文生图 API 不支持图像引用参数（如 七牛文生图 API 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
-
-**步骤**:
-
-1. **首次生成角色设定图**:
-```python
-prompt = "Anime style character design sheet for 小明. Short black hair, blue eyes, white background, character sheet style, high quality anime illustration."
-character_image_url = await image_generator.generate_character_image(
-    character_name="小明",
-    character_description="short black hair, blue eyes"
-)
-```
-
-2. **保存角色到 Redis**:
-```python
-await redis_client.save_character("char_001", {
-    "name": "小明",
-    "description": "short black hair, blue eyes",
-    "reference_image_url": character_image_url
-})
-```
-
-3. **生成场景图像时使用详细角色描述**:
-```python
-character_ref = await redis_client.get_character("char_001")
-prompt = f"Anime style scene. 小明 ({character_ref['description']}) standing in a park, sunny day. Cinematic composition, high quality anime illustration."
-scene_image_url = await image_generator.generate_scene_image(
-    scene_description="小明 standing in a park, sunny day",
-    scene_id="scene_001",
-    character_context=f"{character_ref['name']}: {character_ref['description']}"
-)
-```
-
-**关键策略**:
-- 在每个提示词中包含完整的角色特征描述
-- 保持角色描述的一致性和详细性
-- 使用统一的艺术风格提示（"Anime style", "high quality anime illustration"）
-
 ### Redis Key 命名规范
 
 ```
 task:{task_id}                    # 任务数据 (TTL: 7天)
-task:{task_id}:characters         # 任务的角色ID列表 (Set)
-character:{character_id}          # 角色数据 (永久)
 tasks                             # 所有任务ID集合 (Set)
 ```
 
-### OSS 路径规范
+### 本地存储路径规范
 
 ```
-characters/{character_id}.jpg        # 角色设定图
-scenes/{task_id}/{scene_id}.jpg      # 场景图像
+scenes/{scene_id}.png                # 场景图像
 audio/{task_id}/{scene_id}.mp3       # 配音文件
 videos/{task_id}/final.mp4           # 最终视频
 ```
@@ -535,16 +487,7 @@ ffmpeg_command = [
 ]
 ```
 
-### 3. 如何扩展角色一致性算法?
-
-当前使用 七牛文生图 API 的详细提示词策略，如需更高级的一致性:
-
-1. 考虑使用 Stable Diffusion + ControlNet (支持图像引用)
-2. 使用专业的角色一致性模型 (如 InsightFace)
-3. 考虑 七牛文生图 API API 代理服务 (支持 --cref 参数)
-4. 在 `app/services/character_manager.py` 中实现新算法
-
-### 4. 如何添加新的配音音色?
+### 3. 如何添加新的配音音色?
 
 1. 在 `shared/enums.py` 中添加新的 `TTSVoice` 枚举值
 2. 在 `backend/ai-service/app/services/voice_generator.py` 中的 `VOICE_MAPPING` 映射到七牛 AI Token API TTS 的音色类型（如 "zh-CN-YunxiNeural"）

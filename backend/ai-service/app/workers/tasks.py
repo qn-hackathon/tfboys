@@ -14,11 +14,10 @@ from app.workers.celery_app import celery_app
 from app.services.text_analyzer import text_analyzer
 from app.services.image_generator import image_generator
 from app.services.voice_generator import voice_generator
-from app.services.character_manager import character_manager
 from app.services.video_client import video_client, init_video_client
 from app.config import settings
 from shared.clients import redis_client, init_redis_client
-from shared.models import Scene, Character
+from shared.models import Scene
 from shared.enums import TaskStatus, TTSVoice
 
 logger = logging.getLogger(__name__)
@@ -78,31 +77,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         if total_scenes == 0:
             raise ValueError("No scenes extracted from novel text")
         
-        # === 步骤2: 角色处理 ===
-        logger.info(f"Task {task_id}: Processing characters...")
-        # 构建临时 Scene 对象用于角色提取
-        temp_scenes = []
-        for idx, scene_data in enumerate(scenes_data):
-            scene_characters = [
-                Character(
-                    character_id=f"temp_{c['name']}",
-                    name=c["name"],
-                    description=c["description"]
-                )
-                for c in scene_data["characters"]
-            ]
-            temp_scenes.append(Scene(
-                scene_id=f"temp_{idx}",
-                scene_index=idx,
-                description=scene_data["description"],
-                narration=scene_data["narration"],
-                characters=scene_characters
-            ))
-        
-        characters_map = await character_manager.process_characters(task_id, temp_scenes)
-        logger.info(f"Task {task_id}: Processed {len(characters_map)} characters")
-        
-        # === 步骤3: 场景处理 ===
+        # === 步骤2: 场景处理 ===
         await redis_client.update_task_status(task_id, TaskStatus.GENERATING_IMAGES.value)
         logger.info(f"Task {task_id}: Generating scenes...")
         
@@ -112,24 +87,13 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             
             logger.info(f"Task {task_id}: Processing scene {idx + 1}/{total_scenes}")
             
-            # 3.1 生成场景图(使用详细角色描述)
-            character_context = None
-            if scene_data["characters"]:
-                char_descriptions = []
-                for char_data in scene_data["characters"]:
-                    if char_data["name"] in characters_map:
-                        char = characters_map[char_data["name"]]
-                        char_descriptions.append(f"{char.name} ({char.description})")
-                if char_descriptions:
-                    character_context = ", ".join(char_descriptions)
-            
+            # 2.1 生成场景图
             scene_image_url = await image_generator.generate_scene_image(
                 scene_description=scene_data['description'],
-                scene_id=scene_id,
-                character_context=character_context
+                scene_id=scene_id
             )
             
-            # 3.2 生成配音
+            # 2.2 生成配音
             await redis_client.update_task_status(task_id, TaskStatus.GENERATING_AUDIO.value)
             audio_url, audio_duration = await voice_generator.generate_voice(
                 text=scene_data["narration"],
@@ -138,19 +102,12 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
                 voice=TTSVoice.FEMALE
             )
             
-            # 3.3 构建 Scene 对象
-            scene_characters = [
-                characters_map[c["name"]] 
-                for c in scene_data["characters"] 
-                if c["name"] in characters_map
-            ]
-            
+            # 2.3 构建 Scene 对象
             scene = Scene(
                 scene_id=scene_id,
                 scene_index=idx,
                 description=scene_data["description"],
                 narration=scene_data["narration"],
-                characters=scene_characters,
                 image_url=scene_image_url,
                 audio_url=audio_url,
                 duration=audio_duration
@@ -161,7 +118,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             await _update_task_progress(task_id, "processing", total_scenes, idx + 1)
             logger.info(f"Task {task_id}: Scene {idx + 1}/{total_scenes} completed")
         
-        # === 步骤4: 提交视频服务 ===
+        # === 步骤3: 提交视频服务 ===
         await redis_client.update_task_status(task_id, TaskStatus.SYNTHESIZING_VIDEO.value)
         logger.info(f"Task {task_id}: Submitting to video service...")
         
@@ -185,8 +142,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             "status": "success",
             "task_id": task_id,
             "video_job_id": job_id,
-            "total_scenes": total_scenes,
-            "total_characters": len(characters_map)
+            "total_scenes": total_scenes
         }
         
     except Exception as e:
