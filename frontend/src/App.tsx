@@ -1,5 +1,4 @@
-/** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Sparkles } from 'lucide-react'
@@ -13,32 +12,23 @@ function App() {
     revalidateOnFocus: false,
   })
 
-  const containerStyle = css`
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  `
-
-  const pulseAnimation = css`
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.5;
-      }
-    }
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  `
-
   return (
-    <div css={containerStyle}>
+    <div className="min-h-screen flex items-center justify-center p-8">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-6 h-6" css={pulseAnimation} />
+            <motion.div
+              animate={{
+                opacity: [1, 0.5, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: [0.4, 0, 0.6, 1],
+              }}
+            >
+              <Sparkles className="w-6 h-6" />
+            </motion.div>
             TFBoys Frontend
           </CardTitle>
           <CardDescription>
@@ -54,7 +44,7 @@ function App() {
               <li>✅ TypeScript - 类型安全</li>
               <li>✅ Tailwind CSS - 样式系统</li>
               <li>✅ shadcn/ui - 组件库</li>
-              <li>✅ Emotion - CSS-in-JS</li>
+              <li>✅ Framer Motion - 动画库</li>
               <li>✅ lucide-react - 图标库</li>
               <li>✅ SWR - 数据获取</li>
             </ul>

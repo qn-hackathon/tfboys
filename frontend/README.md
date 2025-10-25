@@ -20,8 +20,10 @@ TFBoys AI 前端项目 - 小说文本一键生成动漫视频的 Web 应用
 ### 状态管理与数据请求
 - **SWR 2.2+** - React Hooks 数据请求库
 
+### 动画库
+- **Framer Motion 11.15+** - 强大的 React 动画库
+
 ### 样式方案
-- **Emotion** - CSS-in-JS 库
 - **PostCSS** - CSS 转换工具
 - **Autoprefixer** - CSS 自动添加浏览器前缀
 
