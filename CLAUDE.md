@@ -12,7 +12,7 @@
 - 数据库: Redis
 - 消息队列: Celery + Redis
 - 对象存储: 阿里云 OSS
-- AI 服务: OpenAI GPT-4/Claude, OpenAI DALL-E 3, 七牛云 TTS
+- AI 服务: OpenAI GPT-4/Claude, Midjourney, 七牛云 TTS
 
 **架构**: Monorepo (所有服务在一个仓库中)
 
@@ -290,8 +290,8 @@ AI_SERVICE_URL=http://localhost:8002
 3. AI Service 异步处理:
    ├─ 3.1 文本分析 (GPT-4) → 生成场景列表
    ├─ 3.2 提取角色 → 保存到 Redis 角色库
-   ├─ 3.3 生成角色设定图 (DALL-E 3)
-   ├─ 3.4 生成场景图像 (DALL-E 3 + 详细提示词)
+   ├─ 3.3 生成角色设定图 (Midjourney)
+   ├─ 3.4 生成场景图像 (Midjourney + --cref)
    ├─ 3.5 生成配音 (七牛云 TTS)
    └─ 3.6 提交到 Video Service
    ↓
@@ -508,7 +508,7 @@ ffmpeg_command = [
 ### 4. 如何添加新的配音音色?
 
 1. 在 `shared/enums.py` 中添加新的 `TTSVoice` 枚举值
-2. 在 `backend/ai-service/app/services/voice_generator.py` 中映射到七牛云 TTS 的音色ID (7-14)
+2. 在 `backend/ai-service/app/services/voice_generator.py` 中映射到七牛云 TTS 的音色 ID
 
 ---
 

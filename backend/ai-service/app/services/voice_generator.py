@@ -1,8 +1,12 @@
 """
-配音生成服务 - 使用阿里云TTS生成中文配音
+配音生成服务 - 使用七牛云TTS生成中文配音
 """
 import logging
 import httpx
+import hmac
+import hashlib
+import base64
+import json
 from io import BytesIO
 from typing import Tuple
 from mutagen.mp3 import MP3
@@ -16,27 +20,26 @@ from shared.enums import TTSVoice
 logger = logging.getLogger(__name__)
 
 VOICE_MAPPING = {
-    TTSVoice.MALE: "zhiyan",
-    TTSVoice.FEMALE: "aitong",
-    TTSVoice.CHILD: "aixia"
+    TTSVoice.MALE: 9,
+    TTSVoice.FEMALE: 7,
+    TTSVoice.CHILD: 10
 }
 
 
 class VoiceGenerator:
     """
-    阿里云 TTS 配音生成服务
+    七牛云 TTS 配音生成服务
     
     职责:
-    1. 调用阿里云 NLS TTS API 生成语音
+    1. 调用七牛云 TTS API 生成语音
     2. 将音频文件上传到 OSS
     3. 返回音频文件 URL 和时长
     """
     
     def __init__(self):
-        self.access_key_id = settings.aliyun_tts_access_key_id
-        self.access_key_secret = settings.aliyun_tts_access_key_secret
-        self.app_key = settings.aliyun_tts_app_key
-        self.api_url = "https://nls-gateway-cn-shanghai.aliyuncs.com/stream/v1/tts"
+        self.access_key = settings.qiniu_access_key
+        self.secret_key = settings.qiniu_secret_key
+        self.api_url = "https://ap-gate-z0.qiniuapi.com/voice/v2/tts"
         
         if not oss_client:
             init_oss_client(
@@ -71,7 +74,7 @@ class VoiceGenerator:
             VoiceGenerationException: 配音生成失败
         """
         try:
-            voice_code = VOICE_MAPPING.get(voice, "aitong")
+            voice_code = VOICE_MAPPING.get(voice, 7)
             
             logger.info(
                 f"Generating voice for task {task_id}, scene {scene_id}, "
@@ -94,19 +97,61 @@ class VoiceGenerator:
             logger.error(f"Failed to generate voice: {e}", exc_info=True)
             raise VoiceGenerationException(str(e))
     
+    def _generate_qiniu_token(self, method: str, path: str, query: str, content_type: str, body: str) -> str:
+        """
+        生成七牛云认证 Token
+        
+        Args:
+            method: HTTP 方法
+            path: 请求路径
+            query: 查询参数
+            content_type: Content-Type
+            body: 请求体
+            
+        Returns:
+            str: 认证 Token
+        """
+        signing_str_parts = [f"{method} {path}"]
+        
+        if query:
+            signing_str_parts[0] += f"?{query}"
+        
+        signing_str_parts.append("Host: ap-gate-z0.qiniuapi.com")
+        
+        if content_type:
+            signing_str_parts.append(f"Content-Type: {content_type}")
+        
+        signing_str_parts.append("")
+        signing_str_parts.append("")
+        
+        if body:
+            signing_str_parts.append(body)
+        
+        signing_str = "\n".join(signing_str_parts)
+        
+        sign = hmac.new(
+            self.secret_key.encode('utf-8'),
+            signing_str.encode('utf-8'),
+            hashlib.sha1
+        ).digest()
+        
+        encoded_sign = base64.urlsafe_b64encode(sign).decode('utf-8')
+        
+        return f"{self.access_key}:{encoded_sign}"
+    
     @retry_on_failure(max_retries=3, delay=2.0, backoff=2.0)
     async def _call_tts_api(
         self, 
         text: str, 
-        voice: str, 
+        voice: int, 
         format: str = "mp3"
     ) -> bytes:
         """
-        调用阿里云 TTS API
+        调用七牛云 TTS API
         
         Args:
             text: 文本内容
-            voice: 音色代码
+            voice: 音色 ID
             format: 音频格式
             
         Returns:
@@ -115,25 +160,39 @@ class VoiceGenerator:
         Raises:
             VoiceGenerationException: API 调用失败
         """
-        params = {
-            "appkey": self.app_key,
-            "text": text,
-            "voice": voice,
-            "format": format,
-            "sample_rate": 16000,
-            "volume": 50
+        audio_type_map = {
+            "mp3": 0
         }
         
+        body_dict = {
+            "content": text,
+            "spkid": voice,
+            "audioType": audio_type_map.get(format, 0),
+            "volume": 1.0,
+            "speed": 1.0
+        }
+        body = json.dumps(body_dict)
+        
+        content_type = "application/json"
+        
+        token = self._generate_qiniu_token(
+            "POST",
+            "/voice/v2/tts",
+            "",
+            content_type,
+            body
+        )
+        
         headers = {
-            "Content-Type": "application/json"
+            "Content-Type": content_type,
+            "Authorization": f"Qiniu {token}"
         }
         
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 self.api_url,
-                json=params,
+                content=body,
                 headers=headers,
-                auth=(self.access_key_id, self.access_key_secret),
                 timeout=30.0
             )
             
@@ -142,7 +201,24 @@ class VoiceGenerator:
                     f"TTS API failed: {response.status_code} - {response.text}"
                 )
             
-            return response.content
+            result = response.json()
+            
+            if result.get("code") != "0":
+                raise VoiceGenerationException(
+                    f"TTS API error: {result.get('msg', 'Unknown error')}"
+                )
+            
+            audio_url = result.get("result", {}).get("audioUrl")
+            if not audio_url:
+                raise VoiceGenerationException("No audio URL in response")
+            
+            audio_response = await client.get(audio_url, timeout=30.0)
+            if audio_response.status_code != 200:
+                raise VoiceGenerationException(
+                    f"Failed to download audio: {audio_response.status_code}"
+                )
+            
+            return audio_response.content
     
     def _get_audio_duration(self, audio_bytes: bytes) -> float:
         """
