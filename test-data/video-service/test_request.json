@@ -1,0 +1,69 @@
+{
+  "task_id": "test_task_001",
+  "scenes": [
+    {
+      "scene_id": "scene_001",
+      "scene_index": 0,
+      "description": "场景1：故事开始，展示主角登场",
+      "narration": "在一个阳光明媚的早晨，小明走在上学的路上",
+      "characters": [
+        {
+          "character_id": "char_001",
+          "name": "小明",
+          "reference_image_url": "file:///workspace/test-data/video-service/character_xiaoming.jpg"
+        }
+      ],
+      "image_url": "file:///workspace/test-data/video-service/scene_1.jpg",
+      "audio_url": "https://example.com/audio/scene_1.mp3",
+      "audio_duration": 3.0,
+      "subtitle_text": "在一个阳光明媚的早晨，小明走在上学的路上"
+    },
+    {
+      "scene_id": "scene_002",
+      "scene_index": 1,
+      "description": "场景2：情节发展，遇到困难",
+      "narration": "突然，他发现前方的桥梁被大雨冲垮了",
+      "characters": [
+        {
+          "character_id": "char_001",
+          "name": "小明",
+          "reference_image_url": "file:///workspace/test-data/video-service/character_xiaoming.jpg"
+        }
+      ],
+      "image_url": "file:///workspace/test-data/video-service/scene_2.jpg",
+      "audio_url": "https://example.com/audio/scene_2.mp3",
+      "audio_duration": 4.0,
+      "subtitle_text": "突然，他发现前方的桥梁被大雨冲垮了"
+    },
+    {
+      "scene_id": "scene_003",
+      "scene_index": 2,
+      "description": "场景3：结局，问题解决",
+      "narration": "小明决定绕道而行，最终按时到达了学校",
+      "characters": [
+        {
+          "character_id": "char_001",
+          "name": "小明",
+          "reference_image_url": "file:///workspace/test-data/video-service/character_xiaoming.jpg"
+        }
+      ],
+      "image_url": "file:///workspace/test-data/video-service/scene_3.jpg",
+      "audio_url": "https://example.com/audio/scene_3.mp3",
+      "audio_duration": 5.0,
+      "subtitle_text": "小明决定绕道而行，最终按时到达了学校"
+    }
+  ],
+  "video_config": {
+    "resolution": "1920x1080",
+    "fps": 30,
+    "transition_effect": "fade",
+    "subtitle_style": {
+      "font_size": 32,
+      "color": "white",
+      "position": "bottom",
+      "font_family": null,
+      "border_width": 2,
+      "border_color": "black"
+    }
+  }
+}
