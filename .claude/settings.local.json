@@ -5,7 +5,13 @@
       "Bash(python3:*)",
       "Bash(pip3 show:*)",
       "Bash(pip3:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(timeout 120 python3 test_qiniu_integration.py --test image)",
+      "Read(//private/tmp/tfboys/characters/**)",
+      "Read(//private/tmp/tfboys/scenes/**)",
+      "Bash(open:*)",
+      "Read(//tmp/tfboys/characters/**)",
+      "Read(//tmp/tfboys/scenes/**)"
     ],
     "deny": [],
     "ask": []
