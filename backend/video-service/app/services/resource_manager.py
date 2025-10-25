@@ -2,7 +2,7 @@ import os
 from typing import List
 from app.models.scene import Scene
 from app.utils.file_utils import ensure_dir, cleanup_files
-from .oss_client import oss_client
+from .local_storage_client import local_storage_client
 
 
 class ResourceManager:
@@ -22,8 +22,8 @@ class ResourceManager:
         image_path = os.path.join(workspace, "images", f"scene_{scene.scene_index}.jpg")
         audio_path = os.path.join(workspace, "audio", f"scene_{scene.scene_index}.mp3")
         
-        await oss_client.download_file(scene.image_url, image_path)
-        await oss_client.download_file(scene.audio_url, audio_path)
+        await local_storage_client.download_file(scene.image_url, image_path)
+        await local_storage_client.download_file(scene.audio_url, audio_path)
         
         return image_path, audio_path
     

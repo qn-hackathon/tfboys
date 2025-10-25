@@ -6,7 +6,7 @@ import logging
 from typing import Optional
 from openai import AsyncOpenAI
 from app.config import settings
-from shared.clients import oss_client
+from shared.clients import local_storage_client
 from shared.exceptions import ImageGenerationException
 from app.utils.retry import retry_on_failure
 
@@ -166,10 +166,10 @@ class ImageGenerator:
                 image_response.raise_for_status()
                 image_bytes = image_response.content
             
-            oss_url = await oss_client.upload_file(image_bytes, object_key)
+            local_path = await local_storage_client.upload_file(image_bytes, object_key)
             
-            logger.info(f"Image uploaded to OSS: {oss_url}")
-            return oss_url
+            logger.info(f"Image saved to local storage: {local_path}")
+            return local_path
             
         except Exception as e:
             logger.error(f"Failed to generate and upload image: {str(e)}", exc_info=True)

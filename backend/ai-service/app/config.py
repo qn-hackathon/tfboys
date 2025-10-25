@@ -12,11 +12,6 @@ class Settings(BaseSettings):
     qiniu_access_key: str = ""
     qiniu_secret_key: str = ""
     
-    oss_endpoint: str = ""
-    oss_access_key_id: str = ""
-    oss_access_key_secret: str = ""
-    oss_bucket_name: str = "tfboys"
-    
     @field_validator("openai_api_key")
     @classmethod
     def validate_openai_key(cls, v: str) -> str:
@@ -36,13 +31,6 @@ class Settings(BaseSettings):
     def validate_qiniu_keys(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Qiniu TTS credentials are required")
-        return v
-    
-    @field_validator("oss_access_key_id", "oss_access_key_secret", "oss_endpoint")
-    @classmethod
-    def validate_oss_config(cls, v: str) -> str:
-        if not v or not v.strip():
-            raise ValueError("OSS configuration is required")
         return v
     
     class Config:

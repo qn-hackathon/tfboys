@@ -9,14 +9,14 @@ from app.utils.ffmpeg_builder import FFmpegCommandBuilder
 from app.utils.file_utils import get_file_size
 from .ffmpeg_executor import ffmpeg_executor
 from .subtitle_renderer import SubtitleRenderer
-from .oss_client import oss_client
+from .local_storage_client import local_storage_client
 from .resource_manager import resource_manager
 
 
 class VideoComposer:
     def __init__(self):
         self.ffmpeg_executor = ffmpeg_executor
-        self.oss_client = oss_client
+        self.local_storage_client = local_storage_client
         self.resource_manager = resource_manager
     
     async def compose_video(self, job: VideoJob) -> str:
@@ -45,10 +45,10 @@ class VideoComposer:
             
             final_video_path = await self.concat_scenes(scene_videos, workspace)
             
-            oss_key = f"videos/{job.task_id}.mp4"
-            video_url = await self.oss_client.upload_file(final_video_path, oss_key)
+            object_key = f"videos/{job.task_id}.mp4"
+            video_path = await self.local_storage_client.upload_file(final_video_path, object_key)
             
-            return video_url
+            return video_path
         
         finally:
             self.resource_manager.cleanup_workspace(workspace)
