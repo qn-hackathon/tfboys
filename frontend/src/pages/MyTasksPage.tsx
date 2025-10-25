@@ -1,12 +1,397 @@
+import { useState, useRef } from "react"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import {
+  Search,
+  Play,
+  Download,
+  Trash2,
+  RefreshCw,
+  Share2,
+  Clock,
+  Film,
+  HardDrive,
+  Monitor,
+  Maximize,
+} from "lucide-react"
+import { mockTasks, mockVideoSlices, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+
+type FilterStatus = "all" | "in-progress" | "completed" | "failed"
+
 export function MyTasksPage() {
+  const [filter, setFilter] = useState<FilterStatus>("all")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [currentSliceIndex, setCurrentSliceIndex] = useState(0)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const filteredTasks = mockTasks.filter((task) => {
+    if (filter === "in-progress") {
+      return ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
+    }
+    if (filter === "completed") {
+      return task.status === "completed"
+    }
+    if (filter === "failed") {
+      return task.status === "failed"
+    }
+    return true
+  }).filter((task) => {
+    if (!searchQuery) return true
+    return task.title.toLowerCase().includes(searchQuery.toLowerCase())
+  })
+
+  const handlePreview = (task: Task) => {
+    setSelectedTask(task)
+    setCurrentSliceIndex(0)
+  }
+
+  const handleDownload = (task: Task) => {
+    // TODO: 实现下载功能
+    console.log("下载视频:", task.id)
+  }
+
+  const handleDelete = (task: Task) => {
+    // TODO: 实现删除功能
+    console.log("删除任务:", task.id)
+  }
+
+  const handleRetry = (task: Task) => {
+    // TODO: 实现重试功能
+    console.log("重试任务:", task.id)
+  }
+
+  const handleCancel = (task: Task) => {
+    // TODO: 实现取消功能
+    console.log("取消任务:", task.id)
+  }
+
+  const handleViewDetails = (task: Task) => {
+    // TODO: 实现查看详情功能
+    console.log("查看详情:", task.id)
+  }
+
+  const handleShare = () => {
+    // TODO: 实现分享功能
+    console.log("分享视频:", selectedTask?.id)
+  }
+
+  const handleSliceClick = (index: number, timeInSeconds: number) => {
+    setCurrentSliceIndex(index)
+    if (videoRef.current) {
+      videoRef.current.currentTime = timeInSeconds
+      videoRef.current.play()
+    }
+  }
+
+  const getStatusIcon = (status: Task["status"]) => {
+    if (status === "completed") return "✅"
+    if (status === "failed") return "❌"
+    return "🔄"
+  }
+
+  const inProgressCount = mockTasks.filter((task) =>
+    ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
+  ).length
+
   return (
-    <div className="h-full flex items-center justify-center p-8">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">📋 我的任务</h1>
-        <p className="text-muted-foreground">
-          任务列表页面内容将在后续迭代中实现
-        </p>
+    <div className="h-full p-6 overflow-auto">
+      <div className="max-w-[1400px] mx-auto">
+        <h1 className="text-3xl font-bold mb-6">📋 我的任务</h1>
+
+        <div className="flex items-center justify-between mb-6">
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
+            <TabsList>
+              <TabsTrigger value="all">全部</TabsTrigger>
+              <TabsTrigger value="in-progress">
+                进行中
+                {inProgressCount > 0 && (
+                  <Badge variant="destructive" className="ml-2 px-1.5 py-0 h-5 min-w-5 rounded-full text-xs">
+                    {inProgressCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="completed">已完成</TabsTrigger>
+              <TabsTrigger value="failed">失败</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索任务..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {filteredTasks.length === 0 ? (
+            <Card className="p-12">
+              <div className="text-center text-muted-foreground">
+                <p>暂无任务</p>
+              </div>
+            </Card>
+          ) : (
+            filteredTasks.map((task) => (
+              <Card key={task.id} className="p-6">
+                <div className="flex items-start gap-4">
+                  {task.thumbnailUrl && task.status === "completed" && (
+                    <div className="w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={task.thumbnailUrl}
+                        alt={task.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-1">
+                          任务 #{task.id.split("-")[1]}: {task.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          创建时间: {task.createdAt}
+                        </p>
+                      </div>
+                      <Badge variant={getTaskStatusVariant(task.status)}>
+                        {getStatusIcon(task.status)} {getTaskStatusText(task.status)}
+                      </Badge>
+                    </div>
+
+                    {task.status !== "completed" && task.status !== "failed" && (
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">状态: {task.currentStage}</span>
+                          <span className="font-semibold">{task.progress}%</span>
+                        </div>
+                        <Progress value={task.progress} className="h-2" />
+                        {task.processedScenes && task.totalScenes && (
+                          <p className="text-sm text-muted-foreground">
+                            已处理: {task.processedScenes} / {task.totalScenes} 场景
+                          </p>
+                        )}
+                        {task.estimatedTimeRemaining && (
+                          <p className="text-sm text-muted-foreground">
+                            预计剩余时间: {task.estimatedTimeRemaining}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {task.status === "completed" && (
+                      <div className="mb-4">
+                        <p className="text-sm text-muted-foreground">
+                          时长: {task.duration} | {task.totalScenes} 个场景 | {task.fileSize}
+                        </p>
+                      </div>
+                    )}
+
+                    {task.status === "failed" && task.errorMessage && (
+                      <div className="mb-4">
+                        <p className="text-sm text-destructive">
+                          错误原因: {task.errorMessage}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      {task.status === "completed" && (
+                        <>
+                          <Button onClick={() => handlePreview(task)}>
+                            <Play className="mr-2 h-4 w-4" />
+                            预览
+                          </Button>
+                          <Button variant="outline" onClick={() => handleDownload(task)}>
+                            <Download className="mr-2 h-4 w-4" />
+                            下载
+                          </Button>
+                          <Button variant="outline" onClick={() => handleDelete(task)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            删除
+                          </Button>
+                        </>
+                      )}
+
+                      {task.status === "failed" && (
+                        <>
+                          <Button onClick={() => handleRetry(task)}>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            重试
+                          </Button>
+                          <Button variant="outline" onClick={() => handleDelete(task)}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            删除
+                          </Button>
+                        </>
+                      )}
+
+                      {!["completed", "failed"].includes(task.status) && (
+                        <>
+                          <Button variant="outline" onClick={() => handleViewDetails(task)}>
+                            查看详情
+                          </Button>
+                          <Button variant="outline" onClick={() => handleCancel(task)}>
+                            取消任务
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {filteredTasks.length > 0 && (
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <Button variant="outline" size="sm" disabled>
+              ← 上一页
+            </Button>
+            <span className="text-sm text-muted-foreground">1 / 1</span>
+            <Button variant="outline" size="sm" disabled>
+              下一页 →
+            </Button>
+          </div>
+        )}
       </div>
+
+      <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="sr-only">视频预览</DialogTitle>
+          </DialogHeader>
+
+          {selectedTask && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="icon" onClick={() => handleDownload(selectedTask)}>
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={handleShare}>
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(selectedTask)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                  <video
+                    ref={videoRef}
+                    src={selectedTask.videoUrl}
+                    controls
+                    className="w-full h-full"
+                  >
+                    您的浏览器不支持视频播放
+                  </video>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold mb-3">🎞️ 视频切片</h3>
+                  <Carousel
+                    opts={{
+                      align: "start",
+                    }}
+                    className="w-full"
+                  >
+                    <CarouselContent>
+                      {mockVideoSlices.map((slice, index) => (
+                        <CarouselItem key={slice.id} className="basis-1/3 lg:basis-1/4">
+                          <button
+                            onClick={() => handleSliceClick(index, slice.timeInSeconds)}
+                            className={`
+                              w-full rounded-lg overflow-hidden border-2 transition-all
+                              ${
+                                currentSliceIndex === index
+                                  ? "border-primary ring-2 ring-primary/20"
+                                  : "border-border hover:border-primary/50"
+                              }
+                            `}
+                          >
+                            <div className="aspect-video bg-muted">
+                              <img
+                                src={slice.thumbnailUrl}
+                                alt={`场景 ${slice.sceneNumber}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-2 bg-background">
+                              <p className="text-xs font-medium">场景 {slice.sceneNumber}</p>
+                              <p className="text-xs text-muted-foreground">{slice.timestamp}</p>
+                            </div>
+                          </button>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious />
+                    <CarouselNext />
+                  </Carousel>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                    📄 小说 Prompt
+                  </h3>
+                  <Card className="p-4">
+                    <p className="text-sm text-muted-foreground max-h-32 overflow-y-auto">
+                      {selectedTask.novelPrompt}
+                    </p>
+                  </Card>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>时长: {selectedTask.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Monitor className="h-4 w-4" />
+                    <span>分辨率: {selectedTask.resolution}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Maximize className="h-4 w-4" />
+                    <span>视频横纵比: {selectedTask.aspectRatio}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Film className="h-4 w-4" />
+                    <span>场景数: {selectedTask.totalScenes}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <HardDrive className="h-4 w-4" />
+                    <span>文件大小: {selectedTask.fileSize}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
