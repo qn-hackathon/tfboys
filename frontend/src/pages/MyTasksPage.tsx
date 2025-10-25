@@ -12,13 +12,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import {
   Search,
   Play,
   Download,
@@ -32,6 +25,7 @@ import {
   Maximize,
 } from "lucide-react"
 import { mockTasks, mockVideoSlices, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 
@@ -312,44 +306,11 @@ export function MyTasksPage() {
 
                 <div>
                   <h3 className="text-sm font-semibold mb-3">🎞️ 视频切片</h3>
-                  <Carousel
-                    opts={{
-                      align: "start",
-                    }}
-                    className="w-full"
-                  >
-                    <CarouselContent>
-                      {mockVideoSlices.map((slice, index) => (
-                        <CarouselItem key={slice.id} className="basis-1/3 lg:basis-1/4">
-                          <button
-                            onClick={() => handleSliceClick(index, slice.timeInSeconds)}
-                            className={`
-                              w-full rounded-lg overflow-hidden border-2 transition-all
-                              ${
-                                currentSliceIndex === index
-                                  ? "border-primary ring-2 ring-primary/20"
-                                  : "border-border hover:border-primary/50"
-                              }
-                            `}
-                          >
-                            <div className="aspect-video bg-muted">
-                              <img
-                                src={slice.thumbnailUrl}
-                                alt={`场景 ${slice.sceneNumber}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="p-2 bg-background">
-                              <p className="text-xs font-medium">场景 {slice.sceneNumber}</p>
-                              <p className="text-xs text-muted-foreground">{slice.timestamp}</p>
-                            </div>
-                          </button>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
-                  </Carousel>
+                  <VideoSliceCarousel
+                    slices={mockVideoSlices}
+                    onSliceClick={handleSliceClick}
+                    currentSliceIndex={currentSliceIndex}
+                  />
                 </div>
               </div>
 
