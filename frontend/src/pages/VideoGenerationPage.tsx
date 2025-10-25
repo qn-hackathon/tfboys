@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { mockTemplateVideos, mockVideoSlices, mockGeneratedVideo } from "@/data/mockData"
+import { mockTemplateVideos, mockGeneratedVideo } from "@/data/mockData"
+import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
 type VoiceType = "女声" | "男声" | "童声"
@@ -45,7 +46,6 @@ export function VideoGenerationPage() {
   const [status, setStatus] = useState<GenerationStatus>("idle")
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
-  const [currentSliceIndex, setCurrentSliceIndex] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const charCount = novelText.length
@@ -116,8 +116,7 @@ export function VideoGenerationPage() {
     console.log("分享视频")
   }
 
-  const handleSliceClick = (index: number, timeInSeconds: number) => {
-    setCurrentSliceIndex(index)
+  const handleSliceClick = (timeInSeconds: number) => {
     if (videoRef.current) {
       videoRef.current.currentTime = timeInSeconds
       videoRef.current.play()
@@ -385,45 +384,10 @@ export function VideoGenerationPage() {
             {/* 视频切片 */}
             {status === "completed" && (
               <Card className="p-6">
-                <h3 className="text-sm font-semibold mb-4">🎞️ 视频切片</h3>
-                <Carousel
-                  opts={{
-                    align: "start",
-                  }}
-                  className="w-full"
-                >
-                  <CarouselContent>
-                    {mockVideoSlices.map((slice, index) => (
-                      <CarouselItem key={slice.id} className="basis-1/3 lg:basis-1/4">
-                        <button
-                          onClick={() => handleSliceClick(index, slice.timeInSeconds)}
-                          className={`
-                            w-full rounded-lg overflow-hidden border-2 transition-all
-                            ${
-                              currentSliceIndex === index
-                                ? "border-primary ring-2 ring-primary/20"
-                                : "border-border hover:border-primary/50"
-                            }
-                          `}
-                        >
-                          <div className="aspect-video bg-muted">
-                            <img
-                              src={slice.thumbnailUrl}
-                              alt={`场景 ${slice.sceneNumber}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="p-2 bg-background">
-                            <p className="text-xs font-medium">场景 {slice.sceneNumber}</p>
-                            <p className="text-xs text-muted-foreground">{slice.timestamp}</p>
-                          </div>
-                        </button>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
+                <VideoSliceCarousel
+                  taskId={mockGeneratedVideo.id}
+                  onSliceClick={handleSliceClick}
+                />
               </Card>
             )}
 
