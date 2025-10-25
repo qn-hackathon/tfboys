@@ -46,8 +46,19 @@ export function VideoPreviewDialog({
           <DialogTitle>视频预览</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full p-6 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full p-6 overflow-y-auto">
           <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+            <div className="aspect-video bg-black rounded-lg overflow-hidden flex-shrink-0">
+              <video
+                ref={videoRef}
+                src={task.videoUrl}
+                controls
+                className="w-full h-full"
+              >
+                您的浏览器不支持视频播放
+              </video>
+            </div>
+
             <div className="flex justify-end gap-2">
               <Button variant="ghost" size="icon" onClick={() => onDownload(task)}>
                 <Download className="h-4 w-4" />
@@ -58,17 +69,6 @@ export function VideoPreviewDialog({
               <Button variant="ghost" size="icon" onClick={() => onDelete(task)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
-            </div>
-
-            <div className="aspect-video bg-black rounded-lg overflow-hidden flex-shrink-0">
-              <video
-                ref={videoRef}
-                src={task.videoUrl}
-                controls
-                className="w-full h-full"
-              >
-                您的浏览器不支持视频播放
-              </video>
             </div>
 
             <div className="flex-1 min-h-0">
@@ -84,7 +84,7 @@ export function VideoPreviewDialog({
               <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
                 📄 小说 Prompt
               </h3>
-              <Card className="p-4">
+              <Card className="p-4 min-h-[160px]">
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {task.novelPrompt}
                 </p>
