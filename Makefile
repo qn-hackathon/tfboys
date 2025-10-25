@@ -26,9 +26,9 @@ dev:
 	@echo "Redis已启动"
 	@echo "请在不同终端运行:"
 	@echo "  cd frontend && npm run dev"
-	@echo "  cd backend/api-gateway && uvicorn app.main:app --reload --port 8000"
-	@echo "  cd backend/ai-service && PYTHONPATH=\$$(pwd)/../.. uvicorn app.main:app --reload --port 8001"
-	@echo "  cd backend/video-service && uvicorn app.main:app --reload --port 8002"
+	@echo "  cd backend/api-gateway && uvicorn app.main:app --reload --host 0.0.0.0 --port 8001"
+	@echo "  cd backend/ai-service && uvicorn app.main:app --reload --host 0.0.0.0 --port 8002"
+	@echo "  cd backend/video-service && uvicorn app.main:app --reload --host 0.0.0.0 --port 8003"
 
 build:
 	@echo "构建Docker镜像..."
@@ -39,9 +39,9 @@ up:
 	docker-compose up -d
 	@echo "服务已启动!"
 	@echo "  前端: http://localhost:3000"
-	@echo "  API Gateway: http://localhost:8000"
-	@echo "  AI Service: http://localhost:8001"
-	@echo "  Video Service: http://localhost:8002"
+	@echo "  API Gateway: http://localhost:8001"
+	@echo "  AI Service: http://localhost:8002"
+	@echo "  Video Service: http://localhost:8003"
 
 down:
 	@echo "停止所有服务..."
