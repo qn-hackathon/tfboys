@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
 import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
+import { ShareDialog } from "@/components/ShareDialog"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
 type VoiceType = "女声" | "男声" | "童声"
@@ -46,6 +47,7 @@ export function VideoGenerationPage() {
   const [status, setStatus] = useState<GenerationStatus>("idle")
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const charCount = novelText.length
@@ -112,8 +114,7 @@ export function VideoGenerationPage() {
   }
 
   const handleShare = () => {
-    // TODO: 实现分享功能
-    console.log("分享视频")
+    setShareDialogOpen(true)
   }
 
   const handleSliceClick = (timeInSeconds: number) => {
@@ -124,8 +125,13 @@ export function VideoGenerationPage() {
   }
 
   const handleTemplateClick = (templateId: string) => {
-    // TODO: 实现模板预览功能
-    console.log("预览模板:", templateId)
+    const template = mockTemplateVideos.find(t => t.id === templateId)
+    if (template) {
+      setNovelText(template.novelText)
+      setSelectedStyle(template.style as VideoStyle)
+      setVoiceType(template.voiceType)
+      setResolution(template.resolution)
+    }
   }
 
   return (
@@ -432,6 +438,8 @@ export function VideoGenerationPage() {
           </div>
         </div>
       </div>
+
+      <ShareDialog open={shareDialogOpen} onOpenChange={setShareDialogOpen} />
     </div>
   )
 }
