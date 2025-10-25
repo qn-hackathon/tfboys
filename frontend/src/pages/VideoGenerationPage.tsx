@@ -15,6 +15,14 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
 import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
@@ -46,6 +54,10 @@ export function VideoGenerationPage() {
   const [status, setStatus] = useState<GenerationStatus>("idle")
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [sharePlatform, setSharePlatform] = useState<"douyin" | "kuaishou">("douyin")
+  const [shareTitle, setShareTitle] = useState("")
+  const [shareDescription, setShareDescription] = useState("")
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const charCount = novelText.length
@@ -112,8 +124,14 @@ export function VideoGenerationPage() {
   }
 
   const handleShare = () => {
-    // TODO: 实现分享功能
-    console.log("分享视频")
+    setShareDialogOpen(true)
+  }
+
+  const handleShareSubmit = () => {
+    console.log("分享到平台:", sharePlatform)
+    console.log("标题:", shareTitle)
+    console.log("描述:", shareDescription)
+    setShareDialogOpen(false)
   }
 
   const handleSliceClick = (timeInSeconds: number) => {
@@ -124,8 +142,13 @@ export function VideoGenerationPage() {
   }
 
   const handleTemplateClick = (templateId: string) => {
-    // TODO: 实现模板预览功能
-    console.log("预览模板:", templateId)
+    const template = mockTemplateVideos.find((t) => t.id === templateId)
+    if (template) {
+      setNovelText(template.novelText)
+      setSelectedStyle(template.style as VideoStyle)
+      setVoiceType(template.voiceType as VoiceType)
+      setResolution(template.resolution as Resolution)
+    }
   }
 
   return (
@@ -380,6 +403,67 @@ export function VideoGenerationPage() {
                 </Button>
               </div>
             </Card>
+
+            {/* 分享对话框 */}
+            <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>一键分享到短视频平台</DialogTitle>
+                  <DialogDescription>
+                    请先绑定短视频平台账号，然后填写分享信息
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label className="text-base mb-3 block">选择平台</Label>
+                    <RadioGroup value={sharePlatform} onValueChange={(v) => setSharePlatform(v as typeof sharePlatform)}>
+                      <div className="flex gap-6">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="douyin" id="platform-douyin" />
+                          <Label htmlFor="platform-douyin" className="cursor-pointer">
+                            抖音
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="kuaishou" id="platform-kuaishou" />
+                          <Label htmlFor="platform-kuaishou" className="cursor-pointer">
+                            快手
+                          </Label>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  <div>
+                    <Label htmlFor="share-title">标题</Label>
+                    <Input
+                      id="share-title"
+                      placeholder="请输入视频标题"
+                      value={shareTitle}
+                      onChange={(e) => setShareTitle(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="share-description">描述</Label>
+                    <Textarea
+                      id="share-description"
+                      placeholder="请输入视频描述"
+                      value={shareDescription}
+                      onChange={(e) => setShareDescription(e.target.value)}
+                      className="mt-2 min-h-[100px] resize-none"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
+                    取消
+                  </Button>
+                  <Button onClick={handleShareSubmit}>
+                    确定分享
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             {/* 视频切片 */}
             {status === "completed" && (

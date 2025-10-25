@@ -16,6 +16,10 @@ export interface TemplateVideo {
   name: string
   thumbnailUrl: string
   style: string
+  novelText: string
+  voiceType: string
+  resolution: string
+  description: string
 }
 
 export interface GeneratedVideo {
@@ -74,33 +78,53 @@ export const mockVideoSlices: VideoSlice[] = [
 export const mockTemplateVideos: TemplateVideo[] = [
   {
     id: "template-1",
-    name: "古风模板",
+    name: "古风侠客传",
     thumbnailUrl: "https://placehold.co/200x150/10b981/ffffff?text=%E5%8F%A4%E9%A3%8E",
     style: "古风",
+    novelText: "江湖侠客，快意恩仇。月光下，一位身着白衣的剑客独自站在山巅，望着远方的灯火。他的剑已经封存多年，但江湖的传说从未停息。今夜，一封血书让他重新出山，为了正义，为了昔日的承诺。",
+    voiceType: "男声",
+    resolution: "1080p",
+    description: "江湖侠客题材，适合武侠、古风类小说",
   },
   {
     id: "template-2",
-    name: "现代模板",
+    name: "都市爱情故事",
     thumbnailUrl: "https://placehold.co/200x150/3b82f6/ffffff?text=%E7%8E%B0%E4%BB%A3",
     style: "现代",
+    novelText: "繁华的都市街头，霓虹灯闪烁。她站在咖啡厅的窗前，看着窗外匆匆而过的行人。三年了，她还在等待那个说要回来的人。手机突然响起，屏幕上显示着一个陌生的号码，她的心跳加速了。",
+    voiceType: "女声",
+    resolution: "1080p",
+    description: "现代都市题材，适合言情、职场类小说",
   },
   {
     id: "template-3",
-    name: "动漫模板",
+    name: "青春校园",
     thumbnailUrl: "https://placehold.co/200x150/ec4899/ffffff?text=%E5%8A%A8%E6%BC%AB",
     style: "动漫",
+    novelText: "樱花飘落的季节，少年站在校门口等待着那个每天一起上学的女孩。阳光洒在她的笑脸上，就像动漫里的场景一样美好。他鼓起勇气，准备说出心中藏了很久的话。",
+    voiceType: "男声",
+    resolution: "720p",
+    description: "青春校园题材，适合校园、青春类小说",
   },
   {
     id: "template-4",
-    name: "奇幻模板",
+    name: "魔法世界冒险",
     thumbnailUrl: "https://placehold.co/200x150/8b5cf6/ffffff?text=%E5%A5%87%E5%B9%BB",
     style: "奇幻",
+    novelText: "在遥远的魔法世界，年轻的魔法师艾莉娅手持法杖，站在古老的魔法阵前。她即将开启通往异世界的传送门，去寻找失落已久的神器。背后的导师叮嘱道：记住，魔法的力量来自内心的信念。",
+    voiceType: "女声",
+    resolution: "1080p",
+    description: "奇幻冒险题材，适合玄幻、魔法类小说",
   },
   {
     id: "template-5",
-    name: "3D卡通",
+    name: "童话王国",
     thumbnailUrl: "https://placehold.co/200x150/f59e0b/ffffff?text=3D",
     style: "3D卡通",
+    novelText: "在彩虹之上的童话王国里，小公主和她的动物朋友们正在筹备一场盛大的派对。可爱的小兔子在布置会场，聪明的猫头鹰在准备节目单，一切都充满了欢乐的气氛。",
+    voiceType: "童声",
+    resolution: "720p",
+    description: "童话故事题材，适合儿童、童话类小说",
   },
 ]
 
