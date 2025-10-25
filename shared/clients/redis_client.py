@@ -1,5 +1,5 @@
 """
-Redis 客户端 - 任务状态管理和角色库管理
+Redis 客户端 - 任务状态管理
 """
 import redis.asyncio as redis
 import json
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class RedisClient:
-    """Redis 客户端,用于任务状态管理和角色库管理"""
+    """Redis 客户端,用于任务状态管理"""
     
     def __init__(self, redis_url: str):
         """
@@ -114,75 +114,6 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to delete task {task_id}: {e}")
             return False
-    
-    async def save_character(self, character_id: str, character_data: dict):
-        """
-        保存角色信息到角色库
-        
-        Args:
-            character_id: 角色ID
-            character_data: 角色数据
-        """
-        try:
-            key = f"character:{character_id}"
-            await self.redis.set(key, json.dumps(character_data))
-            logger.info(f"Character {character_id} saved successfully")
-        except Exception as e:
-            logger.error(f"Failed to save character {character_id}: {e}")
-            raise
-    
-    async def get_character(self, character_id: str) -> Optional[dict]:
-        """
-        获取角色信息
-        
-        Args:
-            character_id: 角色ID
-            
-        Returns:
-            dict: 角色数据,如果不存在返回 None
-        """
-        try:
-            data = await self.redis.get(f"character:{character_id}")
-            if data:
-                return json.loads(data)
-            return None
-        except Exception as e:
-            logger.error(f"Failed to get character {character_id}: {e}")
-            raise
-    
-    async def list_task_characters(self, task_id: str) -> List[str]:
-        """
-        获取任务的所有角色ID
-        
-        Args:
-            task_id: 任务ID
-            
-        Returns:
-            List[str]: 角色ID列表
-        """
-        try:
-            key = f"task:{task_id}:characters"
-            character_ids = await self.redis.smembers(key)
-            return list(character_ids)
-        except Exception as e:
-            logger.error(f"Failed to list task characters for {task_id}: {e}")
-            raise
-    
-    async def add_task_character(self, task_id: str, character_id: str):
-        """
-        添加角色到任务的角色列表
-        
-        Args:
-            task_id: 任务ID
-            character_id: 角色ID
-        """
-        try:
-            key = f"task:{task_id}:characters"
-            await self.redis.sadd(key, character_id)
-            logger.info(f"Character {character_id} added to task {task_id}")
-        except Exception as e:
-            logger.error(f"Failed to add character to task: {e}")
-            raise
     
     async def set_value(self, key: str, value: Any, ttl: Optional[int] = None):
         """

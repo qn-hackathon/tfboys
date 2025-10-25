@@ -74,8 +74,7 @@ class ImageGenerator:
     async def generate_scene_image(
         self,
         scene_description: str,
-        scene_id: str,
-        character_context: Optional[str] = None
+        scene_id: str
     ) -> str:
         """
         生成场景图像
@@ -83,17 +82,11 @@ class ImageGenerator:
         Args:
             scene_description: 场景描述
             scene_id: 场景ID (用于生成文件名)
-            character_context: 角色上下文描述 (可选,用于保持角色一致性)
 
         Returns:
             str: 上传到本地存储后的图像路径
         """
-        prompt = f"Anime style scene. {scene_description}."
-
-        if character_context:
-            prompt += f" Characters in scene: {character_context}."
-
-        prompt += " Cinematic composition, high quality anime illustration, detailed background."
+        prompt = f"Anime style scene. {scene_description}. Cinematic composition, high quality anime illustration, detailed background."
 
         logger.info(f"Generating scene image for scene_id: {scene_id}")
 
