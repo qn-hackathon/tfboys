@@ -84,14 +84,14 @@ tfboys/
 └── docker/                # Docker配置
 ```
 
-详细的目录结构说明请查看 [DIRECTORY_STRUCTURE.md](./DIRECTORY_STRUCTURE.md)
+详细的目录结构说明请查看 [CLAUDE.md](./CLAUDE.md)
 
 ## 文档
 
-- [技术方案设计](./DESIGN.md)
-- [系统架构设计](./docs/ARCHITECTURE.md)
-- [API接口文档](./docs/API.md)
-- [代码目录结构](./DIRECTORY_STRUCTURE.md)
+- [系统架构设计](./docs/ARCHITECTURE.md) - 系统架构、模块组成、数据流
+- [API接口文档](./docs/API.md) - 完整的API接口设计
+- [AI开发指南](./CLAUDE.md) - 项目结构、开发规范、业务逻辑
+- [前端产品设计](./frontend/docs/PRODUCT_DESIGN.md) - 前端页面设计和交互流程
 
 ## 开发指南
 
