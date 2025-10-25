@@ -11,9 +11,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ShimmeringText } from '@/components/ui/shimmering-text'
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { ShimmeringText } from '@/components/ui/shimmering-text'
 
 // Mock 消息数据类型
 interface Notification {
@@ -97,11 +97,13 @@ export function Header() {
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-2">
-          <ShimmeringText 
-            text="文创速推 - 文字内容的短视频传播加速平台" 
-            className="text-xl font-bold"
-            duration={3}
-          />
+          <h1>
+            <ShimmeringText 
+              text="文创速推 - 文字内容的短视频传播加速平台" 
+              className="text-xl font-semibold"
+              wave={true}
+            />
+          </h1>
         </div>
 
         <div className="flex items-center gap-4">
