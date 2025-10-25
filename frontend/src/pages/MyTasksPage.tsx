@@ -188,50 +188,48 @@ export function MyTasksPage() {
                       </div>
                     )}
 
-                    <div className="flex gap-2">
-                      {task.status === "completed" && (
-                        <>
-                          <Button onClick={() => handlePreview(task)}>
-                            <Play className="mr-2 h-4 w-4" />
-                            预览
-                          </Button>
-                          <Button variant="outline" onClick={() => handleDownload(task)}>
-                            <Download className="mr-2 h-4 w-4" />
-                            下载
-                          </Button>
-                          <Button variant="outline" onClick={() => handleDelete(task)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            删除
-                          </Button>
-                        </>
-                      )}
+                    {!["completed", "failed"].includes(task.status) && (
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => handleViewDetails(task)}>
+                          查看详情
+                        </Button>
+                        <Button variant="outline" onClick={() => handleCancel(task)}>
+                          取消任务
+                        </Button>
+                      </div>
+                    )}
 
-                      {task.status === "failed" && (
-                        <>
-                          <Button onClick={() => handleRetry(task)}>
-                            <RefreshCw className="mr-2 h-4 w-4" />
-                            重试
-                          </Button>
-                          <Button variant="outline" onClick={() => handleDelete(task)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            删除
-                          </Button>
-                        </>
-                      )}
-
-                      {!["completed", "failed"].includes(task.status) && (
-                        <>
-                          <Button variant="outline" onClick={() => handleViewDetails(task)}>
-                            查看详情
-                          </Button>
-                          <Button variant="outline" onClick={() => handleCancel(task)}>
-                            取消任务
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                    {task.status === "failed" && (
+                      <div className="flex gap-2">
+                        <Button onClick={() => handleRetry(task)}>
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          重试
+                        </Button>
+                        <Button variant="outline" onClick={() => handleDelete(task)}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          删除
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {task.status === "completed" && (
+                  <div className="flex gap-2 mt-4">
+                    <Button onClick={() => handlePreview(task)}>
+                      <Play className="mr-2 h-4 w-4" />
+                      预览
+                    </Button>
+                    <Button variant="outline" onClick={() => handleDownload(task)}>
+                      <Download className="mr-2 h-4 w-4" />
+                      下载
+                    </Button>
+                    <Button variant="outline" onClick={() => handleDelete(task)}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      删除
+                    </Button>
+                  </div>
+                )}
               </Card>
             ))
           )}
