@@ -1,0 +1,201 @@
+<svg width="1400" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义样式 -->
+  <defs>
+    <style>
+      .header-bg { fill: #ffffff; }
+      .sidebar-bg { fill: #f8fafc; }
+      .content-bg { fill: #ffffff; }
+      .card-bg { fill: #ffffff; }
+      .border { stroke: #e2e8f0; stroke-width: 1; }
+      .primary-bg { fill: #3b82f6; }
+      .primary-border { stroke: #3b82f6; stroke-width: 2; }
+      .text-title { fill: #1e293b; font-size: 16px; font-weight: 600; font-family: Arial, sans-serif; }
+      .text-body { fill: #475569; font-size: 14px; font-family: Arial, sans-serif; }
+      .text-small { fill: #64748b; font-size: 12px; font-family: Arial, sans-serif; }
+      .text-white { fill: #ffffff; font-size: 14px; font-family: Arial, sans-serif; }
+      .icon { fill: #64748b; font-size: 18px; }
+      .selected { fill: #eff6ff; }
+      .button { fill: #3b82f6; }
+      .button-outline { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+      .input-bg { fill: #f8fafc; }
+      .progress-bg { fill: #e2e8f0; }
+      .progress-fill { fill: #3b82f6; }
+    </style>
+  </defs>
+
+  <!-- 顶部栏 -->
+  <rect class="header-bg border" x="0" y="0" width="1400" height="60"/>
+  
+  <!-- Logo 和产品名称 -->
+  <text class="text-title" x="20" y="38">🎬 TFBoys AI</text>
+  
+  <!-- 右侧功能区 -->
+  <text class="text-small" x="1100" y="38">额度: 100 分钟</text>
+  <text class="text-body" x="1210" y="38">👤 用户名 ▼</text>
+  <text class="icon" x="1310" y="38">🌙</text>
+  <text class="icon" x="1350" y="38">🔔</text>
+  
+  <!-- 侧边栏 -->
+  <rect class="sidebar-bg border" x="0" y="60" width="240" height="840"/>
+  
+  <!-- 侧边栏菜单项 -->
+  <!-- 视频生成（选中状态） -->
+  <rect class="selected border" x="10" y="80" width="220" height="56" rx="8"/>
+  <text class="text-body" x="30" y="113">📹 视频生成</text>
+  
+  <!-- 我的任务 -->
+  <rect class="button-outline" x="10" y="150" width="220" height="56" rx="8"/>
+  <text class="text-body" x="30" y="183">📋 我的任务</text>
+  <circle fill="#ef4444" cx="200" cy="170" r="8"/>
+  <text class="text-white" x="196" y="174" font-size="10">3</text>
+  
+  <!-- 内容区域背景 -->
+  <rect class="content-bg" x="240" y="60" width="1160" height="840"/>
+  
+  <!-- 页面标题 -->
+  <text class="text-title" x="270" y="100" font-size="20">📹 视频生成</text>
+  
+  <!-- 主内容区 - 左右分栏 -->
+  <!-- 左侧：输入与配置区域 -->
+  <rect class="card-bg border" x="270" y="130" width="540" height="740" rx="8"/>
+  
+  <!-- 1. 输入小说内容 -->
+  <text class="text-title" x="290" y="160">📝 1. 输入小说内容</text>
+  
+  <!-- Tab 切换 -->
+  <rect class="primary-bg" x="290" y="175" width="80" height="32" rx="4"/>
+  <text class="text-white" x="305" y="197">直接输入</text>
+  <rect class="button-outline" x="375" y="175" width="80" height="32" rx="4"/>
+  <text class="text-body" x="390" y="197">上传文件</text>
+  <rect class="button-outline" x="460" y="175" width="80" height="32" rx="4"/>
+  <text class="text-body" x="470" y="197">粘贴 URL</text>
+  
+  <!-- 文本输入框 -->
+  <rect class="input-bg border" x="290" y="220" width="490" height="180" rx="4"/>
+  <text class="text-small" x="300" y="240" fill="#94a3b8">在这里输入或粘贴小说内容...</text>
+  
+  <!-- 字数统计 -->
+  <text class="text-small" x="290" y="425">字数: 0 / 10,000 字</text>
+  <text class="text-small" x="290" y="445" fill="#3b82f6">💡 建议输入 500-5000 字的内容以获得最佳效果</text>
+  
+  <!-- 2. 配置视频参数 -->
+  <text class="text-title" x="290" y="485">🎨 2. 配置视频参数</text>
+  
+  <!-- 视频风格 -->
+  <text class="text-body" x="290" y="510">视频风格：</text>
+  
+  <!-- 风格选项卡片 -->
+  <g id="style-ancient">
+    <rect class="primary-border" x="290" y="520" width="80" height="70" rx="4" fill="#eff6ff"/>
+    <text x="310" y="550" font-size="24">🏮</text>
+    <text class="text-small" x="308" y="578">古风</text>
+    <text x="355" y="545" fill="#3b82f6" font-size="16">✓</text>
+  </g>
+  <rect class="button-outline" x="380" y="520" width="80" height="70" rx="4"/>
+  <text x="400" y="550" font-size="24">🏙️</text>
+  <text class="text-small" x="398" y="578">现代</text>
+  
+  <rect class="button-outline" x="470" y="520" width="80" height="70" rx="4"/>
+  <text x="490" y="550" font-size="24">🎨</text>
+  <text class="text-small" x="488" y="578">动漫</text>
+  
+  <rect class="button-outline" x="560" y="520" width="80" height="70" rx="4"/>
+  <text x="580" y="550" font-size="24">✨</text>
+  <text class="text-small" x="578" y="578">奇幻</text>
+  
+  <rect class="button-outline" x="650" y="520" width="80" height="70" rx="4"/>
+  <text x="670" y="550" font-size="24">🎭</text>
+  <text class="text-small" x="671" y="578">3D</text>
+  
+  <!-- 配音类型 -->
+  <text class="text-body" x="290" y="625">配音类型：</text>
+  <circle class="border" cx="298" cy="645" r="8" fill="white"/>
+  <text class="text-body" x="315" y="650">女声</text>
+  <circle class="border" cx="378" cy="645" r="8" fill="white"/>
+  <circle fill="#3b82f6" cx="378" cy="645" r="5"/>
+  <text class="text-body" x="395" y="650">男声</text>
+  <circle class="border" cx="458" cy="645" r="8" fill="white"/>
+  <text class="text-body" x="475" y="650">童声</text>
+  
+  <!-- 视频分辨率 -->
+  <text class="text-body" x="290" y="685">视频分辨率：</text>
+  <circle class="border" cx="298" cy="705" r="8" fill="white"/>
+  <circle fill="#3b82f6" cx="298" cy="705" r="5"/>
+  <text class="text-body" x="315" y="710">1080p (高清)</text>
+  <circle class="border" cx="438" cy="705" r="8" fill="white"/>
+  <text class="text-body" x="455" y="710">720p (快速)</text>
+  
+  <!-- 预计时间 -->
+  <text class="text-small" x="290" y="740">⏱️ 预计生成时间：约 5 分钟</text>
+  
+  <!-- 生成按钮 -->
+  <rect class="button" x="290" y="770" width="490" height="48" rx="8"/>
+  <text class="text-white" x="490" y="799" font-size="16" font-weight="600">生成视频</text>
+  
+  <!-- 右侧：预览与模板区域 -->
+  <rect class="card-bg border" x="830" y="130" width="540" height="740" rx="8"/>
+  
+  <!-- 视频预览播放器 -->
+  <text class="text-title" x="850" y="160">🎬 视频预览</text>
+  <rect fill="#000000" x="850" y="175" width="500" height="281" rx="4"/>
+  <text fill="#ffffff" x="1020" y="320" font-size="48" text-anchor="middle">▶</text>
+  <text class="text-small" x="1060" y="450" fill="#ffffff">00:00 / 02:30</text>
+  
+  <!-- 生成进度 -->
+  <text class="text-body" x="850" y="485">生成进度：</text>
+  <rect class="progress-bg" x="850" y="495" width="500" height="8" rx="4"/>
+  <rect class="progress-fill" x="850" y="495" width="250" height="8" rx="4"/>
+  <text class="text-small" x="1095" y="520">50%</text>
+  <text class="text-small" x="850" y="535" fill="#3b82f6">状态: 图像生成中...</text>
+  
+  <!-- 操作按钮 -->
+  <rect class="button-outline" x="850" y="555" width="150" height="40" rx="6"/>
+  <text class="text-body" x="900" y="580">🔄 重新生成</text>
+  
+  <rect class="button-outline" x="1020" y="555" width="150" height="40" rx="6"/>
+  <text class="text-body" x="1070" y="580">⬇️ 下载视频</text>
+  
+  <rect class="button-outline" x="1190" y="555" width="150" height="40" rx="6"/>
+  <text class="text-body" x="1240" y="580">🔗 分享视频</text>
+  
+  <!-- 模板视频 Carousel -->
+  <text class="text-title" x="850" y="635">📚 模板视频</text>
+  
+  <!-- Carousel 容器 -->
+  <rect class="border" x="850" y="650" width="500" height="200" rx="8" fill="#f8fafc"/>
+  
+  <!-- 左箭头 -->
+  <circle class="button-outline" cx="875" cy="750" r="20" fill="white"/>
+  <text x="868" y="757" font-size="20">◀</text>
+  
+  <!-- 样板卡片 -->
+  <rect class="card-bg border" x="920" y="670" width="130" height="160" rx="6"/>
+  <rect fill="#cbd5e1" x="930" y="680" width="110" height="80" rx="4"/>
+  <text class="text-small" x="955" y="725" fill="#64748b">缩略图1</text>
+  <text class="text-small" x="940" y="770">古风武侠</text>
+  <text class="text-small" x="935" y="790" fill="#64748b">时长: 2:30</text>
+  <circle fill="#3b82f6" cx="975" cy="815" r="5"/>
+  
+  <rect class="card-bg border" x="1065" y="670" width="130" height="160" rx="6"/>
+  <rect fill="#cbd5e1" x="1075" y="680" width="110" height="80" rx="4"/>
+  <text class="text-small" x="1100" y="725" fill="#64748b">缩略图2</text>
+  <text class="text-small" x="1085" y="770">现代都市</text>
+  <text class="text-small" x="1080" y="790" fill="#64748b">时长: 1:45</text>
+  <circle class="border" cx="1130" cy="815" r="5" fill="white"/>
+  
+  <rect class="card-bg border" x="1210" y="670" width="130" height="160" rx="6"/>
+  <rect fill="#cbd5e1" x="1220" y="680" width="110" height="80" rx="4"/>
+  <text class="text-small" x="1245" y="725" fill="#64748b">缩略图3</text>
+  <text class="text-small" x="1230" y="770">奇幻冒险</text>
+  <text class="text-small" x="1225" y="790" fill="#64748b">时长: 3:15</text>
+  <circle class="border" cx="1275" cy="815" r="5" fill="white"/>
+  
+  <!-- 右箭头 -->
+  <circle class="button-outline" cx="1325" cy="750" r="20" fill="white"/>
+  <text x="1318" y="757" font-size="20">▶</text>
+  
+  <!-- 指示器 -->
+  <circle fill="#3b82f6" cx="1075" cy="815" r="4"/>
+  <circle fill="#cbd5e1" cx="1095" cy="815" r="4"/>
+  <circle fill="#cbd5e1" cx="1115" cy="815" r="4"/>
+</svg>
