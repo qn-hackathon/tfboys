@@ -22,12 +22,14 @@ docker-compose up -d
 
 ## 🔧 核心配置
 
-在 `.env` 文件中必须配置：
+`.env` 文件包含以下配置（默认值已可用，可按需修改）：
 
 ```env
-OSS_ACCESS_KEY=your_access_key_here
-OSS_SECRET_KEY=your_secret_key_here
-OSS_BUCKET=tfboys
+REDIS_URL=redis://redis:6379/0
+LOCAL_STORAGE_DIR=/tmp/tfboys
+FFMPEG_THREADS=4
+CHINESE_FONT_PATH=/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
+AI_SERVICE_CALLBACK_URL=http://ai-service:8002/callbacks/video-completed
 ```
 
 ## ✅ 验证服务

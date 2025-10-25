@@ -13,7 +13,7 @@
 - FastAPI
 - FFmpeg
 - Celery + Redis
-- 阿里云OSS
+- 本地文件系统存储
 
 ## 开发
 

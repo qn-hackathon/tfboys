@@ -18,20 +18,18 @@ cd backend/video-service
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，填入真实的配置信息：
+编辑 `.env` 文件，填入配置信息（如需自定义）：
 
 ```bash
 nano .env
 ```
 
-**必需配置**：
-- `OSS_ACCESS_KEY`: 阿里云 OSS Access Key
-- `OSS_SECRET_KEY`: 阿里云 OSS Secret Key
-- `OSS_BUCKET`: OSS 存储桶名称
-
-**可选配置**：
+**配置说明**：
+- `REDIS_URL`: Redis 连接地址（默认 redis://redis:6379/0）
+- `LOCAL_STORAGE_DIR`: 本地存储目录（默认 /tmp/tfboys）
 - `FFMPEG_THREADS`: FFmpeg 线程数（默认 4）
-- `AI_SERVICE_CALLBACK_URL`: AI 服务回调 URL
+- `CHINESE_FONT_PATH`: 中文字体路径（默认 /usr/share/fonts/truetype/wqy/wqy-zenhei.ttc）
+- `AI_SERVICE_CALLBACK_URL`: AI 服务回调 URL（可选）
 
 ### 步骤 2: 构建 Docker 镜像
 
@@ -365,20 +363,17 @@ docker-compose exec redis redis-cli ping
 docker-compose restart redis
 ```
 
-### 问题 5: OSS 上传失败
+### 问题 5: 本地存储访问失败
 
-**症状**：视频生成成功但上传失败
+**症状**：视频生成失败，日志显示文件写入错误
 
 **解决方案**：
-1. 检查 OSS 配置是否正确
-2. 检查网络连接
-3. 验证 OSS 权限
+1. 检查存储目录权限
+2. 验证 Docker volume 挂载正确
 
 ```bash
-docker-compose exec video-service python -c "
-from app.services.oss_client import oss_client
-print('OSS连接测试:', oss_client.bucket.bucket_name)
-"
+docker-compose exec video-service ls -la /tmp/tfboys
+docker-compose exec video-service touch /tmp/tfboys/test.txt
 ```
 
 ## 📈 性能优化建议
@@ -401,10 +396,10 @@ celery-worker:
 
 ### 3. 使用 SSD 存储
 
-将临时文件目录映射到 SSD：
+将本地存储目录映射到 SSD：
 ```yaml
 volumes:
-  - /path/to/ssd/video-temp:/tmp/video-service
+  - /path/to/ssd/tfboys:/tmp/tfboys
 ```
 
 ### 4. 限制内存使用
