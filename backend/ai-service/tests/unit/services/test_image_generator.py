@@ -17,22 +17,6 @@ class TestImageGenerator:
             return generator
     
     @pytest.mark.asyncio
-    async def test_generate_character_image_success(self, image_generator, mock_local_storage_client, mock_httpx_client):
-        """测试成功生成角色图像"""
-        with patch('shared.clients.local_storage_client', mock_local_storage_client), \
-             patch('httpx.AsyncClient') as mock_client_class:
-            mock_client_class.return_value.__aenter__.return_value = mock_httpx_client
-            
-            image_url = await image_generator.generate_character_image(
-                character_name="小明",
-                character_description="黑色短发,蓝色眼睛"
-            )
-        
-        assert image_url == "/tmp/tfboys/test_file.png"
-        image_generator.client.images.generate.assert_called_once()
-        mock_local_storage_client.upload_file.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_generate_scene_image_success(self, image_generator, mock_local_storage_client, mock_httpx_client):
         """测试成功生成场景图像"""
         with patch('shared.clients.local_storage_client', mock_local_storage_client), \
@@ -41,26 +25,11 @@ class TestImageGenerator:
             
             image_url = await image_generator.generate_scene_image(
                 scene_description="校园樱花飘落",
-                scene_id="scene_001",
-                character_context="小明: 黑发少年"
+                scene_id="scene_001"
             )
         
         assert image_url == "/tmp/tfboys/test_file.png"
         image_generator.client.images.generate.assert_called_once()
-    
-    @pytest.mark.asyncio
-    async def test_generate_scene_image_without_characters(self, image_generator, mock_local_storage_client, mock_httpx_client):
-        """测试生成无角色的场景图像"""
-        with patch('shared.clients.local_storage_client', mock_local_storage_client), \
-             patch('httpx.AsyncClient') as mock_client_class:
-            mock_client_class.return_value.__aenter__.return_value = mock_httpx_client
-            
-            image_url = await image_generator.generate_scene_image(
-                scene_description="空旷的教室",
-                scene_id="scene_002"
-            )
-        
-        assert image_url == "/tmp/tfboys/test_file.png"
     
     @pytest.mark.asyncio
     async def test_generate_image_with_different_aspect_ratios(self, image_generator, mock_local_storage_client, mock_httpx_client):

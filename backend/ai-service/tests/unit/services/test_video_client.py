@@ -4,7 +4,7 @@
 import pytest
 from unittest.mock import patch, AsyncMock
 from app.services.video_client import VideoClient
-from shared.models.scene import Scene, Character
+from shared.models.scene import Scene
 from shared.exceptions import APICallException
 
 

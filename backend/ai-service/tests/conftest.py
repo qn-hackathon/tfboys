@@ -18,10 +18,6 @@ def mock_redis_client():
     })
     mock_client.save_task = AsyncMock()
     mock_client.update_task_status = AsyncMock()
-    mock_client.get_character = AsyncMock(return_value=None)
-    mock_client.save_character = AsyncMock()
-    mock_client.add_task_character = AsyncMock()
-    mock_client.list_task_characters = AsyncMock(return_value=[])
     return mock_client
 
 
@@ -80,37 +76,14 @@ def sample_scenes_data():
         {
             "scene_index": 1,
             "description": "清晨的校园,樱花飘落,阳光透过树叶洒在地面",
-            "narration": "春天的早晨,校园里樱花盛开,微风吹过,花瓣如雪般飘落。",
-            "characters": [
-                {
-                    "name": "小明",
-                    "description": "少年,黑色短发,蓝色眼睛,身穿白色校服"
-                }
-            ]
+            "narration": "春天的早晨,校园里樱花盛开,微风吹过,花瓣如雪般飘落。"
         },
         {
             "scene_index": 2,
             "description": "教室里,阳光从窗外照进来",
-            "narration": "小明走进教室,同学们已经在座位上了。",
-            "characters": [
-                {
-                    "name": "小明",
-                    "description": "少年,黑色短发,蓝色眼睛,身穿白色校服"
-                }
-            ]
+            "narration": "小明走进教室,同学们已经在座位上了。"
         }
     ]
-
-
-@pytest.fixture
-def sample_character_data():
-    """示例角色数据"""
-    return {
-        "character_id": "char_12345678",
-        "name": "小明",
-        "description": "少年,黑色短发,蓝色眼睛,身穿白色校服",
-        "reference_image_url": "/tmp/tfboys/characters/小明.png"
-    }
 
 
 @pytest.fixture

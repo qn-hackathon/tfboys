@@ -34,7 +34,6 @@ class TestTextAnalyzer:
 
         assert len(scenes) == 2
         assert scenes[0]["scene_index"] == 1
-        assert scenes[0]["characters"][0]["name"] == "小明"
 
     @pytest.mark.asyncio
     async def test_analyze_novel_invalid_json(self, text_analyzer, sample_novel_text):
@@ -81,26 +80,3 @@ class TestTextAnalyzer:
 
         assert "10-20个场景" in prompt
     
-    def test_normalize_character_descriptions(self, text_analyzer):
-        """测试角色描述归一化"""
-        scenes = [
-            {
-                "characters": [
-                    {"name": "小明", "description": "黑发少年"},
-                    {"name": "小红", "description": "红发少女"}
-                ]
-            },
-            {
-                "characters": [
-                    {"name": "小明", "description": "黑发少年"},
-                    {"name": "小红", "description": "不同的描述"}
-                ]
-            }
-        ]
-        
-        normalized = text_analyzer._normalize_character_descriptions(scenes)
-        
-        assert normalized[0]["characters"][0]["description"] == "黑发少年"
-        assert normalized[1]["characters"][0]["description"] == "黑发少年"
-        assert normalized[0]["characters"][1]["description"] == "红发少女"
-        assert normalized[1]["characters"][1]["description"] == "红发少女"
