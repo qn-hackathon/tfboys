@@ -1,6 +1,6 @@
-# TFBoys - 文字生成视频系统
+# TFBoys - 文字内容的短视频传播加速平台
 
-Token Free Boys - 基于大模型的小说文字转动漫视频系统
+Token Free Boys - 文字内容的短视频传播加速平台
 
 ## 项目简介
 
