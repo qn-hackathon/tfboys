@@ -81,12 +81,61 @@ backend/<service-name>/
 
 ## 💻 代码规范
 
+### 语言规范
+
+**重要**: 本项目强制使用中文作为主要语言
+
+1. **代码注释**: 所有注释必须使用中文
+2. **文档字符串**: 所有 docstring 必须使用中文
+3. **变量命名**: 使用英文命名,但相关注释必须是中文
+4. **Pull Request**: PR 标题和描述必须使用中文
+5. **文档**: 所有 Markdown 文档(.md)必须使用中文
+6. **专有名词例外**: 以下技术术语可保留英文:
+   - API 名称 (如 OpenAI API, Claude API, DALL-E 3)
+   - 框架名称 (如 FastAPI, React, Redis)
+   - 技术术语 (如 HTTP, REST, JSON, Docker)
+   - 第三方服务名称 (如 GitHub, Celery)
+   - 代码中的关键字和标准库名称
+
+**示例**:
+```python
+# ✅ 正确: 使用中文注释
+async def generate_image(scene_desc: str) -> str:
+    """
+    生成场景图像
+    
+    Args:
+        scene_desc: 场景描述
+        
+    Returns:
+        str: 生成的图像 URL
+    """
+    # 调用 DALL-E 3 API 生成图像
+    response = await openai_client.create_image(scene_desc)
+    return response.url
+
+# ❌ 错误: 使用英文注释
+async def generate_image(scene_desc: str) -> str:
+    """
+    Generate scene image
+    
+    Args:
+        scene_desc: Scene description
+        
+    Returns:
+        str: Generated image URL
+    """
+    # Call DALL-E 3 API to generate image
+    response = await openai_client.create_image(scene_desc)
+    return response.url
+```
+
 ### Python 代码规范
 
 1. **代码格式化**: 使用 Black (line-length=100)
 2. **导入排序**: 使用 isort
 3. **类型注解**: 所有函数必须有类型注解
-4. **文档字符串**: 使用 Google 风格的 docstring
+4. **文档字符串**: 使用 Google 风格的 docstring (中文)
 
 ```python
 async def generate_image(scene_desc: str, character_refs: List[str]) -> str:
