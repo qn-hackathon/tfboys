@@ -7,6 +7,8 @@ from typing import Optional
 from openai import AsyncOpenAI
 from app.config import settings
 from shared.clients import oss_client
+from shared.exceptions import ImageGenerationException
+from app.utils.retry import retry_on_failure
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +90,7 @@ class ImageGenerator:
         logger.info(f"Scene image generated for {scene_id}: {image_url}")
         return image_url
     
+    @retry_on_failure(max_retries=3, delay=5.0, backoff=2.0)
     async def generate_image(
         self,
         prompt: str,
@@ -125,6 +128,7 @@ class ImageGenerator:
         
         return image_url
     
+    @retry_on_failure(max_retries=3, delay=2.0, backoff=2.0)
     async def _generate_and_upload(
         self,
         prompt: str,
@@ -141,6 +145,9 @@ class ImageGenerator:
         
         Returns:
             str: OSS 中的图像 URL
+            
+        Raises:
+            ImageGenerationException: 图像生成失败
         """
         try:
             response = await self.client.images.generate(
@@ -166,7 +173,7 @@ class ImageGenerator:
             
         except Exception as e:
             logger.error(f"Failed to generate and upload image: {str(e)}", exc_info=True)
-            raise
+            raise ImageGenerationException(f"Failed to generate and upload image: {str(e)}")
     
     def _get_size_from_aspect_ratio(self, ar: str) -> str:
         """
@@ -183,7 +190,14 @@ class ImageGenerator:
             "16:9": "1792x1024",
             "9:16": "1024x1792",
         }
-        return size_map.get(ar, "1024x1024")
+        size = size_map.get(ar, "1024x1024")
+        if ar not in size_map:
+            logger.warning(f"Unsupported aspect ratio '{ar}', using default 1024x1024")
+        return size
+    
+    async def close(self):
+        """关闭OpenAI客户端"""
+        await self.client.close()
 
 
 image_generator = ImageGenerator()
