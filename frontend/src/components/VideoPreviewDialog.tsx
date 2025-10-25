@@ -46,7 +46,7 @@ export function VideoPreviewDialog({
           <DialogTitle>视频预览</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full p-6 overflow-y-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full px-8 py-6 overflow-y-auto">
           <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
             <div className="aspect-video bg-black rounded-lg overflow-hidden flex-shrink-0">
               <video
