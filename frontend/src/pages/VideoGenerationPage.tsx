@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices } from "@/data/mockData"
+import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices, type VideoSlice } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
 
@@ -48,6 +48,7 @@ export function VideoGenerationPage() {
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>(mockVideoSlices)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const charCount = novelText.length
@@ -85,6 +86,8 @@ export function VideoGenerationPage() {
           clearInterval(interval)
           setStatus("completed")
           setStatusText("生成完成")
+          // 生成完成后设置视频切片
+          setVideoSlices(mockVideoSlices)
           return 100
         }
 
@@ -131,6 +134,9 @@ export function VideoGenerationPage() {
       setSelectedStyle(template.style as VideoStyle)
       setVoiceType(template.voiceType)
       setResolution(template.resolution)
+      setVideoSlices(template.slices)
+      // 模拟已完成状态以显示视频切片
+      setStatus("completed")
     }
   }
 
@@ -391,7 +397,7 @@ export function VideoGenerationPage() {
             {status === "completed" && (
               <Card className="p-6">
                 <VideoSliceCarousel
-                  slices={mockVideoSlices}
+                  slices={videoSlices}
                   onSliceClick={handleSliceClick}
                 />
               </Card>
