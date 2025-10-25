@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Carousel,
   CarouselContent,
@@ -6,23 +6,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { mockVideoSlices, VideoSlice } from "@/data/mockData"
+import { VideoSlice } from "@/data/mockData"
 
 interface VideoSliceCarouselProps {
-  taskId: string
+  slices: VideoSlice[]
   onSliceClick?: (timeInSeconds: number) => void
 }
 
 export function VideoSliceCarousel({
-  taskId,
+  slices,
   onSliceClick,
 }: VideoSliceCarouselProps) {
   const [currentSliceIndex, setCurrentSliceIndex] = useState(0)
-  const [slices, setSlices] = useState<VideoSlice[]>([])
-
-  useEffect(() => {
-    setSlices(mockVideoSlices)
-  }, [taskId])
 
   const handleSliceClick = (index: number, timeInSeconds: number) => {
     setCurrentSliceIndex(index)
