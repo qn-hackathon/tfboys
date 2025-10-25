@@ -7,8 +7,6 @@ class Settings(BaseSettings):
     
     openai_api_key: str = ""
     anthropic_api_key: str = ""
-    midjourney_api_key: str = ""
-    midjourney_api_url: str = "https://api.midjourney.com/v1"
     
     aliyun_tts_access_key_id: str = ""
     aliyun_tts_access_key_secret: str = ""

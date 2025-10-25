@@ -12,7 +12,6 @@ class Character(BaseModel):
     name: str = Field(..., description="角色名称")
     description: str = Field(..., description="角色外貌描述(用于图像生成)")
     reference_image_url: Optional[str] = Field(None, description="角色设定图 URL")
-    midjourney_cref_url: Optional[str] = Field(None, description="Midjourney --cref 参数 URL")
     first_appearance_scene: Optional[int] = Field(None, description="首次出现的场景索引")
     created_at: Optional[datetime] = Field(None, description="创建时间")
 
