@@ -4,6 +4,7 @@
 from typing import List, Dict
 import json
 import logging
+import asyncio
 from anthropic import Anthropic
 from app.config import settings
 from shared.exceptions import TextAnalysisException
@@ -17,7 +18,7 @@ class TextAnalyzer:
     def __init__(self):
         self.client = Anthropic(api_key=settings.anthropic_api_key)
     
-    def analyze_novel(self, novel_text: str) -> List[Dict]:
+    async def analyze_novel(self, novel_text: str) -> List[Dict]:
         """
         分析小说文本,分割场景并识别角色
         
@@ -38,7 +39,8 @@ class TextAnalyzer:
         try:
             prompt = self._build_prompt(novel_text)
             
-            response = self.client.messages.create(
+            response = await asyncio.to_thread(
+                self.client.messages.create,
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=4096,
                 temperature=0.7,

@@ -19,7 +19,7 @@ from app.services.video_client import video_client, init_video_client
 from app.config import settings
 from shared.clients import redis_client, init_redis_client
 from shared.models import Scene, Character
-from shared.enums import TaskStatus
+from shared.enums import TaskStatus, TTSVoice
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +35,11 @@ def process_novel_task(task_id: str, novel_text: str):
         
     Returns:
         dict: 任务处理结果
+    
+    Note:
+        客户端初始化在 Celery Worker 启动时已完成 (celery_app.py)
     """
     logger.info(f"Starting process_novel_task for task_id: {task_id}")
-    
-    init_redis_client(settings.redis_url)
-    init_video_client(settings.video_service_url)
     
     return asyncio.run(_process_novel_task_async(task_id, novel_text))
 
@@ -69,7 +69,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         await redis_client.update_task_status(task_id, TaskStatus.ANALYZING.value)
         logger.info(f"Task {task_id}: Analyzing novel text...")
         
-        scenes_data = text_analyzer.analyze_novel(novel_text)
+        scenes_data = await text_analyzer.analyze_novel(novel_text)
         total_scenes = len(scenes_data)
         
         logger.info(f"Task {task_id}: Analyzed {total_scenes} scenes")
@@ -80,7 +80,26 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         
         # === 步骤2: 角色处理 ===
         logger.info(f"Task {task_id}: Processing characters...")
-        characters_map = await _process_characters(task_id, scenes_data)
+        # 构建临时 Scene 对象用于角色提取
+        temp_scenes = []
+        for idx, scene_data in enumerate(scenes_data):
+            scene_characters = [
+                Character(
+                    character_id=f"temp_{c['name']}",
+                    name=c["name"],
+                    description=c["description"]
+                )
+                for c in scene_data["characters"]
+            ]
+            temp_scenes.append(Scene(
+                scene_id=f"temp_{idx}",
+                scene_index=idx,
+                description=scene_data["description"],
+                narration=scene_data["narration"],
+                characters=scene_characters
+            ))
+        
+        characters_map = await character_manager.process_characters(task_id, temp_scenes)
         logger.info(f"Task {task_id}: Processed {len(characters_map)} characters")
         
         # === 步骤3: 场景处理 ===
@@ -112,9 +131,11 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             
             # 3.2 生成配音
             await redis_client.update_task_status(task_id, TaskStatus.GENERATING_AUDIO.value)
-            audio_url = await voice_generator.generate_voice(
+            audio_url, audio_duration = await voice_generator.generate_voice(
                 text=scene_data["narration"],
-                voice="zhiyan"
+                task_id=task_id,
+                scene_id=scene_id,
+                voice=TTSVoice.FEMALE
             )
             
             # 3.3 构建 Scene 对象
@@ -132,7 +153,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
                 characters=scene_characters,
                 image_url=scene_image_url,
                 audio_url=audio_url,
-                duration=5.0
+                duration=audio_duration
             )
             scenes.append(scene)
             
@@ -178,50 +199,6 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         raise
 
 
-async def _process_characters(task_id: str, scenes_data: List[Dict]) -> Dict[str, Character]:
-    """
-    处理角色:生成角色设定图并保存到Redis
-    
-    Args:
-        task_id: 任务ID
-        scenes_data: 场景数据列表
-        
-    Returns:
-        Dict[str, Character]: 角色名称到角色对象的映射
-    """
-    characters_map = {}
-    
-    for scene_data in scenes_data:
-        for char_data in scene_data["characters"]:
-            char_name = char_data["name"]
-            
-            if char_name not in characters_map:
-                logger.info(f"Task {task_id}: Generating character design for '{char_name}'")
-                
-                # 首次出现:生成角色设定图
-                char_ref_url = await image_generator.generate_character_image(
-                    character_name=char_name,
-                    character_description=char_data['description']
-                )
-                
-                # 保存角色到 Redis
-                character = Character(
-                    character_id=f"char_{task_id}_{char_name}",
-                    name=char_name,
-                    description=char_data["description"],
-                    reference_image_url=char_ref_url
-                )
-                characters_map[char_name] = character
-                
-                await character_manager.save_character(
-                    task_id=task_id,
-                    character_name=char_name,
-                    character_data=character.model_dump()
-                )
-                
-                logger.info(f"Task {task_id}: Character '{char_name}' saved successfully")
-    
-    return characters_map
 
 
 async def _update_task_progress(

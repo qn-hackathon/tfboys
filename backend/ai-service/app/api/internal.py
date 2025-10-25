@@ -63,4 +63,9 @@ async def get_task_status(task_id: str):
     if not task_data:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     
+    # Convert scene dicts to Scene objects if present
+    if "scenes" in task_data and task_data["scenes"]:
+        from shared.models import Scene
+        task_data["scenes"] = [Scene(**s) for s in task_data["scenes"]]
+    
     return TaskStatusResponse(**task_data)
