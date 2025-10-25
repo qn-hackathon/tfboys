@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,32 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import {
   Search,
   Play,
   Download,
   Trash2,
   RefreshCw,
-  Share2,
-  Clock,
-  Film,
-  HardDrive,
-  Monitor,
-  Maximize,
 } from "lucide-react"
-import { mockTasks, mockVideoSlices, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+import { mockTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 
@@ -39,8 +21,6 @@ export function MyTasksPage() {
   const [filter, setFilter] = useState<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [currentSliceIndex, setCurrentSliceIndex] = useState(0)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   const filteredTasks = mockTasks.filter((task) => {
     if (filter === "in-progress") {
@@ -60,7 +40,6 @@ export function MyTasksPage() {
 
   const handlePreview = (task: Task) => {
     setSelectedTask(task)
-    setCurrentSliceIndex(0)
   }
 
   const handleDownload = (task: Task) => {
@@ -93,13 +72,6 @@ export function MyTasksPage() {
     console.log("分享视频:", selectedTask?.id)
   }
 
-  const handleSliceClick = (index: number, timeInSeconds: number) => {
-    setCurrentSliceIndex(index)
-    if (videoRef.current) {
-      videoRef.current.currentTime = timeInSeconds
-      videoRef.current.play()
-    }
-  }
 
   const getStatusIcon = (status: Task["status"]) => {
     if (status === "completed") return "✅"
@@ -278,120 +250,14 @@ export function MyTasksPage() {
         )}
       </div>
 
-      <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="sr-only">视频预览</DialogTitle>
-          </DialogHeader>
-
-          {selectedTask && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => handleDownload(selectedTask)}>
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={handleShare}>
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(selectedTask)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                  <video
-                    ref={videoRef}
-                    src={selectedTask.videoUrl}
-                    controls
-                    className="w-full h-full"
-                  >
-                    您的浏览器不支持视频播放
-                  </video>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold mb-3">🎞️ 视频切片</h3>
-                  <Carousel
-                    opts={{
-                      align: "start",
-                    }}
-                    className="w-full"
-                  >
-                    <CarouselContent>
-                      {mockVideoSlices.map((slice, index) => (
-                        <CarouselItem key={slice.id} className="basis-1/3 lg:basis-1/4">
-                          <button
-                            onClick={() => handleSliceClick(index, slice.timeInSeconds)}
-                            className={`
-                              w-full rounded-lg overflow-hidden border-2 transition-all
-                              ${
-                                currentSliceIndex === index
-                                  ? "border-primary ring-2 ring-primary/20"
-                                  : "border-border hover:border-primary/50"
-                              }
-                            `}
-                          >
-                            <div className="aspect-video bg-muted">
-                              <img
-                                src={slice.thumbnailUrl}
-                                alt={`场景 ${slice.sceneNumber}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="p-2 bg-background">
-                              <p className="text-xs font-medium">场景 {slice.sceneNumber}</p>
-                              <p className="text-xs text-muted-foreground">{slice.timestamp}</p>
-                            </div>
-                          </button>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
-                  </Carousel>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                    📄 小说 Prompt
-                  </h3>
-                  <Card className="p-4">
-                    <p className="text-sm text-muted-foreground max-h-32 overflow-y-auto">
-                      {selectedTask.novelPrompt}
-                    </p>
-                  </Card>
-                </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>时长: {selectedTask.duration}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Monitor className="h-4 w-4" />
-                    <span>分辨率: {selectedTask.resolution}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Maximize className="h-4 w-4" />
-                    <span>视频横纵比: {selectedTask.aspectRatio}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Film className="h-4 w-4" />
-                    <span>场景数: {selectedTask.totalScenes}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <HardDrive className="h-4 w-4" />
-                    <span>文件大小: {selectedTask.fileSize}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <VideoPreviewDialog
+        task={selectedTask}
+        open={!!selectedTask}
+        onOpenChange={() => setSelectedTask(null)}
+        onDownload={handleDownload}
+        onShare={handleShare}
+        onDelete={handleDelete}
+      />
     </div>
   )
 }
