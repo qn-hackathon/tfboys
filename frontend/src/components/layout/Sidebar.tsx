@@ -24,7 +24,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
 
   return (
     <aside className="w-60 border-r bg-background">
-      <nav className="flex flex-col gap-1 p-4">
+      <nav className="flex flex-col gap-1 p-4 pt-8">
         {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = currentPage === item.id
