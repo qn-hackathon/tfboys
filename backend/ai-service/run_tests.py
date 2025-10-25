@@ -9,6 +9,7 @@ AI Service 测试统一入口
     python run_tests.py --cov              # 运行测试并生成覆盖率报告
 """
 import sys
+import os
 import subprocess
 import argparse
 
@@ -45,8 +46,10 @@ def run_tests(test_type=None, coverage=False, verbose=False):
         cmd.append("-vv")
     
     print(f"\n▶️  Command: {' '.join(cmd)}\n")
-    
-    result = subprocess.run(cmd, cwd="/workspace/backend/ai-service")
+
+    # 使用脚本所在目录作为工作目录
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    result = subprocess.run(cmd, cwd=script_dir)
     
     if result.returncode == 0:
         print("\n✅ All tests passed!")

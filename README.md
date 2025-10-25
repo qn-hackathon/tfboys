@@ -8,8 +8,8 @@ Token Free Boys - 文字内容的短视频传播加速平台
 
 ### 核心特性
 
-- 🎨 **角色一致性**: 使用Midjourney的--cref参数保证角色在不同场景的视觉一致性
-- 🤖 **AI驱动**: 基于GPT-4/Claude进行文本分析,Midjourney生成图像,阿里云TTS生成配音
+- 🎨 **角色一致性**: 通过详细的提示词描述保证角色在不同场景的视觉一致性
+- 🤖 **AI驱动**: 基于七牛 AI Token API，使用 DeepSeek-V3 进行文本分析，Gemini 2.5 Flash 生成图像，七牛 TTS 生成配音
 - 🎬 **自动化视频合成**: 使用FFmpeg自动合成图片、字幕和音频
 - 📦 **Monorepo架构**: 前后端代码在同一仓库,便于管理和部署
 - 🐳 **Docker支持**: 完整的Docker配置,一键启动所有服务
@@ -25,9 +25,10 @@ Token Free Boys - 文字内容的短视频传播加速平台
 ### 后端
 - Python + FastAPI
 - Celery + Redis (异步任务队列)
-- OpenAI GPT-4 / Claude 3.5 (文本分析)
-- Midjourney API (图像生成)
-- 阿里云TTS (配音生成)
+- 七牛 AI Token API
+  - DeepSeek-V3 (文本分析)
+  - Gemini 2.5 Flash (图像生成)
+  - 七牛 TTS (配音生成)
 - FFmpeg (视频合成)
 
 ## 快速开始
@@ -128,18 +129,21 @@ make clean     # 清理临时文件
 
 ### AI Service (.env)
 ```env
-OPENAI_API_KEY=sk-xxx
-MIDJOURNEY_API_KEY=xxx
-ALIYUN_TTS_ACCESS_KEY=xxx
-ALIYUN_TTS_SECRET_KEY=xxx
-OSS_ENDPOINT=xxx
-OSS_BUCKET=xxx
+# 七牛 AI Token API 配置
+QINIU_API_KEY=your-qiniu-ai-token-api-key
+
+# 七牛 TTS 服务配置
+QINIU_ACCESS_KEY=your-qiniu-access-key
+QINIU_SECRET_KEY=your-qiniu-secret-key
+
+# Redis 配置
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ### Video Service (.env)
 ```env
-OSS_ENDPOINT=xxx
-OSS_BUCKET=xxx
+# Redis 配置
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ## License

@@ -12,7 +12,7 @@
 - 数据库: Redis
 - 消息队列: Celery + Redis
 - 文件存储: 本地文件系统 (/tmp/tfboys)
-- AI 服务: OpenAI GPT-4/Claude, DALL-E 3, 七牛云 TTS
+- AI 服务: 七牛 AI Token API (DeepSeek-V3, Gemini 2.5 Flash), 七牛云 TTS
 
 **架构**: Monorepo (所有服务在一个仓库中)
 
@@ -59,7 +59,7 @@ backend/<service-name>/
 ### 3. services/ vs utils/ 的区别
 
 **services/** (业务逻辑层):
-- 调用外部服务的客户端 (GPT-4, DALL-E 3, Video Service)
+- 调用外部服务的客户端 (DeepSeek-V3, 七牛文生图 API, Video Service)
 - 包含业务逻辑的服务类
 - 示例: `text_analyzer.py`, `image_generator.py`, `video_client.py`
 
@@ -91,7 +91,7 @@ backend/<service-name>/
 4. **Pull Request**: PR 标题和描述必须使用中文
 5. **文档**: 所有 Markdown 文档(.md)必须使用中文
 6. **专有名词例外**: 以下技术术语可保留英文:
-   - API 名称 (如 OpenAI API, Claude API, DALL-E 3)
+   - API 名称 (如 OpenAI API, 七牛 AI 推理 API, 七牛文生图 API)
    - 框架名称 (如 FastAPI, React, Redis)
    - 技术术语 (如 HTTP, REST, JSON, Docker)
    - 第三方服务名称 (如 GitHub, Celery)
@@ -110,7 +110,7 @@ async def generate_image(scene_desc: str) -> str:
     Returns:
         str: 生成的图像 URL
     """
-    # 调用 DALL-E 3 API 生成图像
+    # 调用 七牛文生图 API API 生成图像
     response = await openai_client.create_image(scene_desc)
     return response.url
 
@@ -125,7 +125,7 @@ async def generate_image(scene_desc: str) -> str:
     Returns:
         str: Generated image URL
     """
-    # Call DALL-E 3 API to generate image
+    # Call 七牛文生图 API API to generate image
     response = await openai_client.create_image(scene_desc)
     return response.url
 ```
@@ -283,13 +283,13 @@ REDIS_URL=redis://localhost:6379/0
 VIDEO_SERVICE_URL=http://localhost:8003
 
 # OpenAI
-OPENAI_API_KEY=sk-...
+QINIU_API_KEY=sk-...
 
 # Anthropic
-ANTHROPIC_API_KEY=...
+QINIU_API_KEY=...
 
-# DALL-E 3 (使用 OpenAI API)
-# DALL-E 3 图像生成通过 OPENAI_API_KEY 实现，无需额外配置
+# 七牛文生图 API (使用 OpenAI API)
+# 七牛文生图 API 图像生成通过 QINIU_API_KEY 实现，无需额外配置
 
 # 七牛云 TTS
 QINIU_ACCESS_KEY=...
@@ -337,10 +337,10 @@ AI_SERVICE_URL=http://localhost:8002
 2. API Gateway → AI Service (创建任务)
    ↓
 3. AI Service 异步处理:
-   ├─ 3.1 文本分析 (GPT-4) → 生成场景列表
+   ├─ 3.1 文本分析 (DeepSeek-V3) → 生成场景列表
    ├─ 3.2 提取角色 → 保存到 Redis 角色库
-   ├─ 3.3 生成角色设定图 (DALL-E 3)
-   ├─ 3.4 生成场景图像 (DALL-E 3 + --cref)
+   ├─ 3.3 生成角色设定图 (七牛文生图 API)
+   ├─ 3.4 生成场景图像 (七牛文生图 API + --cref)
    ├─ 3.5 生成配音 (七牛云 TTS)
    └─ 3.6 提交到 Video Service
    ↓
@@ -351,11 +351,11 @@ AI_SERVICE_URL=http://localhost:8002
 6. 用户查询任务状态 → API Gateway → Redis
 ```
 
-### 角色一致性实现 (DALL-E 3)
+### 角色一致性实现 (七牛文生图 API)
 
-**核心原理**: 使用 DALL-E 3 通过详细的角色描述提示词来保持角色一致性
+**核心原理**: 使用 七牛文生图 API 通过详细的角色描述提示词来保持角色一致性
 
-**注意**: DALL-E 3 不支持图像引用参数（如 DALL-E 3 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
+**注意**: 七牛文生图 API 不支持图像引用参数（如 七牛文生图 API 的 --cref），因此我们通过在每个场景的提示词中包含详细的角色特征描述来维持一致性。
 
 **步骤**:
 
@@ -547,11 +547,11 @@ ffmpeg_command = [
 
 ### 3. 如何扩展角色一致性算法?
 
-当前使用 DALL-E 3 的详细提示词策略，如需更高级的一致性:
+当前使用 七牛文生图 API 的详细提示词策略，如需更高级的一致性:
 
 1. 考虑使用 Stable Diffusion + ControlNet (支持图像引用)
 2. 使用专业的角色一致性模型 (如 InsightFace)
-3. 考虑 DALL-E 3 API 代理服务 (支持 --cref 参数)
+3. 考虑 七牛文生图 API API 代理服务 (支持 --cref 参数)
 4. 在 `app/services/character_manager.py` 中实现新算法
 
 ### 4. 如何添加新的配音音色?
@@ -590,7 +590,7 @@ docker-compose logs -f ai-service
 
 - [FastAPI 文档](https://fastapi.tiangolo.com/)
 - [Celery 文档](https://docs.celeryproject.org/)
-- [OpenAI DALL-E 3 文档](https://platform.openai.com/docs/guides/images)
+- [OpenAI 七牛文生图 API 文档](https://platform.openai.com/docs/guides/images)
 - [阿里云 OSS 文档](https://help.aliyun.com/product/31815.html)
 - [七牛云 TTS 文档](https://developer.qiniu.com/dora/8091/speech-synthesis)
 
