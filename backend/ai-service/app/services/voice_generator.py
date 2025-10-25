@@ -1,39 +1,45 @@
 """
 配音生成服务 - 使用七牛云TTS生成中文配音
 """
-import asyncio
 import logging
-import json
-import uuid
+import httpx
 import hmac
 import hashlib
 import base64
-from typing import Optional
-from urllib.parse import urlparse
-import httpx
+import json
+from io import BytesIO
+from typing import Tuple
+from mutagen.mp3 import MP3
+
 from app.config import settings
+from app.utils.retry import retry_on_failure
+from shared.clients.oss_client import init_oss_client, oss_client
 from shared.exceptions import VoiceGenerationException
-from shared.clients import oss_client, init_oss_client
+from shared.enums import TTSVoice
 
 logger = logging.getLogger(__name__)
 
+VOICE_MAPPING = {
+    TTSVoice.MALE: 9,
+    TTSVoice.FEMALE: 7,
+    TTSVoice.CHILD: 10
+}
+
 
 class VoiceGenerator:
+    """
+    七牛云 TTS 配音生成服务
+    
+    职责:
+    1. 调用七牛云 TTS API 生成语音
+    2. 将音频文件上传到 OSS
+    3. 返回音频文件 URL 和时长
+    """
+    
     def __init__(self):
         self.access_key = settings.qiniu_access_key
         self.secret_key = settings.qiniu_secret_key
-        self.tts_url = "https://ap-gate-z0.qiniuapi.com/voice/v2/tts"
-        
-        self.voice_mapping = {
-            "mature_female": 7,
-            "shaanxi_male": 8,
-            "northeast_male": 9,
-            "mature_male": 10,
-            "boy_male": 11,
-            "narrator_male": 12,
-            "news_male": 13,
-            "adolescent_female": 14
-        }
+        self.api_url = "https://ap-gate-z0.qiniuapi.com/voice/v2/tts"
         
         if not oss_client:
             init_oss_client(
@@ -44,194 +50,213 @@ class VoiceGenerator:
             )
     
     async def generate_voice(
-        self, 
-        text: str, 
-        voice: str = "mature_female",
-        speed: float = 1.0,
-        volume: float = 1.0
-    ) -> str:
+        self,
+        text: str,
+        task_id: str,
+        scene_id: str,
+        voice: TTSVoice = TTSVoice.FEMALE,
+        format: str = "mp3"
+    ) -> Tuple[str, float]:
         """
-        生成配音
+        生成配音并上传到 OSS
         
         Args:
-            text: 文字内容 (1-200字符)
-            voice: 音色 (支持: mature_female, shaanxi_male, northeast_male, 
-                   mature_male, boy_male, narrator_male, news_male, adolescent_female)
-            speed: 语速 (0.75-1.25)
-            volume: 音量 (0.75-1.25)
-        
+            text: 旁白文字
+            task_id: 任务 ID
+            scene_id: 场景 ID
+            voice: 音色类型
+            format: 音频格式
+            
         Returns:
-            音频文件URL (OSS上传后的URL)
+            tuple[str, float]: (音频 URL, 音频时长)
             
         Raises:
             VoiceGenerationException: 配音生成失败
         """
         try:
-            if not text or not text.strip():
-                raise VoiceGenerationException("Text content is empty")
+            voice_code = VOICE_MAPPING.get(voice, 7)
             
-            if len(text) > 200:
-                raise VoiceGenerationException("Text exceeds 200 characters limit")
-            
-            spkid = self.voice_mapping.get(voice, 7)
-            logger.info(f"Generating voice for text (length: {len(text)}) with voice ID: {spkid}")
-            
-            audio_url = await self._call_qiniu_tts(
-                text=text, 
-                spkid=spkid,
-                speed=speed,
-                volume=volume
+            logger.info(
+                f"Generating voice for task {task_id}, scene {scene_id}, "
+                f"text length: {len(text)}, voice: {voice_code}"
             )
             
-            audio_data = await self._download_audio(audio_url)
+            audio_bytes = await self._call_tts_api(text, voice_code, format)
             
-            audio_filename = f"audio/{uuid.uuid4()}.mp3"
-            oss_url = await oss_client.upload_file(audio_data, audio_filename)
+            duration = self._get_audio_duration(audio_bytes)
             
-            logger.info(f"Voice generated and uploaded: {oss_url}")
-            return oss_url
+            audio_url = await self._upload_to_oss(audio_bytes, task_id, scene_id)
+            
+            logger.info(
+                f"Voice generated successfully: {audio_url}, duration: {duration}s"
+            )
+            
+            return audio_url, duration
             
         except Exception as e:
             logger.error(f"Failed to generate voice: {e}", exc_info=True)
             raise VoiceGenerationException(str(e))
     
-    async def _call_qiniu_tts(
-        self, 
-        text: str, 
-        spkid: int,
-        speed: float,
-        volume: float
-    ) -> str:
+    def _generate_qiniu_token(self, method: str, path: str, query: str, content_type: str, body: str) -> str:
         """
-        调用七牛云TTS API
+        生成七牛云认证 Token
         
         Args:
-            text: 文字内容
-            spkid: 音色ID (7-14)
-            speed: 语速 (0.75-1.25)
-            volume: 音量 (0.75-1.25)
-            
-        Returns:
-            str: 音频文件下载URL
-            
-        Raises:
-            VoiceGenerationException: API调用失败
-        """
-        try:
-            payload = {
-                "content": text,
-                "spkid": spkid,
-                "audioType": 3,
-                "volume": max(0.75, min(1.25, volume)),
-                "speed": max(0.75, min(1.25, speed))
-            }
-            
-            body = json.dumps(payload).encode('utf-8')
-            auth_header = self._generate_qiniu_auth(
-                url=self.tts_url,
-                method="POST",
-                body=body,
-                content_type="application/json"
-            )
-            
-            headers = {
-                "Authorization": auth_header,
-                "Content-Type": "application/json"
-            }
-            
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    self.tts_url, 
-                    content=body,
-                    headers=headers
-                )
-                response.raise_for_status()
-                
-                result = response.json()
-                
-                if result.get("code") == 0:
-                    audio_url = result.get("result", {}).get("audioUrl")
-                    if not audio_url:
-                        raise VoiceGenerationException("No audioUrl in response")
-                    logger.info(f"Qiniu TTS API success: {audio_url}")
-                    return audio_url
-                else:
-                    error_msg = result.get("msg", "Unknown error")
-                    raise VoiceGenerationException(f"API returned error: {error_msg}")
-                    
-        except httpx.HTTPError as e:
-            logger.error(f"Qiniu TTS HTTP error: {e}")
-            raise VoiceGenerationException(f"HTTP error: {str(e)}")
-        except Exception as e:
-            logger.error(f"Unexpected error calling Qiniu TTS: {e}", exc_info=True)
-            raise VoiceGenerationException(str(e))
-    
-    def _generate_qiniu_auth(
-        self, 
-        url: str, 
-        method: str = "POST",
-        body: bytes = b"",
-        content_type: str = "application/json"
-    ) -> str:
-        """
-        生成七牛云认证签名
-        
-        Args:
-            url: API URL
-            method: HTTP方法
-            body: 请求体
+            method: HTTP 方法
+            path: 请求路径
+            query: 查询参数
             content_type: Content-Type
+            body: 请求体
             
         Returns:
-            str: Authorization header值
+            str: 认证 Token
         """
-        parsed_url = urlparse(url)
-        path = parsed_url.path
-        if parsed_url.query:
-            path += f"?{parsed_url.query}"
+        signing_str_parts = [f"{method} {path}"]
         
-        data_to_sign = f"{method} {path}\nHost: {parsed_url.netloc}\n"
+        if query:
+            signing_str_parts[0] += f"?{query}"
+        
+        signing_str_parts.append("Host: ap-gate-z0.qiniuapi.com")
         
         if content_type:
-            data_to_sign += f"Content-Type: {content_type}\n"
+            signing_str_parts.append(f"Content-Type: {content_type}")
         
-        data_to_sign += "\n"
+        signing_str_parts.append("")
+        signing_str_parts.append("")
         
-        if body and content_type == "application/json":
-            data_to_sign += body.decode('utf-8')
+        if body:
+            signing_str_parts.append(body)
         
-        signature = hmac.new(
+        signing_str = "\n".join(signing_str_parts)
+        
+        sign = hmac.new(
             self.secret_key.encode('utf-8'),
-            data_to_sign.encode('utf-8'),
+            signing_str.encode('utf-8'),
             hashlib.sha1
         ).digest()
         
-        encoded_signature = base64.urlsafe_b64encode(signature).decode('utf-8')
+        encoded_sign = base64.urlsafe_b64encode(sign).decode('utf-8')
         
-        return f"Qiniu {self.access_key}:{encoded_signature}"
+        return f"{self.access_key}:{encoded_sign}"
     
-    async def _download_audio(self, audio_url: str) -> bytes:
+    @retry_on_failure(max_retries=3, delay=2.0, backoff=2.0)
+    async def _call_tts_api(
+        self, 
+        text: str, 
+        voice: int, 
+        format: str = "mp3"
+    ) -> bytes:
         """
-        下载音频文件
+        调用七牛云 TTS API
         
         Args:
-            audio_url: 音频文件URL
+            text: 文本内容
+            voice: 音色 ID
+            format: 音频格式
             
         Returns:
-            bytes: 音频数据
+            bytes: 音频文件字节流
             
         Raises:
-            VoiceGenerationException: 下载失败
+            VoiceGenerationException: API 调用失败
+        """
+        audio_type_map = {
+            "mp3": 0
+        }
+        
+        body_dict = {
+            "content": text,
+            "spkid": voice,
+            "audioType": audio_type_map.get(format, 0),
+            "volume": 1.0,
+            "speed": 1.0
+        }
+        body = json.dumps(body_dict)
+        
+        content_type = "application/json"
+        
+        token = self._generate_qiniu_token(
+            "POST",
+            "/voice/v2/tts",
+            "",
+            content_type,
+            body
+        )
+        
+        headers = {
+            "Content-Type": content_type,
+            "Authorization": f"Qiniu {token}"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                self.api_url,
+                content=body,
+                headers=headers,
+                timeout=30.0
+            )
+            
+            if response.status_code != 200:
+                raise VoiceGenerationException(
+                    f"TTS API failed: {response.status_code} - {response.text}"
+                )
+            
+            result = response.json()
+            
+            if result.get("code") != "0":
+                raise VoiceGenerationException(
+                    f"TTS API error: {result.get('msg', 'Unknown error')}"
+                )
+            
+            audio_url = result.get("result", {}).get("audioUrl")
+            if not audio_url:
+                raise VoiceGenerationException("No audio URL in response")
+            
+            audio_response = await client.get(audio_url, timeout=30.0)
+            if audio_response.status_code != 200:
+                raise VoiceGenerationException(
+                    f"Failed to download audio: {audio_response.status_code}"
+                )
+            
+            return audio_response.content
+    
+    def _get_audio_duration(self, audio_bytes: bytes) -> float:
+        """
+        获取音频时长
+        
+        Args:
+            audio_bytes: 音频文件字节流
+            
+        Returns:
+            float: 时长(秒)
         """
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.get(audio_url)
-                response.raise_for_status()
-                return response.content
-                
-        except httpx.HTTPError as e:
-            logger.error(f"Failed to download audio: {e}")
-            raise VoiceGenerationException(f"Audio download failed: {str(e)}")
+            audio = MP3(BytesIO(audio_bytes))
+            return audio.info.length
+        except Exception as e:
+            logger.warning(f"Failed to get audio duration: {e}, using default 5.0s")
+            return 5.0
+    
+    async def _upload_to_oss(
+        self, 
+        audio_bytes: bytes, 
+        task_id: str, 
+        scene_id: str
+    ) -> str:
+        """
+        上传音频到 OSS
+        
+        Args:
+            audio_bytes: 音频文件字节流
+            task_id: 任务 ID
+            scene_id: 场景 ID
+            
+        Returns:
+            str: 音频文件 URL
+        """
+        object_key = f"audio/{task_id}/{scene_id}.mp3"
+        url = await oss_client.upload_file(audio_bytes, object_key)
+        return url
 
 
 voice_generator = VoiceGenerator()
