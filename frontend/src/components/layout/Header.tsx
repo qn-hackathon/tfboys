@@ -11,7 +11,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { ShimmeringText } from '@/components/ui/shimmering-text'
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 
@@ -97,11 +96,9 @@ export function Header() {
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-2">
-          <ShimmeringText 
-            text="文创速推 - 文字内容的短视频传播加速平台" 
-            className="text-xl font-bold"
-            duration={3}
-          />
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
+            文创速推 - 文字内容的短视频传播加速平台
+          </h1>
         </div>
 
         <div className="flex items-center gap-4">
