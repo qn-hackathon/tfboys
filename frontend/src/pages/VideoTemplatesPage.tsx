@@ -80,9 +80,6 @@ export function VideoTemplatesPage() {
     console.log("分享视频")
   }
 
-  const handleDelete = () => {
-    console.log("删除视频")
-  }
 
   return (
     <div className="h-full p-6 overflow-auto">
@@ -195,7 +192,6 @@ export function VideoTemplatesPage() {
         onOpenChange={setPreviewDialogOpen}
         onDownload={handleDownload}
         onShare={handleShare}
-        onDelete={handleDelete}
       />
     </div>
   )

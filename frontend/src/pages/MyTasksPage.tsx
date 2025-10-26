@@ -310,7 +310,6 @@ export function MyTasksPage() {
         onOpenChange={() => setSelectedVideo(null)}
         onDownload={handleDownload}
         onShare={() => handleShare()}
-        onDelete={handleDelete}
       />
 
       <ShareDialog

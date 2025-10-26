@@ -1,16 +1,17 @@
-.PHONY: help install dev build clean test
+.PHONY: help install dev build build-frontend clean test
 
 help:
 	@echo "TFBoys - 文字生成视频系统"
 	@echo ""
 	@echo "可用命令:"
-	@echo "  make install    - 安装所有依赖"
-	@echo "  make dev        - 启动开发环境"
-	@echo "  make build      - 构建Docker镜像"
-	@echo "  make up         - 启动所有服务(Docker)"
-	@echo "  make down       - 停止所有服务"
-	@echo "  make clean      - 清理临时文件"
-	@echo "  make test       - 运行测试"
+	@echo "  make install        - 安装所有依赖"
+	@echo "  make dev            - 启动开发环境"
+	@echo "  make build          - 构建所有Docker镜像"
+	@echo "  make build-frontend - 构建前端Docker镜像"
+	@echo "  make up             - 启动所有服务(Docker)"
+	@echo "  make down           - 停止所有服务"
+	@echo "  make clean          - 清理临时文件"
+	@echo "  make test           - 运行测试"
 
 install:
 	@echo "安装前端依赖..."
@@ -33,6 +34,11 @@ dev:
 build:
 	@echo "构建Docker镜像..."
 	docker-compose build
+
+build-frontend:
+	@echo "构建前端Docker镜像..."
+	docker-compose build frontend
+	@echo "前端镜像构建完成!"
 
 up:
 	@echo "启动所有服务..."
