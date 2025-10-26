@@ -29,8 +29,11 @@ async def video_completed(callback: VideoCallbackRequest):
             task_data["status"] = TaskStatus.COMPLETED.value
             task_data["result"] = {
                 "video_url": callback.video_url,
-                "duration": callback.duration
+                "duration": callback.duration,
+                "aspect_ratio": callback.aspect_ratio,
+                "file_size": callback.file_size
             }
+            task_data["current_stage"] = "视频生成完成"
             logger.info(f"Task {callback.task_id} completed successfully")
         else:
             task_data["status"] = TaskStatus.FAILED.value

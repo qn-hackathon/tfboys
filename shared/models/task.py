@@ -22,6 +22,8 @@ class TaskResult(BaseModel):
     duration: Optional[float] = Field(None, description="视频时长(秒)")
     scene_count: int = Field(default=0, description="场景数量")
     character_count: int = Field(default=0, description="角色数量")
+    aspect_ratio: Optional[str] = Field(None, description="视频宽高比")
+    file_size: Optional[str] = Field(None, description="视频文件大小")
 
 
 class Task(BaseModel):
@@ -29,8 +31,10 @@ class Task(BaseModel):
     task_id: str = Field(..., description="任务唯一标识")
     status: TaskStatus = Field(default=TaskStatus.PENDING, description="任务状态")
     novel_text: str = Field(..., description="小说文本")
+    style: Optional[str] = Field(None, description="视频风格")
     scenes: List[Scene] = Field(default_factory=list, description="场景列表")
     progress: TaskProgress = Field(default_factory=TaskProgress, description="任务进度")
+    current_stage: Optional[str] = Field(None, description="当前执行阶段")
     result: Optional[TaskResult] = Field(None, description="任务结果")
     created_at: datetime = Field(default_factory=datetime.now, description="创建时间")
     updated_at: datetime = Field(default_factory=datetime.now, description="更新时间")

@@ -31,6 +31,9 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
     }
+    
+    if request.style:
+        task_data["style"] = request.style
 
     redis_client = get_redis_client()
     if not redis_client:

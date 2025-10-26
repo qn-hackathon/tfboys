@@ -11,6 +11,7 @@ class TaskCreateRequest(BaseModel):
     """任务创建请求"""
     task_id: Optional[str] = Field(None, description="任务ID，如果不提供则自动生成")
     novel_text: str = Field(..., description="小说文本")
+    style: Optional[str] = Field(None, description="视频风格")
 
 
 class TaskStatusResponse(BaseModel):
@@ -29,4 +30,6 @@ class VideoCallbackRequest(BaseModel):
     video_url: str = Field(..., description="视频 URL")
     duration: float = Field(..., description="视频时长(秒)")
     status: str = Field(..., description="状态: success 或 failed")
+    aspect_ratio: Optional[str] = Field(None, description="视频宽高比")
+    file_size: Optional[str] = Field(None, description="视频文件大小")
     error: Optional[str] = Field(None, description="错误信息")

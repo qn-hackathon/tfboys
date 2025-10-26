@@ -71,6 +71,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
 
         # === 步骤1: 文本分析 ===
         await redis_client.update_task_status(task_id, TaskStatus.ANALYZING.value)
+        await _update_current_stage(task_id, "正在分析小说文本")
         logger.info(f"Task {task_id}: Analyzing novel text...")
         
         scenes_data = await text_analyzer.analyze_novel(novel_text)
@@ -84,6 +85,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         
         # === 步骤2: 场景处理 ===
         await redis_client.update_task_status(task_id, TaskStatus.GENERATING_IMAGES.value)
+        await _update_current_stage(task_id, "正在生成场景图像")
         logger.info(f"Task {task_id}: Generating scenes...")
         
         scenes = []
@@ -100,6 +102,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
             
             # 2.2 生成配音
             await redis_client.update_task_status(task_id, TaskStatus.GENERATING_AUDIO.value)
+            await _update_current_stage(task_id, f"正在生成配音 ({idx + 1}/{total_scenes})")
             audio_url, audio_duration = await voice_generator.generate_voice(
                 text=scene_data["narration"],
                 task_id=task_id,
@@ -125,6 +128,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         
         # === 步骤3: 提交视频服务 ===
         await redis_client.update_task_status(task_id, TaskStatus.SYNTHESIZING_VIDEO.value)
+        await _update_current_stage(task_id, "正在合成视频")
         logger.info(f"Task {task_id}: Submitting to video service...")
 
         video_client = get_video_client()
@@ -198,3 +202,24 @@ async def _update_task_progress(
             await redis_client.save_task(task_id, task_data)
     except Exception as e:
         logger.warning(f"Task {task_id}: Failed to update progress - {str(e)}")
+
+
+async def _update_current_stage(task_id: str, stage: str) -> None:
+    """
+    更新当前执行阶段
+
+    Args:
+        task_id: 任务ID
+        stage: 当前阶段描述
+    """
+    redis_client = get_redis_client()
+    if not redis_client:
+        return
+
+    try:
+        task_data = await redis_client.get_task(task_id)
+        if task_data:
+            task_data["current_stage"] = stage
+            await redis_client.save_task(task_id, task_data)
+    except Exception as e:
+        logger.warning(f"Task {task_id}: Failed to update current stage - {str(e)}")
