@@ -9,39 +9,87 @@ export type TaskStatus =
   | "synthesizing_video"
   | "completed"
   | "failed"
+  | "cancelled"
+
+export interface TaskProgress {
+  current_stage?: string
+  total_scenes?: number
+  processed_scenes?: number
+  percentage: number
+  current_scene?: number
+}
+
+export interface TaskError {
+  code: number
+  message: string
+  retry_able?: boolean
+}
+
+export interface TaskResult {
+  video_url: string
+  duration: number
+  scenes_count: number
+  thumbnail_url: string
+}
 
 export interface Task {
-  id: string
-  title: string
+  task_id: string
   status: TaskStatus
-  progress: number
-  currentStage?: string
-  createdAt: string
-  errorMessage?: string
+  progress?: TaskProgress
+  created_at: string
+  updated_at?: string
+  completed_at?: string
+  estimated_time?: number
+  error?: TaskError
+  result?: TaskResult
+  title?: string
   video?: Video
-  processedScenes?: number
-  totalScenes?: number
-  estimatedTimeRemaining?: string
+}
+
+export interface CreateTaskParams {
+  novel_text: string
+  options?: {
+    video_style?: string
+    voice_type?: string
+    video_resolution?: string
+  }
+}
+
+export interface GetTasksParams {
+  page?: number
+  page_size?: number
+  status?: TaskStatus
 }
 
 const mockTasks: Task[] = [
   {
-    id: "task-001",
+    task_id: "task-001",
     title: "春天的故事...",
     status: "generating_images",
-    progress: 60,
-    currentStage: "图像生成中",
-    createdAt: "2025-10-25 10:30:00",
-    processedScenes: 6,
-    totalScenes: 10,
-    estimatedTimeRemaining: "2 分钟",
+    progress: {
+      current_stage: "generating_images",
+      total_scenes: 10,
+      processed_scenes: 6,
+      percentage: 60,
+    },
+    created_at: "2025-10-25T10:30:00Z",
+    updated_at: "2025-10-25T10:35:00Z",
   },
   {
-    id: "task-002",
+    task_id: "task-002",
     title: "少年与猫...",
     status: "completed",
-    progress: 100,
-    createdAt: "2025-10-23 14:30:00",
+    progress: {
+      percentage: 100,
+    },
+    created_at: "2025-10-23T14:30:00Z",
+    completed_at: "2025-10-23T14:40:00Z",
+    result: {
+      video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      duration: 150,
+      scenes_count: 10,
+      thumbnail_url: "https://placehold.co/160x120/10b981/ffffff?text=%E5%B7%B2%E5%AE%8C%E6%88%90",
+    },
     video: {
       thumbnailUrl:
         "https://placehold.co/160x120/10b981/ffffff?text=%E5%B7%B2%E5%AE%8C%E6%88%90",
@@ -77,19 +125,34 @@ const mockTasks: Task[] = [
     },
   },
   {
-    id: "task-003",
+    task_id: "task-003",
     title: "星际旅行...",
     status: "failed",
-    progress: 35,
-    errorMessage: "图像生成 API 限流,请稍后重试",
-    createdAt: "2025-10-23 12:15:00",
+    progress: {
+      percentage: 35,
+    },
+    created_at: "2025-10-23T12:15:00Z",
+    error: {
+      code: 50001,
+      message: "图像生成 API 限流,请稍后重试",
+      retry_able: true,
+    },
   },
   {
-    id: "task-004",
+    task_id: "task-004",
     title: "古风江湖侠客传...",
     status: "completed",
-    progress: 100,
-    createdAt: "2025-10-22 16:20:00",
+    progress: {
+      percentage: 100,
+    },
+    created_at: "2025-10-22T16:20:00Z",
+    completed_at: "2025-10-22T16:30:00Z",
+    result: {
+      video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
+      duration: 195,
+      scenes_count: 12,
+      thumbnail_url: "https://placehold.co/160x120/8b5cf6/ffffff?text=%E5%8F%A4%E9%A3%8E",
+    },
     video: {
       thumbnailUrl:
         "https://placehold.co/160x120/8b5cf6/ffffff?text=%E5%8F%A4%E9%A3%8E",
@@ -125,43 +188,145 @@ const mockTasks: Task[] = [
     },
   },
   {
-    id: "task-005",
+    task_id: "task-005",
     title: "未来都市赛博朋克...",
     status: "analyzing",
-    progress: 15,
-    currentStage: "文本分析中",
-    createdAt: "2025-10-25 11:00:00",
+    progress: {
+      current_stage: "analyzing",
+      percentage: 15,
+    },
+    created_at: "2025-10-25T11:00:00Z",
   },
 ]
 
-export const getTasks = async (): Promise<ApiResponse<Task[]>> => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
+/**
+ * 创建视频生成任务
+ */
+export const createTask = async (
+  params: CreateTaskParams
+): Promise<ApiResponse<Task>> => {
+  // 真实请求实现（暂时注释掉）
+  // const response = await fetch('/api/tasks', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify(params),
+  // })
+  // return await response.json()
+
+  // 使用 mock 数据
+  await new Promise((resolve) => setTimeout(resolve, 500))
+  
+  const newTask: Task = {
+    task_id: `task_${Date.now()}`,
+    status: "pending",
+    created_at: new Date().toISOString(),
+    estimated_time: 300,
+    title: params.novel_text.slice(0, 20) + "...",
+  }
 
   return {
     code: 0,
-    message: "获取任务列表成功",
-    data: mockTasks,
+    message: "任务创建成功",
+    data: newTask,
   }
 }
 
-export const getTaskById = async (
+/**
+ * 查询任务状态
+ */
+export const getTaskStatus = async (
   taskId: string
 ): Promise<ApiResponse<Task>> => {
+  // 真实请求实现（暂时注释掉）
+  // const response = await fetch(`/api/tasks/${taskId}`, {
+  //   method: 'GET',
+  // })
+  // return await response.json()
+
+  // 使用 mock 数据
   await new Promise((resolve) => setTimeout(resolve, 200))
 
-  const task = mockTasks.find((t) => t.id === taskId)
+  const task = mockTasks.find((t) => t.task_id === taskId)
 
   if (!task) {
     return {
-      code: 40004,
+      code: 40404,
       message: "任务不存在",
     }
   }
 
   return {
     code: 0,
-    message: "获取任务详情成功",
+    message: "成功",
     data: task,
+  }
+}
+
+/**
+ * 获取任务列表
+ */
+export const getTasks = async (
+  params?: GetTasksParams
+): Promise<ApiResponse<{ total: number; page: number; page_size: number; tasks: Task[] }>> => {
+  // 真实请求实现（暂时注释掉）
+  // const queryParams = new URLSearchParams()
+  // if (params?.page) queryParams.append('page', params.page.toString())
+  // if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+  // if (params?.status) queryParams.append('status', params.status)
+  // 
+  // const response = await fetch(`/api/tasks?${queryParams.toString()}`, {
+  //   method: 'GET',
+  // })
+  // return await response.json()
+
+  // 使用 mock 数据
+  await new Promise((resolve) => setTimeout(resolve, 300))
+
+  let filteredTasks = [...mockTasks]
+  
+  if (params?.status) {
+    filteredTasks = filteredTasks.filter((t) => t.status === params.status)
+  }
+
+  const page = params?.page || 1
+  const pageSize = params?.page_size || 10
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+
+  return {
+    code: 0,
+    message: "成功",
+    data: {
+      total: filteredTasks.length,
+      page,
+      page_size: pageSize,
+      tasks: filteredTasks.slice(start, end),
+    },
+  }
+}
+
+/**
+ * 取消任务
+ */
+export const cancelTask = async (
+  taskId: string
+): Promise<ApiResponse<void>> => {
+  // 真实请求实现（暂时注释掉）
+  // const response = await fetch(`/api/tasks/${taskId}`, {
+  //   method: 'DELETE',
+  // })
+  // return await response.json()
+
+  // 使用 mock 数据
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  
+  console.log("取消任务:", taskId)
+
+  return {
+    code: 0,
+    message: "任务已取消",
   }
 }
 
@@ -174,6 +339,7 @@ export const getTaskStatusText = (status: TaskStatus): string => {
     synthesizing_video: "视频合成中",
     completed: "已完成",
     failed: "失败",
+    cancelled: "已取消",
   }
   return statusMap[status]
 }

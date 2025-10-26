@@ -30,9 +30,9 @@ export function MyTasksPage() {
     const fetchTasks = async () => {
       try {
         setIsLoading(true)
-        const response = await getTasks()
+        const response = await getTasks({ page: 1, page_size: 100 })
         if (response.code === 0 && response.data) {
-          setTasks(response.data)
+          setTasks(response.data.tasks)
         } else {
           toast.error(response.message || "获取任务列表失败")
         }
@@ -59,7 +59,7 @@ export function MyTasksPage() {
     return true
   }).filter((task) => {
     if (!searchQuery) return true
-    return task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return task.title?.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
   const handlePreview = (task: Task) => {
@@ -77,15 +77,15 @@ export function MyTasksPage() {
   }
 
   const handleRetry = (task: Task) => {
-    console.log("重试任务:", task.id)
+    console.log("重试任务:", task.task_id)
   }
 
   const handleCancel = (task: Task) => {
-    console.log("取消任务:", task.id)
+    console.log("取消任务:", task.task_id)
   }
 
   const handleViewDetails = (task: Task) => {
-    console.log("查看详情:", task.id)
+    console.log("查看详情:", task.task_id)
   }
 
   const handleShare = () => {
@@ -151,7 +151,7 @@ export function MyTasksPage() {
             </Card>
           ) : (
             filteredTasks.map((task) => (
-              <Card key={task.id} className="p-6">
+              <Card key={task.task_id} className="p-6">
                 <div className="flex items-start gap-4">
                   {task.video?.thumbnailUrl && task.status === "completed" && (
                     <div className="w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
@@ -167,10 +167,10 @@ export function MyTasksPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-lg font-semibold mb-1">
-                          任务 #{task.id.split("-")[1]}: {task.title}
+                          任务 #{task.task_id.split("-")[1]}: {task.title}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          创建时间: {task.createdAt}
+                          创建时间: {new Date(task.created_at).toLocaleString('zh-CN')}
                         </p>
                       </div>
                       <Badge variant={getTaskStatusVariant(task.status)}>
@@ -178,21 +178,18 @@ export function MyTasksPage() {
                       </Badge>
                     </div>
 
-                    {task.status !== "completed" && task.status !== "failed" && (
+                    {task.status !== "completed" && task.status !== "failed" && task.progress && (
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">状态: {task.currentStage}</span>
-                          <span className="font-semibold">{task.progress}%</span>
+                          <span className="text-muted-foreground">
+                            状态: {task.progress.current_stage ? getTaskStatusText(task.progress.current_stage as any) : getTaskStatusText(task.status)}
+                          </span>
+                          <span className="font-semibold">{task.progress.percentage}%</span>
                         </div>
-                        <Progress value={task.progress} className="h-2" />
-                        {task.processedScenes && task.totalScenes && (
+                        <Progress value={task.progress.percentage} className="h-2" />
+                        {task.progress.processed_scenes && task.progress.total_scenes && (
                           <p className="text-sm text-muted-foreground">
-                            已处理: {task.processedScenes} / {task.totalScenes} 场景
-                          </p>
-                        )}
-                        {task.estimatedTimeRemaining && (
-                          <p className="text-sm text-muted-foreground">
-                            预计剩余时间: {task.estimatedTimeRemaining}
+                            已处理: {task.progress.processed_scenes} / {task.progress.total_scenes} 场景
                           </p>
                         )}
                       </div>
@@ -206,10 +203,10 @@ export function MyTasksPage() {
                       </div>
                     )}
 
-                    {task.status === "failed" && task.errorMessage && (
+                    {task.status === "failed" && task.error && (
                       <div className="mb-4">
                         <p className="text-sm text-destructive">
-                          错误原因: {task.errorMessage}
+                          错误原因: {task.error.message}
                         </p>
                       </div>
                     )}
