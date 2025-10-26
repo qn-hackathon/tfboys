@@ -19,10 +19,9 @@
 ## 技术栈
 
 ### 前端
-- React + TypeScript
-- Vite
-- Ant Design
-- Axios
+
+[前端技术栈](https://github.com/qn-hackathon/tfboys/blob/main/frontend/README.md#%EF%B8%8F-%E6%8A%80%E6%9C%AF%E6%A0%88)
+
 
 ### 后端
 - Python + FastAPI
