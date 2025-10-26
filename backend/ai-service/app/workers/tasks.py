@@ -40,8 +40,14 @@ def process_novel_task(task_id: str, novel_text: str):
     """
     logger.info(f"Starting process_novel_task for task_id: {task_id}")
     
-    return asyncio.run(_process_novel_task_async(task_id, novel_text))
+    # 获取或创建事件循环,避免使用 asyncio.run() 导致事件循环关闭
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
+    return loop.run_until_complete(_process_novel_task_async(task_id, novel_text))
 
 async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
     """
