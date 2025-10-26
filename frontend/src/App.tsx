@@ -10,13 +10,14 @@ function App() {
   })
 
   useEffect(() => {
-    const handleNavigate = (event: CustomEvent<{ route: 'home' | 'app' }>) => {
-      setCurrentRoute(event.detail.route)
-      window.history.pushState({}, '', event.detail.route === 'home' ? '/' : '/app')
+    const handleNavigate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ route: 'home' | 'app' }>
+      setCurrentRoute(customEvent.detail.route)
+      window.history.pushState({}, '', customEvent.detail.route === 'home' ? '/' : '/app')
     }
 
-    window.addEventListener('navigate' as any, handleNavigate as EventListener)
-    return () => window.removeEventListener('navigate' as any, handleNavigate as EventListener)
+    window.addEventListener('navigate', handleNavigate)
+    return () => window.removeEventListener('navigate', handleNavigate)
   }, [])
 
   return (
