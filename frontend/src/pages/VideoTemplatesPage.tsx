@@ -12,6 +12,7 @@ import {
 import { Search, Eye, Edit } from "lucide-react"
 import { getTaskTemplates, type TaskTemplate, type Task } from "@/apis/task"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
+import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
 
 type VideoStyle = "全部" | "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
@@ -23,6 +24,7 @@ export function VideoTemplatesPage() {
   const [selectedResolution, setSelectedResolution] = useState<VideoResolution>("全部")
   const [previewTask, setPreviewTask] = useState<Task | null>(null)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [templates, setTemplates] = useState<TaskTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -77,7 +79,7 @@ export function VideoTemplatesPage() {
   }
 
   const handleShare = () => {
-    console.log("分享视频")
+    setShareDialogOpen(true)
   }
 
 
@@ -192,6 +194,11 @@ export function VideoTemplatesPage() {
         onOpenChange={setPreviewDialogOpen}
         onDownload={handleDownload}
         onShare={handleShare}
+      />
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
       />
     </div>
   )
