@@ -54,11 +54,14 @@ create_task() {
             \"novel_text\": \"${TEST_NOVEL_TEXT}\"
         }")
     
-    # 提取任务ID
-    TASK_ID=$(echo "$RESPONSE" | grep -o '"task_id":"[^"]*"' | cut -d'"' -f4 || echo "")
+    # 检查响应码
+    CODE=$(echo "$RESPONSE" | grep -o '"code":[0-9]*' | cut -d':' -f2 || echo "")
+    
+    # 提取任务ID (从 data 字段中)
+    TASK_ID=$(echo "$RESPONSE" | jq -r '.data.task_id' 2>/dev/null || echo "")
     
     # 检查响应
-    if [ -n "$TASK_ID" ]; then
+    if [ "$CODE" = "0" ] && [ -n "$TASK_ID" ]; then
         echo -e "${GREEN}✅ 任务创建成功${NC}"
         echo "任务ID: $TASK_ID"
         echo "响应: $RESPONSE"
@@ -82,7 +85,10 @@ get_task_detail() {
     
     RESPONSE=$(curl -s "${API_GATEWAY_URL}/api/tasks/${TASK_ID}")
     
-    if echo "$RESPONSE" | grep -q '"task_id"'; then
+    # 检查响应码
+    CODE=$(echo "$RESPONSE" | grep -o '"code":[0-9]*' | cut -d':' -f2 || echo "")
+    
+    if [ "$CODE" = "0" ]; then
         echo -e "${GREEN}✅ 成功获取任务详情${NC}"
         echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
         return 0
@@ -98,8 +104,11 @@ list_tasks() {
     
     RESPONSE=$(curl -s "${API_GATEWAY_URL}/api/tasks")
     
-    if echo "$RESPONSE" | grep -q '\['; then
-        TASK_COUNT=$(echo "$RESPONSE" | jq 'length' 2>/dev/null || echo "unknown")
+    # 检查响应码
+    CODE=$(echo "$RESPONSE" | grep -o '"code":[0-9]*' | cut -d':' -f2 || echo "")
+    
+    if [ "$CODE" = "0" ]; then
+        TASK_COUNT=$(echo "$RESPONSE" | jq '.data | length' 2>/dev/null || echo "unknown")
         echo -e "${GREEN}✅ 成功获取任务列表${NC}"
         echo "任务数量: $TASK_COUNT"
         echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
