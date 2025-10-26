@@ -1,6 +1,8 @@
-# TFBoys - 文字内容的短视频传播加速平台
+# 文创速推 - 文字内容的短视频传播加速平台
 
-Token Free Boys - 文字内容的短视频传播加速平台
+文创速推 - 文字内容的短视频传播加速平台
+
+[demo演示](https://jsd834kap.ootaiwaevufe.com/czl/tfboys-demo.mp4)
 
 ## 项目简介
 
