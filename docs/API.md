@@ -15,7 +15,7 @@
 
 ### 1.1 创建视频生成任务
 
-**接口**: `POST /tasks`
+**接口**: `POST /api/tasks`
 
 **描述**: 用户上传小说文本,创建视频生成任务
 
@@ -23,33 +23,31 @@
 ```json
 {
   "novel_text": "这是小说的完整文本内容...",
-  "options": {
-    "video_style": "anime",
-    "voice_type": "female",
-    "video_resolution": "1080p"
-  }
+  "style": "anime"
 }
 ```
 
-**响应**: `201 Created`
+**字段说明**:
+- `novel_text` (必填): 小说文本内容,最大长度 50000 字符
+- `style` (可选): 视频风格参数,如 "anime"、"realistic" 等
+
+**响应**: `200 OK`
 ```json
 {
   "code": 0,
   "message": "任务创建成功",
   "data": {
-    "task_id": "task_abc123",
-    "status": "pending",
-    "created_at": "2025-10-24T08:00:00Z",
-    "estimated_time": 300
+    "task_id": "task_abc123"
   }
 }
 ```
 
-**错误响应**: `400 Bad Request`
+**错误响应**: `200 OK`
 ```json
 {
-  "code": 40001,
-  "message": "小说文本不能为空"
+  "code": 500,
+  "message": "任务创建失败: 错误详情",
+  "data": null
 }
 ```
 
@@ -57,7 +55,7 @@
 
 ### 1.2 查询任务状态
 
-**接口**: `GET /tasks/{task_id}`
+**接口**: `GET /api/tasks/{task_id}`
 
 **描述**: 轮询查询任务处理状态和进度
 
@@ -65,41 +63,56 @@
 ```json
 {
   "code": 0,
-  "message": "成功",
+  "message": "success",
   "data": {
     "task_id": "task_abc123",
     "status": "processing",
-    "progress": {
-      "current_stage": "generating_images",
-      "total_scenes": 10,
-      "processed_scenes": 5,
-      "percentage": 50
-    },
+    "novel_text": "小说文本...",
     "created_at": "2025-10-24T08:00:00Z",
-    "updated_at": "2025-10-24T08:05:00Z"
+    "progress": {
+      "total_scenes": 10,
+      "processed_scenes": 5
+    },
+    "current_stage": "正在生成场景图像",
+    "result": null,
+    "error": null
   }
 }
 ```
+
+**字段说明**:
+- `task_id`: 任务唯一标识
+- `status`: 任务状态,可选值: `pending`、`analyzing`、`generating_images`、`generating_audio`、`synthesizing_video`、`completed`、`failed`
+- `novel_text`: 小说文本
+- `created_at`: 创建时间 (ISO 8601 格式)
+- `progress`: 进度信息
+  - `total_scenes`: 总场景数
+  - `processed_scenes`: 已处理场景数
+- `current_stage`: 当前正在执行的阶段描述 (如 "正在分析小说文本"、"正在生成场景图像"、"正在生成配音 (3/10)"、"正在合成视频"、"视频生成完成")
+- `result`: 任务结果 (仅在 `status` 为 `completed` 时有值)
+- `error`: 错误信息 (仅在 `status` 为 `failed` 时有值)
 
 **任务完成时的响应**:
 ```json
 {
   "code": 0,
-  "message": "成功",
+  "message": "success",
   "data": {
     "task_id": "task_abc123",
     "status": "completed",
+    "novel_text": "小说文本...",
+    "created_at": "2025-10-24T08:00:00Z",
     "progress": {
-      "percentage": 100
+      "total_scenes": 10,
+      "processed_scenes": 10
     },
+    "current_stage": "视频生成完成",
     "result": {
       "video_url": "https://oss.example.com/videos/task_abc123.mp4",
-      "duration": 120.5,
-      "scenes_count": 10,
-      "thumbnail_url": "https://oss.example.com/thumbnails/task_abc123.jpg"
+      "aspect_ratio": "16:9",
+      "file_size": "45.6 MB"
     },
-    "created_at": "2025-10-24T08:00:00Z",
-    "completed_at": "2025-10-24T08:10:00Z"
+    "error": null
   }
 }
 ```
@@ -108,16 +121,29 @@
 ```json
 {
   "code": 0,
-  "message": "成功",
+  "message": "success",
   "data": {
     "task_id": "task_abc123",
     "status": "failed",
-    "error": {
-      "code": 50001,
-      "message": "图像生成失败: Midjourney API限流",
-      "retry_able": true
-    }
+    "novel_text": "小说文本...",
+    "created_at": "2025-10-24T08:00:00Z",
+    "progress": {
+      "total_scenes": 10,
+      "processed_scenes": 3
+    },
+    "current_stage": "正在生成场景图像",
+    "result": null,
+    "error": "图像生成失败: API 限流"
   }
+}
+```
+
+**任务不存在时的响应**:
+```json
+{
+  "code": 404,
+  "message": "任务不存在",
+  "data": null
 }
 ```
 
@@ -125,28 +151,47 @@
 
 ### 1.3 获取任务列表
 
-**接口**: `GET /tasks?page=1&page_size=10&status=completed`
+**接口**: `GET /api/tasks`
 
-**描述**: 获取用户的任务历史列表
+**描述**: 获取所有任务列表
 
 **响应**: `200 OK`
 ```json
 {
   "code": 0,
-  "message": "成功",
-  "data": {
-    "total": 25,
-    "page": 1,
-    "page_size": 10,
-    "tasks": [
-      {
-        "task_id": "task_abc123",
-        "status": "completed",
-        "created_at": "2025-10-24T08:00:00Z",
-        "video_url": "https://oss.example.com/videos/task_abc123.mp4"
-      }
-    ]
-  }
+  "message": "success",
+  "data": [
+    {
+      "task_id": "task_abc123",
+      "status": "completed",
+      "novel_text": "小说文本...",
+      "created_at": "2025-10-24T08:00:00Z",
+      "progress": {
+        "total_scenes": 10,
+        "processed_scenes": 10
+      },
+      "current_stage": "视频生成完成",
+      "result": {
+        "video_url": "https://oss.example.com/videos/task_abc123.mp4",
+        "aspect_ratio": "16:9",
+        "file_size": "45.6 MB"
+      },
+      "error": null
+    },
+    {
+      "task_id": "task_def456",
+      "status": "processing",
+      "novel_text": "另一个小说文本...",
+      "created_at": "2025-10-24T09:00:00Z",
+      "progress": {
+        "total_scenes": 8,
+        "processed_scenes": 3
+      },
+      "current_stage": "正在生成配音 (3/8)",
+      "result": null,
+      "error": null
+    }
+  ]
 }
 ```
 
@@ -297,28 +342,39 @@ AI处理服务生成场景数据后,通过内部API传递给视频合成服务�
 
 ---
 
-### 2.3 视频合成完成回调 (可选)
+### 2.3 视频合成完成回调
 
-**接口**: `POST /ai-service/callbacks/video-completed`
+**接口**: `POST /callbacks/video-completed`
 
-**描述**: 视频服务合成完成后,回调AI服务(或主服务)更新任务状态
+**描述**: 视频服务合成完成后,回调 AI 服务更新任务状态
 
 **请求体**:
 ```json
 {
-  "job_id": "video_job_xyz789",
   "task_id": "task_abc123",
-  "status": "completed",
   "video_url": "https://oss.example.com/videos/task_abc123.mp4",
-  "duration": 120.5
+  "duration": 120.5,
+  "status": "success",
+  "aspect_ratio": "16:9",
+  "file_size": "45.6 MB"
 }
 ```
+
+**字段说明**:
+- `task_id` (必填): 任务ID
+- `video_url` (必填): 视频 URL
+- `duration` (必填): 视频时长(秒)
+- `status` (必填): 状态,可选值: `success` 或 `failed`
+- `aspect_ratio` (可选): 视频宽高比,如 "16:9"、"9:16"
+- `file_size` (可选): 视频文件大小,如 "45.6 MB"
+- `error` (可选): 错误信息 (仅当 status 为 failed 时)
 
 **响应**: `200 OK`
 ```json
 {
-  "code": 0,
-  "message": "回调接收成功"
+  "message": "Callback processed successfully",
+  "task_id": "task_abc123",
+  "status": "completed"
 }
 ```
 
