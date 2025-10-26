@@ -1,4 +1,4 @@
-const API_BASE_URL = "/api"
+const API_BASE_URL = "http://100.100.21.31:8001/api"
 
 export interface ApiResponse<T = unknown> {
   code: number
