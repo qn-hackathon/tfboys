@@ -84,7 +84,8 @@ export function HomePage() {
           <div className="w-32 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
           <Button 
             size="lg" 
-            className="text-lg px-12 py-4 h-auto rounded-2xl bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
+            className="text-lg px-12 py-4 h-auto bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
+            style={{ borderRadius: '30px' }}
             onClick={handleNavigateToApp}
           >
             立即制作
@@ -210,7 +211,8 @@ export function HomePage() {
                   </div>
                   <Button 
                     size="lg" 
-                    className="w-full text-lg py-6 h-auto rounded-2xl bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
+                    className="w-full text-lg py-6 h-auto bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
+                    style={{ borderRadius: '30px' }}
                     onClick={handleNavigateToApp}
                   >
                     立即制作

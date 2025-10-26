@@ -124,9 +124,9 @@ export function Header() {
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-3 cursor-pointer" onClick={handleNavigateToHome}>
-          <img src="/favicon.svg" alt="TFBoys AI Logo" className="w-8 h-8" />
+          <img src="/favicon.svg" alt="文创速推 AI Logo" className="w-8 h-8" />
           <ShimmeringText 
-            text="TFBoys AI" 
+            text="文创速推 AI" 
             className="text-xl font-semibold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text"
             duration={3}
           />

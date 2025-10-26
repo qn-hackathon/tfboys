@@ -6,15 +6,25 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Search,
   Play,
   Download,
   Trash2,
   RefreshCw,
+  Share2,
 } from "lucide-react"
 import { getTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/apis/task"
 import { Video } from "@/apis/video"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
+import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
@@ -25,6 +35,9 @@ export function MyTasksPage() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -72,8 +85,18 @@ export function MyTasksPage() {
     console.log("下载视频")
   }
 
-  const handleDelete = () => {
-    console.log("删除视频")
+  const handleDelete = (task: Task) => {
+    setTaskToDelete(task)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (taskToDelete) {
+      console.log("删除任务:", taskToDelete.id)
+      toast.success("任务已删除")
+      setDeleteDialogOpen(false)
+      setTaskToDelete(null)
+    }
   }
 
   const handleRetry = (task: Task) => {
@@ -88,8 +111,11 @@ export function MyTasksPage() {
     console.log("查看详情:", task.id)
   }
 
-  const handleShare = () => {
-    console.log("分享视频")
+  const handleShare = (task?: Task) => {
+    if (task && task.video) {
+      setSelectedVideo(task.video)
+    }
+    setShareDialogOpen(true)
   }
 
 
@@ -231,7 +257,7 @@ export function MyTasksPage() {
                           <RefreshCw className="mr-2 h-4 w-4" />
                           重试
                         </Button>
-                        <Button variant="outline" onClick={handleDelete}>
+                        <Button variant="outline" onClick={() => handleDelete(task)}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           删除
                         </Button>
@@ -250,7 +276,11 @@ export function MyTasksPage() {
                       <Download className="mr-2 h-4 w-4" />
                       下载
                     </Button>
-                    <Button variant="outline" onClick={handleDelete}>
+                    <Button variant="outline" onClick={() => handleShare(task)}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      分享
+                    </Button>
+                    <Button variant="outline" onClick={() => handleDelete(task)}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       删除
                     </Button>
@@ -276,12 +306,36 @@ export function MyTasksPage() {
 
       <VideoPreviewDialog
         video={selectedVideo}
-        open={!!selectedVideo}
+        open={!!selectedVideo && !shareDialogOpen}
         onOpenChange={() => setSelectedVideo(null)}
         onDownload={handleDownload}
-        onShare={handleShare}
+        onShare={() => handleShare()}
         onDelete={handleDelete}
       />
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+      />
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              确定要删除任务 "{taskToDelete?.title}" 吗?此操作不可恢复。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              确认删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
