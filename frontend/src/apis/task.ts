@@ -1,4 +1,4 @@
-import { ApiResponse } from "./user"
+import { httpClient, ApiResponse } from "./http"
 
 export interface VideoSlice {
   id: string
@@ -541,71 +541,19 @@ export const getTaskTemplates = async (): Promise<
 }
 
 export const createTask = async (
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _params: CreateTaskParams
+  params: CreateTaskParams
 ): Promise<ApiResponse<CreateTaskResponse>> => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  return {
-    code: 0,
-    message: "任务创建成功",
-    data: {
-      task_id: `task-${Date.now()}`,
-    },
-  }
+  return httpClient.post<CreateTaskResponse>("/tasks", params)
 }
 
 export const getTaskStatus = async (
   task_id: string
 ): Promise<ApiResponse<Task>> => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  const mockProgress = Math.min(100, Math.floor(Math.random() * 100))
-  const isCompleted = mockProgress === 100
-
-  const task: Task = {
-    task_id,
-    status: isCompleted ? "completed" : "generating_images",
-    novel_text: "生成的视频内容...",
-    created_at: new Date().toISOString(),
-    progress: {
-      total_scenes: 5,
-      processed_scenes: isCompleted ? 5 : Math.floor(mockProgress / 20),
-    },
-    current_stage: isCompleted ? "已完成" : "图像生成中",
-    result: isCompleted
-      ? {
-          video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
-          aspect_ratio: "16:9",
-          file_size: "45.6 MB",
-        }
-      : undefined,
-    style: "古风",
-    resolution: "1080p",
-    duration: "2:30",
-    description: "生成的视频",
-    keywords: ["生成", "视频"],
-    slices: isCompleted ? mockVideoSlices : undefined,
-    thumbnail_url: isCompleted
-      ? "https://placehold.co/400x225/10b981/ffffff?text=%E5%B7%B2%E5%AE%8C%E6%88%90"
-      : undefined,
-  }
-
-  return {
-    code: 0,
-    message: "获取任务状态成功",
-    data: task,
-  }
+  return httpClient.get<Task>(`/tasks/${task_id}`)
 }
 
 export const getTasks = async (): Promise<ApiResponse<Task[]>> => {
-  await new Promise((resolve) => setTimeout(resolve, 300))
-
-  return {
-    code: 0,
-    message: "获取任务列表成功",
-    data: mockTasks,
-  }
+  return httpClient.get<Task[]>("/tasks")
 }
 
 export const getTaskStatusText = (status: TaskStatus): string => {

@@ -110,10 +110,7 @@ export function MyTasksPage() {
     console.log("查看详情:", task.task_id)
   }
 
-  const handleShare = (task?: Task) => {
-    if (task && task.result) {
-      setSelectedTask(task)
-    }
+  const handleShare = () => {
     setShareDialogOpen(true)
   }
 
@@ -273,7 +270,7 @@ export function MyTasksPage() {
                       <Download className="mr-2 h-4 w-4" />
                       下载
                     </Button>
-                    <Button variant="outline" onClick={() => handleShare(task)}>
+                    <Button variant="outline" onClick={handleShare}>
                       <Share2 className="mr-2 h-4 w-4" />
                       分享
                     </Button>
@@ -306,7 +303,7 @@ export function MyTasksPage() {
         open={!!selectedTask && !shareDialogOpen}
         onOpenChange={() => setSelectedTask(null)}
         onDownload={handleDownload}
-        onShare={() => handleShare()}
+        onShare={handleShare}
       />
 
       <ShareDialog
