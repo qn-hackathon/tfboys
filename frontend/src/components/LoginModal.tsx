@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Github } from 'lucide-react'
 import { loginWithPassword, loginWithPhone, type User } from '@/apis/user'
+import { toast } from 'sonner'
 
 interface LoginModalProps {
   open: boolean
@@ -36,24 +37,25 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
   // 处理密码登录
   const handlePasswordLogin = async () => {
     if (!username || !password) {
-      alert('请输入用户名和密码')
+      toast.error('请输入用户名和密码')
       return
     }
 
     setPasswordLoading(true)
     try {
       const response = await loginWithPassword({ username, password })
-      if (response.success && response.user) {
-        onLoginSuccess(response.user)
+      if (response.code === 0 && response.data) {
+        toast.success(response.message)
+        onLoginSuccess(response.data)
         onOpenChange(false)
         // 清空表单
         setUsername('')
         setPassword('')
       } else {
-        alert(response.message)
+        toast.error(response.message)
       }
     } catch (error) {
-      alert('登录失败，请稍后重试')
+      toast.error('登录失败，请稍后重试')
     } finally {
       setPasswordLoading(false)
     }
@@ -62,16 +64,17 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
   // 发送验证码
   const handleSendCode = () => {
     if (!phone) {
-      alert('请输入手机号')
+      toast.error('请输入手机号')
       return
     }
 
     if (!/^1[3-9]\d{9}$/.test(phone)) {
-      alert('请输入有效的手机号')
+      toast.error('请输入有效的手机号')
       return
     }
 
     // Mock 发送验证码
+    toast.success('验证码已发送')
     setCodeSent(true)
     setCountdown(60)
     
@@ -91,15 +94,16 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
   // 处理手机验证码登录
   const handlePhoneLogin = async () => {
     if (!phone || !code) {
-      alert('请输入手机号和验证码')
+      toast.error('请输入手机号和验证码')
       return
     }
 
     setPhoneLoading(true)
     try {
       const response = await loginWithPhone({ phone, code })
-      if (response.success && response.user) {
-        onLoginSuccess(response.user)
+      if (response.code === 0 && response.data) {
+        toast.success(response.message)
+        onLoginSuccess(response.data)
         onOpenChange(false)
         // 清空表单
         setPhone('')
@@ -107,10 +111,10 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
         setCodeSent(false)
         setCountdown(0)
       } else {
-        alert(response.message)
+        toast.error(response.message)
       }
     } catch (error) {
-      alert('登录失败，请稍后重试')
+      toast.error('登录失败，请稍后重试')
     } finally {
       setPhoneLoading(false)
     }
@@ -118,7 +122,7 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
 
   // 处理第三方登录（Mock，仅显示提示）
   const handleThirdPartyLogin = (provider: string) => {
-    alert(`${provider} 登录功能开发中，敬请期待`)
+    toast.info(`${provider} 登录功能开发中，敬请期待`)
   }
 
   return (
