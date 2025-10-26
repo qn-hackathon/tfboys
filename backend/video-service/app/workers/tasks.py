@@ -1,10 +1,14 @@
 import json
 import redis
+import httpx
+import logging
 from datetime import datetime
 from app.workers.celery_app import celery_app
 from app.services.video_composer import video_composer
 from app.models.video_job import VideoJob
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 def get_redis_client():
@@ -34,6 +38,40 @@ def update_job_status_in_redis(job_id: str, status: str, **kwargs):
     r.setex(key, 86400 * 7, json.dumps(job_dict))
 
 
+async def send_completion_callback(task_id: str, video_url: str, duration: float, status: str, error: str = None):
+    """
+    发送视频合成完成回调给AI Service
+    
+    Args:
+        task_id: 任务ID
+        video_url: 视频URL
+        duration: 视频时长
+        status: 状态 (success/failed)
+        error: 错误信息(可选)
+    """
+    try:
+        ai_service_url = "http://ai-service:8002"
+        callback_url = f"{ai_service_url}/callbacks/video-completed"
+        
+        payload = {
+            "task_id": task_id,
+            "video_url": video_url,
+            "duration": duration,
+            "status": status
+        }
+        
+        if error:
+            payload["error"] = error
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(callback_url, json=payload)
+            response.raise_for_status()
+            logger.info(f"Successfully sent callback for task {task_id}")
+            
+    except Exception as e:
+        logger.error(f"Failed to send callback for task {task_id}: {e}")
+
+
 @celery_app.task(bind=True)
 def process_video_job(self, job_data: dict):
     """
@@ -57,15 +95,37 @@ def process_video_job(self, job_data: dict):
         import asyncio
         video_url = asyncio.run(video_composer.compose_video(job))
         
+        # 获取视频时长 (这里简化处理，实际应该从视频文件获取)
+        duration = 30.0  # 默认时长，实际应该从视频文件获取
+        
         update_job_status_in_redis(
             job.job_id,
             "completed",
             result={"video_url": video_url}
         )
         
+        # 发送完成回调给AI Service
+        asyncio.run(send_completion_callback(
+            job.task_id,
+            video_url,
+            duration,
+            "success"
+        ))
+        
         return {"status": "completed", "video_url": video_url}
     
     except Exception as e:
         error_msg = str(e)
         update_job_status_in_redis(job.job_id, "failed", error=error_msg)
+        
+        # 发送失败回调给AI Service
+        import asyncio
+        asyncio.run(send_completion_callback(
+            job.task_id,
+            "",
+            0.0,
+            "failed",
+            error_msg
+        ))
+        
         raise

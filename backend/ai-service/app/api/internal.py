@@ -1,10 +1,13 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 import uuid
+import logging
 from datetime import datetime
 from app.workers.tasks import process_novel_task
 from app.schemas.task_schema import TaskCreateRequest, TaskStatusResponse
 from shared.clients import get_redis_client
 from shared.enums import TaskStatus
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -41,9 +44,15 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
 
     try:
         await redis_client.save_task(task_id, task_data)
+        logger.info(f"Task {task_id} saved to Redis successfully")
+        
         # 提交 Celery 异步任务
-        process_novel_task.delay(task_id, request.novel_text)
+        logger.info(f"Submitting Celery task for {task_id}")
+        result = process_novel_task.delay(task_id, request.novel_text)
+        logger.info(f"Celery task submitted successfully: {result.id}")
+        
     except Exception as e:
+        logger.error(f"Failed to create task {task_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create task: {str(e)}")
     
     return {
