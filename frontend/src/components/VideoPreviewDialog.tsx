@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Download, Share2, Trash2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
+import { Download, Share2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
 import { Video } from "@/apis/video"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
@@ -17,7 +17,6 @@ interface VideoPreviewDialogProps {
   onOpenChange: (open: boolean) => void
   onDownload?: () => void
   onShare?: () => void
-  onDelete?: () => void
 }
 
 export function VideoPreviewDialog({
@@ -26,7 +25,6 @@ export function VideoPreviewDialog({
   onOpenChange,
   onDownload,
   onShare,
-  onDelete,
 }: VideoPreviewDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -68,11 +66,6 @@ export function VideoPreviewDialog({
               {onShare && (
                 <Button variant="ghost" size="icon" onClick={onShare}>
                   <Share2 className="h-4 w-4" />
-                </Button>
-              )}
-              {onDelete && (
-                <Button variant="ghost" size="icon" onClick={onDelete}>
-                  <Trash2 className="h-4 w-4" />
                 </Button>
               )}
             </div>
