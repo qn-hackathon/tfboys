@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { getTaskTemplates, type VideoSlice, type TaskTemplate } from "@/apis/task"
+import { getTaskTemplates, createTask, getTaskStatus, type VideoSlice, type TaskTemplate, type Task } from "@/apis/task"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
@@ -50,7 +50,9 @@ export function VideoGenerationPage() {
   const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
   const [templateTasks, setTemplateTasks] = useState<TaskTemplate[]>([])
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>("")
+  const [currentTask, setCurrentTask] = useState<Task | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,37 +97,91 @@ export function VideoGenerationPage() {
     console.log("抓取 URL:", urlInput)
   }
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!novelText || isOverLimit) return
 
     setStatus("generating")
     setProgress(0)
-    setStatusText("文本分析中...")
+    setStatusText("正在创建任务...")
 
-    // 模拟生成进度
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setStatus("completed")
-          setStatusText("生成完成")
-          toast.success("视频生成完成!")
-          return 100
-        }
-
-        const next = prev + 10
-        if (next >= 25 && next < 35) {
-          setStatusText("图像生成中...")
-        } else if (next >= 50 && next < 60) {
-          setStatusText("配音生成中...")
-        } else if (next >= 75 && next < 85) {
-          setStatusText("视频合成中...")
-        }
-
-        return next
+    try {
+      const response = await createTask({
+        novel_text: novelText,
+        style: selectedStyle,
       })
-    }, 500)
+
+      if (response.code === 0 && response.data?.task_id) {
+        const taskId = response.data.task_id
+        toast.success("任务创建成功,开始生成...")
+        
+        startPolling(taskId)
+      } else {
+        toast.error(response.message || "任务创建失败")
+        setStatus("failed")
+      }
+    } catch (error) {
+      console.error("创建任务失败:", error)
+      toast.error("任务创建失败")
+      setStatus("failed")
+    }
   }
+
+  const startPolling = (taskId: string) => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+    }
+
+    const pollTaskStatus = async () => {
+      try {
+        const response = await getTaskStatus(taskId)
+        
+        if (response.code === 0 && response.data) {
+          const task = response.data
+          setCurrentTask(task)
+
+          const totalScenes = task.progress.total_scenes || 1
+          const processedScenes = task.progress.processed_scenes || 0
+          const progressPercent = Math.floor((processedScenes / totalScenes) * 100)
+          
+          setProgress(progressPercent)
+          setStatusText(task.current_stage || "处理中...")
+
+          if (task.status === "completed") {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current)
+            }
+            setStatus("completed")
+            if (task.result?.video_url) {
+              setGeneratedVideoUrl(task.result.video_url)
+            }
+            if (task.slices) {
+              setVideoSlices(task.slices)
+            }
+            toast.success("视频生成完成!")
+          } else if (task.status === "failed") {
+            if (pollingIntervalRef.current) {
+              clearInterval(pollingIntervalRef.current)
+            }
+            setStatus("failed")
+            toast.error(task.error || "视频生成失败")
+          }
+        }
+      } catch (error) {
+        console.error("轮询任务状态失败:", error)
+      }
+    }
+
+    pollTaskStatus()
+    pollingIntervalRef.current = setInterval(pollTaskStatus, 3000)
+  }
+
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+      }
+    }
+  }, [])
 
   const handleRegenerate = () => {
     // TODO: 实现重新生成功能
