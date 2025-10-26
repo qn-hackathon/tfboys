@@ -11,6 +11,6 @@ def sample_scene_data():
         "characters": [],
         "image_url": "https://example.com/image.jpg",
         "audio_url": "https://example.com/audio.mp3",
-        "audio_duration": 5.0,
+        "duration": 5.0,
         "subtitle_text": "测试字幕"
     }

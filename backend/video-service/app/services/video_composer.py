@@ -86,7 +86,7 @@ class VideoComposer:
             audio_path=audio_path,
             subtitle_filter=subtitle_filter,
             output_path=output_path,
-            duration=scene.audio_duration
+            duration=scene.duration
         )
         
         success, output = self.ffmpeg_executor.execute(command)

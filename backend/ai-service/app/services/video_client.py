@@ -46,11 +46,23 @@ class VideoClient:
             APICallException: API 调用失败
         """
         try:
-            url = f"{self.base_url}/internal/synthesize"
+            url = f"{self.base_url}/internal/video-synthesis/jobs"
             
             payload = {
                 "task_id": task_id,
-                "scenes": [scene.model_dump() for scene in scenes]
+                "scenes": [scene.model_dump() for scene in scenes],
+                "video_config": {
+                    "resolution": "1920x1080",
+                    "fps": 30,
+                    "transition_effect": "fade",
+                    "subtitle_style": {
+                        "font_size": 32,
+                        "color": "white",
+                        "position": "bottom",
+                        "border_width": 2,
+                        "border_color": "black"
+                    }
+                }
             }
             
             logger.info(f"Submitting video synthesis job for task {task_id}")
@@ -61,7 +73,11 @@ class VideoClient:
             result = response.json()
             logger.info(f"Video synthesis job submitted successfully: {result}")
             
-            return result.get("task_id", task_id)
+            # VideoService返回格式: {"code": 0, "message": "...", "data": {"job_id": "...", "task_id": "...", "status": "..."}}
+            if result.get("code") == 0 and "data" in result:
+                return result["data"].get("job_id", task_id)
+            else:
+                return task_id
             
         except httpx.HTTPError as e:
             logger.error(f"Failed to submit video synthesis job: {e}")
