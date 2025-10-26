@@ -62,7 +62,7 @@ services:
       context: ./backend/ai-service
       dockerfile: Dockerfile
     container_name: tfboys-ai-worker
-    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2 --queues=ai_queue
     env_file:
       - ./backend/ai-service/.env
     environment:
@@ -109,7 +109,7 @@ services:
       context: ./backend/video-service
       dockerfile: Dockerfile
     container_name: tfboys-video-worker
-    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2 --queues=video_queue
     env_file:
       - ./backend/video-service/.env
     environment:

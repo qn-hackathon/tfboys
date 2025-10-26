@@ -15,4 +15,9 @@ celery_app.conf.update(
     enable_utc=True,
     task_track_started=True,
     task_time_limit=3600,
+    # 任务路由配置 - 确保视频任务只发送到video worker
+    task_routes={
+        'process_video_job': {'queue': 'video_queue'},
+    },
+    task_default_queue='video_queue',
 )

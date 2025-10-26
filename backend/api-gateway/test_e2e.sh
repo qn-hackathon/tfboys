@@ -65,11 +65,19 @@ check_ai_service() {
 
 check_video_service() {
     echo -e "\n${YELLOW}3. 检查 Video Service 是否运行...${NC}"
-    if curl -s -f "${VIDEO_SERVICE_URL}/health" > /dev/null 2>&1; then
+    echo "尝试访问: ${VIDEO_SERVICE_URL}/health"
+    
+    # 先尝试获取详细错误信息
+    RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}\n" "${VIDEO_SERVICE_URL}/health" 2>&1)
+    HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_CODE:" | cut -d: -f2)
+    
+    if [ "$HTTP_CODE" = "200" ]; then
         echo -e "${GREEN}✅ Video Service 正在运行${NC}"
         return 0
     else
         echo -e "${RED}❌ Video Service 未运行${NC}"
+        echo "HTTP 状态码: $HTTP_CODE"
+        echo "响应内容: $RESPONSE"
         echo "请先启动 Video Service (端口 8003)"
         return 1
     fi

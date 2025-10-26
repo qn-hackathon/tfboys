@@ -83,7 +83,13 @@ def process_video_job(self, job_data: dict):
     Returns:
         结果字典
     """
-    job = VideoJob(**job_data)
+    try:
+        job = VideoJob(**job_data)
+        logger.info(f"Starting video job processing for job_id: {job.job_id}, task_id: {job.task_id}")
+    except Exception as e:
+        logger.error(f"Failed to create VideoJob from data: {e}")
+        logger.error(f"Job data: {job_data}")
+        raise
     
     try:
         update_job_status_in_redis(
@@ -93,7 +99,20 @@ def process_video_job(self, job_data: dict):
         )
         
         import asyncio
-        video_url = asyncio.run(video_composer.compose_video(job))
+        try:
+            # 检查是否有运行中的事件循环
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                # 如果事件循环已关闭，创建新的事件循环
+                asyncio.set_event_loop(asyncio.new_event_loop())
+            video_url = asyncio.run(video_composer.compose_video(job))
+        except RuntimeError as e:
+            if "cannot be called from a running event loop" in str(e):
+                # 如果已经在事件循环中，使用 create_task
+                loop = asyncio.get_event_loop()
+                video_url = loop.run_until_complete(video_composer.compose_video(job))
+            else:
+                raise
         
         # 获取视频时长 (这里简化处理，实际应该从视频文件获取)
         duration = 30.0  # 默认时长，实际应该从视频文件获取
@@ -105,12 +124,24 @@ def process_video_job(self, job_data: dict):
         )
         
         # 发送完成回调给AI Service
-        asyncio.run(send_completion_callback(
-            job.task_id,
-            video_url,
-            duration,
-            "success"
-        ))
+        try:
+            asyncio.run(send_completion_callback(
+                job.task_id,
+                video_url,
+                duration,
+                "success"
+            ))
+        except RuntimeError as e:
+            if "cannot be called from a running event loop" in str(e):
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(send_completion_callback(
+                    job.task_id,
+                    video_url,
+                    duration,
+                    "success"
+                ))
+            else:
+                raise
         
         return {"status": "completed", "video_url": video_url}
     
@@ -120,12 +151,25 @@ def process_video_job(self, job_data: dict):
         
         # 发送失败回调给AI Service
         import asyncio
-        asyncio.run(send_completion_callback(
-            job.task_id,
-            "",
-            0.0,
-            "failed",
-            error_msg
-        ))
+        try:
+            asyncio.run(send_completion_callback(
+                job.task_id,
+                "",
+                0.0,
+                "failed",
+                error_msg
+            ))
+        except RuntimeError as e:
+            if "cannot be called from a running event loop" in str(e):
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(send_completion_callback(
+                    job.task_id,
+                    "",
+                    0.0,
+                    "failed",
+                    error_msg
+                ))
+            else:
+                raise
         
         raise

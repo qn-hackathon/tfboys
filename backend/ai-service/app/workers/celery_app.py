@@ -17,6 +17,11 @@ celery_app.conf.update(
     broker_connection_retry_on_startup=True,
     broker_connection_retry=True,
     broker_connection_max_retries=10,
+    # 任务路由配置 - 确保AI任务只发送到AI worker
+    task_routes={
+        'process_novel_task': {'queue': 'ai_queue'},
+    },
+    task_default_queue='ai_queue',
     # Redis 客户端配置 - 修复 "wrong number of arguments for 'ping' command" 错误
     broker_transport_options={
         'visibility_timeout': 3600,
