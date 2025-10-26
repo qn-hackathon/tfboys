@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, Eye, Edit } from "lucide-react"
-import { getVideoTemplates, type VideoTemplate, type Video } from "@/apis/video"
+import { getTaskTemplates, type TaskTemplate, type Task } from "@/apis/task"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
 import { toast } from "sonner"
 
@@ -21,22 +21,22 @@ export function VideoTemplatesPage() {
   const [searchKeyword, setSearchKeyword] = useState("")
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>("全部")
   const [selectedResolution, setSelectedResolution] = useState<VideoResolution>("全部")
-  const [previewVideo, setPreviewVideo] = useState<Video | null>(null)
+  const [previewTask, setPreviewTask] = useState<Task | null>(null)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
-  const [templates, setTemplates] = useState<VideoTemplate[]>([])
+  const [templates, setTemplates] = useState<TaskTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchTemplates = async () => {
       try {
         setIsLoading(true)
-        const response = await getVideoTemplates()
+        const response = await getTaskTemplates()
         if (response.code === 0 && response.data) {
           setTemplates(response.data)
         } else {
           toast.error(response.message || "获取视频模板失败")
         }
-      } catch (error) {
+      } catch {
         toast.error("获取视频模板时发生错误")
       } finally {
         setIsLoading(false)
@@ -50,25 +50,25 @@ export function VideoTemplatesPage() {
     const matchesKeyword =
       searchKeyword === "" ||
       template.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      template.video.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      template.video.keywords.some((keyword) =>
+      template.task.description?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      template.task.keywords?.some((keyword) =>
         keyword.toLowerCase().includes(searchKeyword.toLowerCase())
       )
 
-    const matchesStyle = selectedStyle === "全部" || template.video.style === selectedStyle
+    const matchesStyle = selectedStyle === "全部" || template.task.style === selectedStyle
 
     const matchesResolution =
-      selectedResolution === "全部" || template.video.resolution === selectedResolution
+      selectedResolution === "全部" || template.task.resolution === selectedResolution
 
     return matchesKeyword && matchesStyle && matchesResolution
   })
 
-  const handlePreview = (template: VideoTemplate) => {
-    setPreviewVideo(template.video)
+  const handlePreview = (template: TaskTemplate) => {
+    setPreviewTask(template.task)
     setPreviewDialogOpen(true)
   }
 
-  const handleEdit = (template: VideoTemplate) => {
+  const handleEdit = (template: TaskTemplate) => {
     console.log("编辑模板:", template.name)
   }
 
@@ -187,7 +187,7 @@ export function VideoTemplatesPage() {
       </div>
 
       <VideoPreviewDialog
-        video={previewVideo}
+        video={previewTask}
         open={previewDialogOpen}
         onOpenChange={setPreviewDialogOpen}
         onDownload={handleDownload}
@@ -198,9 +198,9 @@ export function VideoTemplatesPage() {
 }
 
 interface TemplateCardProps {
-  template: VideoTemplate
-  onPreview: (template: VideoTemplate) => void
-  onEdit: (template: VideoTemplate) => void
+  template: TaskTemplate
+  onPreview: (template: TaskTemplate) => void
+  onEdit: (template: TaskTemplate) => void
 }
 
 function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
@@ -214,7 +214,7 @@ function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
     >
       <div className="relative aspect-video overflow-hidden bg-muted">
         <img
-          src={template.video.thumbnailUrl}
+          src={template.task.thumbnail_url}
           alt={template.name}
           className={`w-full h-full object-cover transition-all duration-300 ${
             isHovered ? "scale-110 blur-sm" : "scale-100 blur-0"
@@ -250,18 +250,18 @@ function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
       <div className="p-4">
         <h3 className="font-semibold text-base mb-2 line-clamp-1">{template.name}</h3>
         <p className="text-sm text-muted-foreground mb-3 line-clamp-2 min-h-[40px]">
-          {template.video.description}
+          {template.task.description}
         </p>
 
         <div className="flex items-center justify-between mb-3">
           <Badge variant="secondary" className="text-xs">
-            {template.video.style}
+            {template.task.style}
           </Badge>
-          <span className="text-xs text-muted-foreground">{template.video.duration}</span>
+          <span className="text-xs text-muted-foreground">{template.task.duration}</span>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {template.video.keywords.slice(0, 3).map((keyword) => (
+          {template.task.keywords?.slice(0, 3).map((keyword) => (
             <Badge key={keyword} variant="outline" className="text-xs">
               {keyword}
             </Badge>

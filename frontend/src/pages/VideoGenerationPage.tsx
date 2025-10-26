@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { getVideoTemplates, type VideoSlice, type VideoTemplate } from "@/apis/video"
+import { getTaskTemplates, type VideoSlice, type TaskTemplate } from "@/apis/task"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
@@ -48,25 +48,25 @@ export function VideoGenerationPage() {
   const [statusText, setStatusText] = useState("")
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
-  const [templateVideos, setTemplateVideos] = useState<VideoTemplate[]>([])
+  const [templateTasks, setTemplateTasks] = useState<TaskTemplate[]>([])
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>("")
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const templatesResponse = await getVideoTemplates()
+        const templatesResponse = await getTaskTemplates()
 
         if (templatesResponse.code === 0 && templatesResponse.data) {
-          setTemplateVideos(templatesResponse.data)
-          if (templatesResponse.data.length > 0) {
-            setVideoSlices(templatesResponse.data[0].video.slices)
-            setGeneratedVideoUrl(templatesResponse.data[0].video.videoUrl)
+          setTemplateTasks(templatesResponse.data)
+          if (templatesResponse.data.length > 0 && templatesResponse.data[0].task.slices) {
+            setVideoSlices(templatesResponse.data[0].task.slices)
+            setGeneratedVideoUrl(templatesResponse.data[0].task.result?.video_url || "")
           }
         } else {
           toast.error(templatesResponse.message || "获取视频模板失败")
         }
-      } catch (error) {
+      } catch {
         toast.error("加载数据时发生错误")
       }
     }
@@ -150,12 +150,12 @@ export function VideoGenerationPage() {
   }
 
   const handleTemplateClick = (templateId: string) => {
-    const template = templateVideos.find(t => t.id === templateId)
+    const template = templateTasks.find(t => t.id === templateId)
     if (template) {
-      setNovelText(template.video.novelPrompt)
-      setSelectedStyle(template.video.style as VideoStyle)
-      setResolution(template.video.resolution as Resolution)
-      setVideoSlices(template.video.slices)
+      setNovelText(template.task.novel_text)
+      setSelectedStyle(template.task.style as VideoStyle)
+      setResolution(template.task.resolution as Resolution)
+      setVideoSlices(template.task.slices || [])
       setStatus("completed")
       toast.success(`已应用模板: ${template.name}`)
     }
@@ -406,7 +406,7 @@ export function VideoGenerationPage() {
                 className="w-full"
               >
                 <CarouselContent>
-                  {templateVideos.map((template) => (
+                  {templateTasks.map((template) => (
                     <CarouselItem key={template.id} className="basis-1/2 lg:basis-1/3">
                       <button
                         onClick={() => handleTemplateClick(template.id)}
@@ -414,7 +414,7 @@ export function VideoGenerationPage() {
                       >
                         <div className="aspect-video bg-muted">
                           <img
-                            src={template.video.thumbnailUrl}
+                            src={template.task.thumbnail_url}
                             alt={template.name}
                             className="w-full h-full object-cover"
                           />
@@ -422,7 +422,7 @@ export function VideoGenerationPage() {
                         <div className="p-3 bg-background">
                           <p className="text-sm font-medium">{template.name}</p>
                           <Badge variant="secondary" className="mt-1 text-xs">
-                            {template.video.style}
+                            {template.task.style}
                           </Badge>
                         </div>
                       </button>

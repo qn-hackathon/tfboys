@@ -8,11 +8,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Download, Share2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
-import { Video } from "@/apis/video"
+import { Task } from "@/apis/task"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 
 interface VideoPreviewDialogProps {
-  video: Video | null
+  video: Task | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onDownload?: () => void
@@ -49,7 +49,7 @@ export function VideoPreviewDialog({
             <div className="aspect-video bg-black rounded-lg overflow-hidden flex-shrink-0">
               <video
                 ref={videoRef}
-                src={video.videoUrl}
+                src={video.result?.video_url}
                 controls
                 className="w-full h-full"
               >
@@ -87,7 +87,7 @@ export function VideoPreviewDialog({
               </h3>
               <Card className="p-4 min-h-[160px]">
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {video.novelPrompt}
+                  {video.novel_text}
                 </p>
               </Card>
             </div>
@@ -103,15 +103,15 @@ export function VideoPreviewDialog({
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Maximize className="h-4 w-4 flex-shrink-0" />
-                <span>视频横纵比: {video.aspectRatio}</span>
+                <span>视频横纵比: {video.result?.aspect_ratio}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Film className="h-4 w-4 flex-shrink-0" />
-                <span>场景数: {video.totalScenes}</span>
+                <span>场景数: {video.progress.total_scenes}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <HardDrive className="h-4 w-4 flex-shrink-0" />
-                <span>文件大小: {video.fileSize}</span>
+                <span>文件大小: {video.result?.file_size}</span>
               </div>
             </div>
           </div>
