@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 from shared.enums import TaskStatus
 
 
@@ -34,4 +34,4 @@ class ApiResponse(BaseModel):
     """统一 API 响应格式"""
     code: int = 0
     message: str = "success"
-    data: Optional[dict | list | str] = None
+    data: Optional[Union[dict, list, str]] = None
