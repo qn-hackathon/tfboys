@@ -1,10 +1,10 @@
-import { Video, ListTodo } from 'lucide-react'
+import { Video, ListTodo, Film } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
-  currentPage: 'video-generation' | 'my-tasks'
-  onPageChange: (page: 'video-generation' | 'my-tasks') => void
+  currentPage: 'video-generation' | 'my-tasks' | 'video-templates'
+  onPageChange: (page: 'video-generation' | 'my-tasks' | 'video-templates') => void
 }
 
 export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
@@ -13,6 +13,11 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
       id: 'video-generation' as const,
       icon: Video,
       label: '视频生成',
+    },
+    {
+      id: 'video-templates' as const,
+      icon: Film,
+      label: '视频模板',
     },
     {
       id: 'my-tasks' as const,
