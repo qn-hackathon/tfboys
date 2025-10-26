@@ -9,6 +9,11 @@ services:
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - tfboys-network
 
@@ -23,7 +28,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - AI_SERVICE_URL=http://ai-service:8002
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - tfboys-network
     restart: unless-stopped
@@ -40,8 +46,13 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
       - VIDEO_SERVICE_URL=http://video-service:8003
+      - LOCAL_STORAGE_DIR=/tmp/tfboys
+    volumes:
+      - tfboys-storage:/tmp/tfboys
+      - ./shared:/app/shared:ro
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - tfboys-network
     restart: unless-stopped
@@ -51,14 +62,21 @@ services:
       context: ./backend/ai-service
       dockerfile: Dockerfile
     container_name: tfboys-ai-worker
-    command: celery -A app.workers.celery_app worker --loglevel=info
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
     env_file:
       - ./backend/ai-service/.env
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - VIDEO_SERVICE_URL=http://video-service:8003
+      - LOCAL_STORAGE_DIR=/tmp/tfboys
+    volumes:
+      - tfboys-storage:/tmp/tfboys
+      - ./shared:/app/shared:ro
     depends_on:
-      - redis
-      - ai-service
+      redis:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
     networks:
       - tfboys-network
     restart: unless-stopped
@@ -74,8 +92,14 @@ services:
       - ./backend/video-service/.env
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - LOCAL_STORAGE_DIR=/tmp/tfboys
+      - AI_SERVICE_CALLBACK_URL=http://ai-service:8002/callbacks/video-completed
+    volumes:
+      - tfboys-storage:/tmp/tfboys
+      - ./shared:/app/shared:ro
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - tfboys-network
     restart: unless-stopped
@@ -85,14 +109,21 @@ services:
       context: ./backend/video-service
       dockerfile: Dockerfile
     container_name: tfboys-video-worker
-    command: celery -A app.workers.celery_app worker --loglevel=info
+    command: celery -A app.workers.celery_app worker --loglevel=info --concurrency=2
     env_file:
       - ./backend/video-service/.env
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - LOCAL_STORAGE_DIR=/tmp/tfboys
+      - AI_SERVICE_CALLBACK_URL=http://ai-service:8002/callbacks/video-completed
+    volumes:
+      - tfboys-storage:/tmp/tfboys
+      - ./shared:/app/shared:ro
     depends_on:
-      - redis
-      - video-service
+      redis:
+        condition: service_healthy
+      video-service:
+        condition: service_started
     networks:
       - tfboys-network
     restart: unless-stopped
@@ -116,3 +147,4 @@ networks:
 
 volumes:
   redis-data:
+  tfboys-storage:
