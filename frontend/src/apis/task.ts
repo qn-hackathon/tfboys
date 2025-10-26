@@ -391,8 +391,49 @@ export const getTaskStatus = async (
   return httpClient.get<Task>(`/tasks/${task_id}`)
 }
 
+const mockVideoSlices: VideoSlice[] = [
+  {
+    id: "mock-slice-1",
+    scene_number: 1,
+    thumbnail_url:
+      "https://placehold.co/160x90/10b981/ffffff?text=%E5%9C%BA%E6%99%AF1",
+    timestamp: "0:00",
+    time_in_seconds: 0,
+  },
+  {
+    id: "mock-slice-2",
+    scene_number: 2,
+    thumbnail_url:
+      "https://placehold.co/160x90/10b981/ffffff?text=%E5%9C%BA%E6%99%AF2",
+    timestamp: "0:15",
+    time_in_seconds: 15,
+  },
+  {
+    id: "mock-slice-3",
+    scene_number: 3,
+    thumbnail_url:
+      "https://placehold.co/160x90/10b981/ffffff?text=%E5%9C%BA%E6%99%AF3",
+    timestamp: "0:30",
+    time_in_seconds: 30,
+  },
+]
+
 export const getTasks = async (): Promise<ApiResponse<Task[]>> => {
-  return httpClient.get<Task[]>("/tasks")
+  const response = await httpClient.get<Task[]>("/tasks")
+  
+  if (response.data) {
+    response.data = response.data.map(task => {
+      if (!task.slices || task.slices.length === 0) {
+        return {
+          ...task,
+          slices: mockVideoSlices
+        }
+      }
+      return task
+    })
+  }
+  
+  return response
 }
 
 export const getTaskStatusText = (status: TaskStatus): string => {
