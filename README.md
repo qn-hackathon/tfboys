@@ -63,7 +63,9 @@ docker-compose up -d redis
 
 # 3. 启动后端服务(需要3个终端)
 cd backend/api-gateway && uvicorn app.main:app --reload --port 8000
-cd backend/ai-service && PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --reload --port 8001
+cd backend/ai-service
+export PYTHONPATH="$(cd ../.. && pwd)"
+uvicorn app.main:app --reload --port 8001
 cd backend/video-service && uvicorn app.main:app --reload --port 8002
 
 # 4. 启动前端

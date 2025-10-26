@@ -13,7 +13,7 @@ setup(
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[
-        "redis>=5.0.1",
+        "redis>=4.6.0,<5.0.0",  # 限制 Redis 版本以兼容 Celery 5.3.4
         "pydantic>=2.5.0",
     ],
     classifiers=[

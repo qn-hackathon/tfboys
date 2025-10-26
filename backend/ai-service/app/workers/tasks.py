@@ -14,9 +14,9 @@ from app.workers.celery_app import celery_app
 from app.services.text_analyzer import text_analyzer
 from app.services.image_generator import image_generator
 from app.services.voice_generator import voice_generator
-from app.services.video_client import video_client, init_video_client
+from app.services.video_client import get_video_client, init_video_client
 from app.config import settings
-from shared.clients import redis_client, init_redis_client
+from shared.clients import get_redis_client, init_redis_client
 from shared.models import Scene
 from shared.enums import TaskStatus, TTSVoice
 
@@ -46,24 +46,29 @@ def process_novel_task(task_id: str, novel_text: str):
 async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
     """
     异步处理小说生成视频任务
-    
+
     处理流程:
     1. 文本分析 → 获取场景列表
     2. 角色处理 → 生成角色设定图 + 保存到 Redis
     3. 场景处理 → 生成场景图(--cref) + 配音
     4. 提交视频服务 → 调用 video_client
     5. 全程更新任务状态到 Redis
-    
+
     Args:
         task_id: 任务ID
         novel_text: 小说文本
-        
+
     Returns:
         dict: 处理结果
     """
+    # 获取 Redis 客户端
+    redis_client = get_redis_client()
+    if not redis_client:
+        raise RuntimeError("Redis client not initialized")
+
     try:
         logger.info(f"Task {task_id}: Starting async processing")
-        
+
         # === 步骤1: 文本分析 ===
         await redis_client.update_task_status(task_id, TaskStatus.ANALYZING.value)
         logger.info(f"Task {task_id}: Analyzing novel text...")
@@ -121,7 +126,11 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
         # === 步骤3: 提交视频服务 ===
         await redis_client.update_task_status(task_id, TaskStatus.SYNTHESIZING_VIDEO.value)
         logger.info(f"Task {task_id}: Submitting to video service...")
-        
+
+        video_client = get_video_client()
+        if not video_client:
+            raise RuntimeError("Video client not initialized")
+
         job_id = await video_client.submit_video_synthesis_job(
             task_id=task_id,
             scenes=scenes
@@ -158,20 +167,25 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
 
 
 async def _update_task_progress(
-    task_id: str, 
-    step: str, 
-    total: int, 
+    task_id: str,
+    step: str,
+    total: int,
     processed: int
 ) -> None:
     """
     更新任务进度
-    
+
     Args:
         task_id: 任务ID
         step: 当前步骤
         total: 总数
         processed: 已处理数量
     """
+    redis_client = get_redis_client()
+    if not redis_client:
+        logger.warning(f"Task {task_id}: Redis client not initialized, skipping progress update")
+        return
+
     try:
         task_data = await redis_client.get_task(task_id)
         if task_data:

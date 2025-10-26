@@ -11,7 +11,14 @@
       "Read(//private/tmp/tfboys/scenes/**)",
       "Bash(open:*)",
       "Read(//tmp/tfboys/characters/**)",
-      "Read(//tmp/tfboys/scenes/**)"
+      "Read(//tmp/tfboys/scenes/**)",
+      "Bash(redis-cli:*)",
+      "Bash(timeout 10 celery -A app.workers.celery_app worker --loglevel=info)",
+      "Bash(curl -s http://localhost:8002/health)",
+      "Bash(curl -s -X POST http://localhost:8002/internal/tasks -H \"Content-Type: application/json\" -d '{\"\"\"\"task_id\"\"\"\": \"\"\"\"test_manual_002\"\"\"\", \"\"\"\"novel_text\"\"\"\": \"\"\"\"小明是一个活泼开朗的男孩。\"\"\"\"}')",
+      "Bash(curl:*)",
+      "Bash(./test_e2e.sh:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
