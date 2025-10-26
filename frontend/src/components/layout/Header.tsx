@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, ChevronDown, Check } from 'lucide-react'
+import { Bell, Moon, Sun, ChevronDown, Check, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -14,6 +14,8 @@ import {
 import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { ShimmeringText } from '@/components/ui/shimmering-text'
+import { LoginModal } from '@/components/LoginModal'
+import { getCurrentUser, logout, type User } from '@/apis/user'
 
 // Mock 消息数据类型
 interface Notification {
@@ -28,6 +30,16 @@ export function Header() {
     const savedTheme = localStorage.getItem('theme')
     return savedTheme === 'dark'
   })
+
+  // 登录状态管理
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
+
+  // 初始化用户状态
+  useEffect(() => {
+    const user = getCurrentUser()
+    setCurrentUser(user)
+  }, [])
 
   // Mock 消息数据
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -93,6 +105,17 @@ export function Header() {
     return `${days}天前`
   }
 
+  // 处理登录成功
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user)
+  }
+
+  // 处理退出登录
+  const handleLogout = () => {
+    logout()
+    setCurrentUser(null)
+  }
+
   return (
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
@@ -106,21 +129,28 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            额度: <span className="font-medium text-foreground">100 分钟</span>
+            额度: <span className="font-medium text-foreground">{currentUser ? `${currentUser.quota} 分钟` : '0 分钟'}</span>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-1">
-                <span>用户名</span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>个人设置</DropdownMenuItem>
-              <DropdownMenuItem>退出登录</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {currentUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-1">
+                  <span>{currentUser.username}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>个人设置</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>退出登录</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="ghost" className="gap-1" onClick={() => setLoginModalOpen(true)}>
+              <LogIn className="h-4 w-4" />
+              <span>登录</span>
+            </Button>
+          )}
 
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -206,6 +236,12 @@ export function Header() {
           </Popover>
         </div>
       </div>
+
+      <LoginModal
+        open={loginModalOpen}
+        onOpenChange={setLoginModalOpen}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </header>
   )
 }
