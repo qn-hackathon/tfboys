@@ -33,7 +33,7 @@ export interface Task {
   status: TaskStatus
   novel_text: string
   created_at: string
-  progress: TaskProgress
+  progress?: TaskProgress
   current_stage: string
   result?: TaskResult
   error?: string

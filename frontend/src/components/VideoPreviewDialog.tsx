@@ -107,7 +107,7 @@ export function VideoPreviewDialog({
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Film className="h-4 w-4 flex-shrink-0" />
-                <span>场景数: {video.progress.total_scenes}</span>
+                <span>场景数: {video.progress?.total_scenes ?? 0}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <HardDrive className="h-4 w-4 flex-shrink-0" />
