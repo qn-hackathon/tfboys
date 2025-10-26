@@ -75,8 +75,8 @@ export function HomePage() {
         </video>
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">文创速推</h1>
-          <h2 className="text-3xl md:text-4xl font-semibold mb-8">文字内容的短视频传播加速平台</h2>
+          <h1 className="text-5xl md:text-6xl font-bold mb-2 tracking-wider">文创速推</h1>
+          <h2 className="text-3xl md:text-4xl font-semibold mb-8 tracking-wide">文字内容的短视频传播加速平台</h2>
           <div className="w-32 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
             只需简单的提示词,就能将您的文本、小说或链接转化为高质量视频。无需任何技术技能。
