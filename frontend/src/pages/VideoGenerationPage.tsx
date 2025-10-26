@@ -139,8 +139,8 @@ export function VideoGenerationPage() {
           const task = response.data
           setCurrentTask(task)
 
-          const totalScenes = task.progress.total_scenes || 1
-          const processedScenes = task.progress.processed_scenes || 0
+          const totalScenes = task.progress?.total_scenes || 1
+          const processedScenes = task.progress?.processed_scenes || 0
           const progressPercent = Math.floor((processedScenes / totalScenes) * 100)
           
           setProgress(progressPercent)

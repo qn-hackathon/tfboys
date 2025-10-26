@@ -200,7 +200,7 @@ export function MyTasksPage() {
                       </Badge>
                     </div>
 
-                    {task.status !== "completed" && task.status !== "failed" && (
+                    {task.status !== "completed" && task.status !== "failed" && task.progress && (
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">状态: {task.current_stage}</span>
@@ -221,7 +221,7 @@ export function MyTasksPage() {
                     {task.status === "completed" && task.result && (
                       <div className="mb-4">
                         <p className="text-sm text-muted-foreground">
-                          时长: {task.duration} | {task.progress.total_scenes} 个场景 | {task.result.file_size}
+                          时长: {task.duration} | {task.progress?.total_scenes ?? 0} 个场景 | {task.result.file_size}
                         </p>
                       </div>
                     )}
