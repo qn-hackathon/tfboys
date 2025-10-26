@@ -22,7 +22,6 @@ import {
   Share2,
 } from "lucide-react"
 import { getTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/apis/task"
-import { Video } from "@/apis/video"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
 import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
@@ -32,7 +31,7 @@ type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 export function MyTasksPage() {
   const [filter, setFilter] = useState<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -49,7 +48,7 @@ export function MyTasksPage() {
         } else {
           toast.error(response.message || "获取任务列表失败")
         }
-      } catch (error) {
+      } catch {
         toast.error("获取任务列表时发生错误")
       } finally {
         setIsLoading(false)
@@ -72,12 +71,12 @@ export function MyTasksPage() {
     return true
   }).filter((task) => {
     if (!searchQuery) return true
-    return task.title.toLowerCase().includes(searchQuery.toLowerCase())
+    return task.title?.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
   const handlePreview = (task: Task) => {
-    if (task.video) {
-      setSelectedVideo(task.video)
+    if (task.result) {
+      setSelectedTask(task)
     }
   }
 
@@ -92,7 +91,7 @@ export function MyTasksPage() {
 
   const confirmDelete = () => {
     if (taskToDelete) {
-      console.log("删除任务:", taskToDelete.id)
+      console.log("删除任务:", taskToDelete.task_id)
       toast.success("任务已删除")
       setDeleteDialogOpen(false)
       setTaskToDelete(null)
@@ -100,20 +99,20 @@ export function MyTasksPage() {
   }
 
   const handleRetry = (task: Task) => {
-    console.log("重试任务:", task.id)
+    console.log("重试任务:", task.task_id)
   }
 
   const handleCancel = (task: Task) => {
-    console.log("取消任务:", task.id)
+    console.log("取消任务:", task.task_id)
   }
 
   const handleViewDetails = (task: Task) => {
-    console.log("查看详情:", task.id)
+    console.log("查看详情:", task.task_id)
   }
 
   const handleShare = (task?: Task) => {
-    if (task && task.video) {
-      setSelectedVideo(task.video)
+    if (task && task.result) {
+      setSelectedTask(task)
     }
     setShareDialogOpen(true)
   }
@@ -177,12 +176,12 @@ export function MyTasksPage() {
             </Card>
           ) : (
             filteredTasks.map((task) => (
-              <Card key={task.id} className="p-6">
+              <Card key={task.task_id} className="p-6">
                 <div className="flex items-start gap-4">
-                  {task.video?.thumbnailUrl && task.status === "completed" && (
+                  {task.thumbnail_url && task.status === "completed" && (
                     <div className="w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
                       <img
-                        src={task.video.thumbnailUrl}
+                        src={task.thumbnail_url}
                         alt={task.title}
                         className="w-full h-full object-cover"
                       />
@@ -193,10 +192,10 @@ export function MyTasksPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-lg font-semibold mb-1">
-                          任务 #{task.id.split("-")[1]}: {task.title}
+                          任务 #{task.task_id.split("-")[1]}: {task.title}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          创建时间: {task.createdAt}
+                          创建时间: {task.created_at}
                         </p>
                       </div>
                       <Badge variant={getTaskStatusVariant(task.status)}>
@@ -207,35 +206,33 @@ export function MyTasksPage() {
                     {task.status !== "completed" && task.status !== "failed" && (
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">状态: {task.currentStage}</span>
-                          <span className="font-semibold">{task.progress}%</span>
+                          <span className="text-muted-foreground">状态: {task.current_stage}</span>
+                          <span className="font-semibold">{Math.floor((task.progress.processed_scenes / task.progress.total_scenes) * 100)}%</span>
                         </div>
-                        <Progress value={task.progress} className="h-2" />
-                        {task.processedScenes && task.totalScenes && (
+                        <Progress value={Math.floor((task.progress.processed_scenes / task.progress.total_scenes) * 100)} className="h-2" />
+                        <p className="text-sm text-muted-foreground">
+                          已处理: {task.progress.processed_scenes} / {task.progress.total_scenes} 场景
+                        </p>
+                        {task.estimated_time_remaining && (
                           <p className="text-sm text-muted-foreground">
-                            已处理: {task.processedScenes} / {task.totalScenes} 场景
-                          </p>
-                        )}
-                        {task.estimatedTimeRemaining && (
-                          <p className="text-sm text-muted-foreground">
-                            预计剩余时间: {task.estimatedTimeRemaining}
+                            预计剩余时间: {task.estimated_time_remaining}
                           </p>
                         )}
                       </div>
                     )}
 
-                    {task.status === "completed" && task.video && (
+                    {task.status === "completed" && task.result && (
                       <div className="mb-4">
                         <p className="text-sm text-muted-foreground">
-                          时长: {task.video.duration} | {task.video.totalScenes} 个场景 | {task.video.fileSize}
+                          时长: {task.duration} | {task.progress.total_scenes} 个场景 | {task.result.file_size}
                         </p>
                       </div>
                     )}
 
-                    {task.status === "failed" && task.errorMessage && (
+                    {task.status === "failed" && task.error && (
                       <div className="mb-4">
                         <p className="text-sm text-destructive">
-                          错误原因: {task.errorMessage}
+                          错误原因: {task.error}
                         </p>
                       </div>
                     )}
@@ -305,9 +302,9 @@ export function MyTasksPage() {
       </div>
 
       <VideoPreviewDialog
-        video={selectedVideo}
-        open={!!selectedVideo && !shareDialogOpen}
-        onOpenChange={() => setSelectedVideo(null)}
+        video={selectedTask}
+        open={!!selectedTask && !shareDialogOpen}
+        onOpenChange={() => setSelectedTask(null)}
         onDownload={handleDownload}
         onShare={() => handleShare()}
       />

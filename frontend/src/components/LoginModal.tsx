@@ -54,7 +54,7 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
       } else {
         toast.error(response.message)
       }
-    } catch (error) {
+    } catch {
       toast.error('登录失败，请稍后重试')
     } finally {
       setPasswordLoading(false)
@@ -113,7 +113,7 @@ export function LoginModal({ open, onOpenChange, onLoginSuccess }: LoginModalPro
       } else {
         toast.error(response.message)
       }
-    } catch (error) {
+    } catch {
       toast.error('登录失败，请稍后重试')
     } finally {
       setPhoneLoading(false)

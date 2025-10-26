@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { VideoSlice } from "@/apis/video"
+import { VideoSlice } from "@/apis/task"
 
 interface VideoSliceCarouselProps {
   slices: VideoSlice[]
@@ -41,7 +41,7 @@ export function VideoSliceCarousel({
           {slices.map((slice, index) => (
             <CarouselItem key={slice.id} className="basis-1/3 lg:basis-1/4">
               <button
-                onClick={() => handleSliceClick(index, slice.timeInSeconds)}
+                onClick={() => handleSliceClick(index, slice.time_in_seconds)}
                 className={`
                   w-full rounded-lg overflow-hidden border-2 transition-all
                   ${
@@ -53,13 +53,13 @@ export function VideoSliceCarousel({
               >
                 <div className="aspect-video bg-muted">
                   <img
-                    src={slice.thumbnailUrl}
-                    alt={`场景 ${slice.sceneNumber}`}
+                    src={slice.thumbnail_url}
+                    alt={`场景 ${slice.scene_number}`}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-2 bg-background">
-                  <p className="text-xs font-medium">场景 {slice.sceneNumber}</p>
+                  <p className="text-xs font-medium">场景 {slice.scene_number}</p>
                   <p className="text-xs text-muted-foreground">{slice.timestamp}</p>
                 </div>
               </button>
