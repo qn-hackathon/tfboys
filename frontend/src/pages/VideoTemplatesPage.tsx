@@ -10,9 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, Eye, Edit } from "lucide-react"
-import { getVideoTemplates, type VideoTemplate } from "@/apis/video"
+import { getVideoTemplates, type VideoTemplate, type Video } from "@/apis/video"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
-import { Task } from "@/apis/task"
 import { toast } from "sonner"
 
 type VideoStyle = "全部" | "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
@@ -22,7 +21,7 @@ export function VideoTemplatesPage() {
   const [searchKeyword, setSearchKeyword] = useState("")
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>("全部")
   const [selectedResolution, setSelectedResolution] = useState<VideoResolution>("全部")
-  const [previewTask, setPreviewTask] = useState<Task | null>(null)
+  const [previewVideo, setPreviewVideo] = useState<Video | null>(null)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
   const [templates, setTemplates] = useState<VideoTemplate[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -51,35 +50,21 @@ export function VideoTemplatesPage() {
     const matchesKeyword =
       searchKeyword === "" ||
       template.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-      template.keywords.some((keyword) =>
+      template.video.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+      template.video.keywords.some((keyword) =>
         keyword.toLowerCase().includes(searchKeyword.toLowerCase())
       )
 
-    const matchesStyle = selectedStyle === "全部" || template.style === selectedStyle
+    const matchesStyle = selectedStyle === "全部" || template.video.style === selectedStyle
 
     const matchesResolution =
-      selectedResolution === "全部" || template.resolution === selectedResolution
+      selectedResolution === "全部" || template.video.resolution === selectedResolution
 
     return matchesKeyword && matchesStyle && matchesResolution
   })
 
   const handlePreview = (template: VideoTemplate) => {
-    const task: Task = {
-      id: template.id,
-      title: template.name,
-      status: "completed",
-      progress: 100,
-      videoUrl: template.videoUrl,
-      duration: template.duration,
-      createdAt: template.createdAt,
-      novelPrompt: template.novelPrompt,
-      resolution: template.resolution,
-      aspectRatio: template.aspectRatio,
-      totalScenes: template.totalScenes,
-      fileSize: template.fileSize,
-    }
-    setPreviewTask(task)
+    setPreviewVideo(template.video)
     setPreviewDialogOpen(true)
   }
 
@@ -87,16 +72,16 @@ export function VideoTemplatesPage() {
     console.log("编辑模板:", template.name)
   }
 
-  const handleDownload = (task: Task) => {
-    console.log("下载视频:", task.title)
+  const handleDownload = () => {
+    console.log("下载视频")
   }
 
   const handleShare = () => {
     console.log("分享视频")
   }
 
-  const handleDelete = (task: Task) => {
-    console.log("删除视频:", task.title)
+  const handleDelete = () => {
+    console.log("删除视频")
   }
 
   return (
@@ -205,7 +190,7 @@ export function VideoTemplatesPage() {
       </div>
 
       <VideoPreviewDialog
-        task={previewTask}
+        video={previewVideo}
         open={previewDialogOpen}
         onOpenChange={setPreviewDialogOpen}
         onDownload={handleDownload}
@@ -233,7 +218,7 @@ function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
     >
       <div className="relative aspect-video overflow-hidden bg-muted">
         <img
-          src={template.thumbnailUrl}
+          src={template.video.thumbnailUrl}
           alt={template.name}
           className={`w-full h-full object-cover transition-all duration-300 ${
             isHovered ? "scale-110 blur-sm" : "scale-100 blur-0"
@@ -269,18 +254,18 @@ function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
       <div className="p-4">
         <h3 className="font-semibold text-base mb-2 line-clamp-1">{template.name}</h3>
         <p className="text-sm text-muted-foreground mb-3 line-clamp-2 min-h-[40px]">
-          {template.description}
+          {template.video.description}
         </p>
 
         <div className="flex items-center justify-between mb-3">
           <Badge variant="secondary" className="text-xs">
-            {template.style}
+            {template.video.style}
           </Badge>
-          <span className="text-xs text-muted-foreground">{template.duration}</span>
+          <span className="text-xs text-muted-foreground">{template.video.duration}</span>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {template.keywords.slice(0, 3).map((keyword) => (
+          {template.video.keywords.slice(0, 3).map((keyword) => (
             <Badge key={keyword} variant="outline" className="text-xs">
               {keyword}
             </Badge>
