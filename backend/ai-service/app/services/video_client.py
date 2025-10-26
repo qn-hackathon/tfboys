@@ -109,14 +109,31 @@ video_client: VideoClient = None
 def init_video_client(base_url: str, timeout: int = 300) -> VideoClient:
     """
     初始化全局视频服务客户端实例
-    
+
     使用示例:
         from app.services.video_client import init_video_client, video_client
-        
+
         init_video_client("http://video-service:8003")
-        
+
         await video_client.submit_video_synthesis_job(task_id, scenes)
     """
     global video_client
     video_client = VideoClient(base_url, timeout)
     return video_client
+
+
+def get_video_client() -> VideoClient:
+    """
+    获取视频服务客户端实例（动态获取，解决模块导入时的值复制问题）
+
+    Returns:
+        VideoClient: 视频服务客户端实例，如果未初始化则返回 None
+    """
+    import sys
+    # 直接从 sys.modules 获取模块
+    vc_module = sys.modules.get('app.services.video_client')
+    if vc_module is None:
+        # 如果模块未加载，先导入
+        import importlib
+        vc_module = importlib.import_module('app.services.video_client')
+    return vc_module.video_client

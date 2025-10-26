@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from app.workers.tasks import process_novel_task
 from app.schemas.task_schema import TaskCreateRequest, TaskStatusResponse
-from shared.clients import redis_client
+from shared.clients import get_redis_client
 from shared.enums import TaskStatus
 
 router = APIRouter()
@@ -31,13 +31,15 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
     }
-    
+
+    redis_client = get_redis_client()
     if not redis_client:
         raise HTTPException(status_code=500, detail="Redis client not initialized")
-    
+
     try:
         await redis_client.save_task(task_id, task_data)
-        background_tasks.add_task(process_novel_task.delay, task_id, request.novel_text)
+        # 提交 Celery 异步任务
+        process_novel_task.delay(task_id, request.novel_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create task: {str(e)}")
     
@@ -52,12 +54,13 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
 async def get_task_status(task_id: str):
     """
     获取任务状态
-    
+
     从 Redis 查询任务状态和处理进度
     """
+    redis_client = get_redis_client()
     if not redis_client:
         raise HTTPException(status_code=500, detail="Redis client not initialized")
-    
+
     task_data = await redis_client.get_task(task_id)
     
     if not task_data:

@@ -42,11 +42,16 @@ cp .env.example .env
 ### 启动服务
 
 ```bash
-# 启动 API 服务（需要设置 PYTHONPATH 以正确导入 shared 模块）
-PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --reload --port 8001
+# 在 ai-service 目录下执行
 
-# 启动 Celery Worker
-PYTHONPATH=$(pwd)/../.. celery -A app.workers.celery_app worker --loglevel=info
+# 设置项目根目录到 PYTHONPATH
+export PYTHONPATH="$(cd ../.. && pwd)"
+
+# 终端1: 启动 API 服务
+uvicorn app.main:app --reload --port 8001
+
+# 终端2: 启动 Celery Worker
+celery -A app.workers.celery_app worker --loglevel=info
 ```
 
 **注意:** 由于 ai-service 依赖项目根目录的 `shared` 模块，启动时必须设置 `PYTHONPATH` 环境变量指向项目根目录。
@@ -75,6 +80,10 @@ REDIS_URL=redis://localhost:6379/0
 # Video Service URL
 VIDEO_SERVICE_URL=http://localhost:8002
 ```
+
+## 端到端测试
+
+详细的端到端测试指南请参见 [E2E_TESTING.md](./E2E_TESTING.md)
 
 ## API 文档
 

@@ -261,10 +261,13 @@ python3 test_ai_service_workflow.py --test all
 启动 AI Service 并通过 API 端点测试：
 
 ```bash
-cd /Users/jiangzhi/repo/tfboys/backend/ai-service
+cd backend/ai-service
 
-# 启动服务（需要设置 PYTHONPATH 以正确导入 shared 模块）
-PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+# 设置项目根目录到 PYTHONPATH
+export PYTHONPATH="$(cd ../.. && pwd)"
+
+# 启动服务
+uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 ```
 
 **注意:** 由于 ai-service 依赖项目根目录的 `shared` 模块，启动时必须设置 `PYTHONPATH` 环境变量指向项目根目录。
@@ -332,7 +335,8 @@ docker run -d -p 6379:6379 redis:latest
 **查看详细日志:**
 ```bash
 # 启动服务时查看日志
-PYTHONPATH=$(pwd)/../.. uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
+export PYTHONPATH="$(cd ../.. && pwd)"
+uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload --log-level debug
 ```
 
 ---
