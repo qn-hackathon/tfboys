@@ -55,7 +55,7 @@ class TestVideoClient:
         assert task_id == "test_task_001"
         video_client.client.post.assert_called_once()
         call_args = video_client.client.post.call_args
-        assert "http://test-video-service:8003/internal/synthesize" in call_args[0]
+        assert "http://test-video-service:8003/internal/video-synthesis/jobs" in call_args[0]
     
     @pytest.mark.asyncio
     async def test_submit_video_synthesis_job_http_error(self, video_client, sample_scenes):
