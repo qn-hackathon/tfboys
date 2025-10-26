@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,9 +10,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Search, Eye, Edit } from "lucide-react"
-import { mockVideoTemplates, type VideoTemplate } from "@/data/mockTemplateData"
+import { getVideoTemplates, type VideoTemplate } from "@/apis/video"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
-import { Task } from "@/data/mockData"
+import { Task } from "@/apis/task"
+import { toast } from "sonner"
 
 type VideoStyle = "全部" | "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
 type VideoResolution = "全部" | "720p" | "1080p" | "4K"
@@ -23,8 +24,30 @@ export function VideoTemplatesPage() {
   const [selectedResolution, setSelectedResolution] = useState<VideoResolution>("全部")
   const [previewTask, setPreviewTask] = useState<Task | null>(null)
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false)
+  const [templates, setTemplates] = useState<VideoTemplate[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const filteredTemplates = mockVideoTemplates.filter((template) => {
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getVideoTemplates()
+        if (response.code === 0 && response.data) {
+          setTemplates(response.data)
+        } else {
+          toast.error(response.message || "获取视频模板失败")
+        }
+      } catch (error) {
+        toast.error("获取视频模板时发生错误")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTemplates()
+  }, [])
+
+  const filteredTemplates = templates.filter((template) => {
     const matchesKeyword =
       searchKeyword === "" ||
       template.name.toLowerCase().includes(searchKeyword.toLowerCase()) ||
@@ -146,18 +169,24 @@ export function VideoTemplatesPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredTemplates.map((template) => (
+        {isLoading ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg">加载中...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredTemplates.map((template) => (
             <TemplateCard
               key={template.id}
               template={template}
               onPreview={handlePreview}
               onEdit={handleEdit}
             />
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
-        {filteredTemplates.length === 0 && (
+        {!isLoading && filteredTemplates.length === 0 && (
           <div className="text-center py-20">
             <p className="text-muted-foreground text-lg">未找到匹配的模板</p>
             <Button

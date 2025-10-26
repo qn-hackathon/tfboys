@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -8,8 +8,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Download, Share2, Trash2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
-import { Task, mockVideoSlices } from "@/data/mockData"
+import { Task } from "@/apis/task"
+import { getVideoSlices, type VideoSlice } from "@/apis/video"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
+import { toast } from "sonner"
 
 interface VideoPreviewDialogProps {
   task: Task | null
@@ -29,6 +31,26 @@ export function VideoPreviewDialog({
   onDelete,
 }: VideoPreviewDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
+
+  useEffect(() => {
+    if (open) {
+      const fetchSlices = async () => {
+        try {
+          const response = await getVideoSlices()
+          if (response.code === 0 && response.data) {
+            setVideoSlices(response.data)
+          } else {
+            toast.error(response.message || "获取视频切片失败")
+          }
+        } catch (error) {
+          toast.error("获取视频切片时发生错误")
+        }
+      }
+
+      fetchSlices()
+    }
+  }, [open])
 
   const handleSliceClick = (timeInSeconds: number) => {
     if (videoRef.current) {
@@ -71,12 +93,14 @@ export function VideoPreviewDialog({
               </Button>
             </div>
 
-            <div className="flex-1 min-h-0">
-              <VideoSliceCarousel
-                slices={mockVideoSlices}
-                onSliceClick={handleSliceClick}
-              />
-            </div>
+            {videoSlices.length > 0 && (
+              <div className="flex-1 min-h-0">
+                <VideoSliceCarousel
+                  slices={videoSlices}
+                  onSliceClick={handleSliceClick}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-4 overflow-y-auto">

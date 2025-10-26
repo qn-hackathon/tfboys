@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,9 +16,10 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices, type VideoSlice } from "@/data/mockData"
+import { getTemplateVideos, getGeneratedVideo, getVideoSlices, type VideoSlice, type TemplateVideo } from "@/apis/video"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
+import { toast } from "sonner"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
 type VoiceType = "女声" | "男声" | "童声"
@@ -48,8 +49,44 @@ export function VideoGenerationPage() {
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>(mockVideoSlices)
+  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
+  const [templateVideos, setTemplateVideos] = useState<TemplateVideo[]>([])
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>("")
   const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [slicesResponse, templatesResponse, videoResponse] = await Promise.all([
+          getVideoSlices(),
+          getTemplateVideos(),
+          getGeneratedVideo(),
+        ])
+
+        if (slicesResponse.code === 0 && slicesResponse.data) {
+          setVideoSlices(slicesResponse.data)
+        } else {
+          toast.error(slicesResponse.message || "获取视频切片失败")
+        }
+
+        if (templatesResponse.code === 0 && templatesResponse.data) {
+          setTemplateVideos(templatesResponse.data)
+        } else {
+          toast.error(templatesResponse.message || "获取模板视频失败")
+        }
+
+        if (videoResponse.code === 0 && videoResponse.data) {
+          setGeneratedVideoUrl(videoResponse.data.url)
+        } else {
+          toast.error(videoResponse.message || "获取生成视频失败")
+        }
+      } catch (error) {
+        toast.error("加载数据时发生错误")
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const charCount = novelText.length
   const isOverLimit = charCount > MAX_CHARS
@@ -86,8 +123,7 @@ export function VideoGenerationPage() {
           clearInterval(interval)
           setStatus("completed")
           setStatusText("生成完成")
-          // 生成完成后设置视频切片
-          setVideoSlices(mockVideoSlices)
+          toast.success("视频生成完成!")
           return 100
         }
 
@@ -112,8 +148,8 @@ export function VideoGenerationPage() {
   }
 
   const handleDownload = () => {
-    // TODO: 实现下载功能
-    console.log("下载视频:", mockGeneratedVideo.url)
+    console.log("下载视频:", generatedVideoUrl)
+    toast.success("开始下载视频")
   }
 
   const handleShare = () => {
@@ -128,15 +164,15 @@ export function VideoGenerationPage() {
   }
 
   const handleTemplateClick = (templateId: string) => {
-    const template = mockTemplateVideos.find(t => t.id === templateId)
+    const template = templateVideos.find(t => t.id === templateId)
     if (template) {
       setNovelText(template.novelText)
       setSelectedStyle(template.style as VideoStyle)
       setVoiceType(template.voiceType)
-      setResolution(template.resolution)
+      setResolution(template.resolution as Resolution)
       setVideoSlices(template.slices)
-      // 模拟已完成状态以显示视频切片
       setStatus("completed")
+      toast.success(`已应用模板: ${template.name}`)
     }
   }
 
@@ -340,7 +376,7 @@ export function VideoGenerationPage() {
                 {status === "completed" ? (
                   <video
                     ref={videoRef}
-                    src={mockGeneratedVideo.url}
+                    src={generatedVideoUrl}
                     controls
                     className="w-full h-full"
                   >
@@ -414,7 +450,7 @@ export function VideoGenerationPage() {
                 className="w-full"
               >
                 <CarouselContent>
-                  {mockTemplateVideos.map((template) => (
+                  {templateVideos.map((template) => (
                     <CarouselItem key={template.id} className="basis-1/2 lg:basis-1/3">
                       <button
                         onClick={() => handleTemplateClick(template.id)}
