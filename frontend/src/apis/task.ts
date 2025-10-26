@@ -26,6 +26,7 @@ export interface TaskResult {
   video_url: string
   aspect_ratio: string
   file_size: string
+  duration?: string
 }
 
 export interface Task {
@@ -39,7 +40,6 @@ export interface Task {
   error?: string
   style?: "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
   resolution?: "1080p" | "720p" | "4K"
-  duration?: string
   description?: string
   keywords?: string[]
   slices?: VideoSlice[]
@@ -83,10 +83,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "52.3 MB",
+        duration: "2:45",
       },
       style: "古风",
       resolution: "1080p",
-      duration: "2:45",
       description: "月光下的江湖侠客,行走于青石板街道,展现古典武侠之美",
       keywords: ["侠客", "月夜", "武侠", "古典"],
       slices: [
@@ -137,10 +137,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "89.5 MB",
+        duration: "3:12",
       },
       style: "现代",
       resolution: "4K",
-      duration: "3:12",
       description: "繁华都市的霓虹灯下,讲述现代人的故事",
       keywords: ["都市", "霓虹", "现代", "夜景"],
       slices: [
@@ -183,10 +183,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "45.8 MB",
+        duration: "2:30"
       },
       style: "动漫",
       resolution: "1080p",
-      duration: "2:30",
       description: "樱花飘落的校园,少女们的青春物语",
       keywords: ["校园", "樱花", "青春", "动漫"],
       slices: [
@@ -237,10 +237,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "58.2 MB",
+        duration: "3:00"
       },
       style: "奇幻",
       resolution: "1080p",
-      duration: "3:00",
       description: "魔法森林深处,魔法师与精灵的奇幻冒险",
       keywords: ["魔法", "森林", "精灵", "奇幻"],
       slices: [
@@ -283,10 +283,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "38.5 MB",
+        duration: "2:15"
       },
       style: "3D卡通",
       resolution: "720p",
-      duration: "2:15",
       description: "彩虹岛上小兔子的可爱冒险故事",
       keywords: ["卡通", "冒险", "可爱", "童趣"],
       slices: [
@@ -336,10 +336,10 @@ const mockTaskTemplates: TaskTemplate[] = [
         video_url: "https://www.w3schools.com/html/mov_bbb.mp4",
         aspect_ratio: "16:9",
         file_size: "95.7 MB",
+        duration: "3:30"
       },
       style: "现代",
       resolution: "4K",
-      duration: "3:30",
       description: "2077年赛博都市,黑客与企业的较量",
       keywords: ["科幻", "赛博朋克", "未来", "黑客"],
       slices: [
