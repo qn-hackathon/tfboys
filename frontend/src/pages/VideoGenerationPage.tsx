@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { getTaskTemplates, createTask, getTaskStatus, type VideoSlice, type TaskTemplate, type Task } from "@/apis/task"
+import { getTaskTemplates, createTask, getTaskStatus, type VideoSlice, type TaskTemplate } from "@/apis/task"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
@@ -50,7 +50,6 @@ export function VideoGenerationPage() {
   const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
   const [templateTasks, setTemplateTasks] = useState<TaskTemplate[]>([])
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>("")
-  const [currentTask, setCurrentTask] = useState<Task | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -137,7 +136,6 @@ export function VideoGenerationPage() {
         
         if (response.code === 0 && response.data) {
           const task = response.data
-          setCurrentTask(task)
 
           const totalScenes = task.progress?.total_scenes || 1
           const processedScenes = task.progress?.processed_scenes || 0
