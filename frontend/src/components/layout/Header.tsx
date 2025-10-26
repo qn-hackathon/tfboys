@@ -123,18 +123,21 @@ export function Header() {
   return (
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={handleNavigateToHome}>
+        <div className="flex items-center gap-3 cursor-pointer" onClick={handleNavigateToHome}>
+          <img src="/favicon.svg" alt="TFBoys AI Logo" className="w-12 h-12" />
           <ShimmeringText 
-            text="文创速推 - 文字内容的短视频传播加速平台" 
-            className="text-xl font-semibold"
+            text="TFBoys AI" 
+            className="text-xl font-semibold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-500 bg-clip-text"
             duration={3}
           />
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="text-sm text-muted-foreground">
-            额度: <span className="font-medium text-foreground">{currentUser ? `${currentUser.quota} 分钟` : '0 分钟'}</span>
-          </div>
+          {currentUser && (
+            <div className="text-sm text-muted-foreground">
+              额度: <span className="font-medium text-foreground">{currentUser.quota} 分钟</span>
+            </div>
+          )}
 
           {currentUser ? (
             <DropdownMenu>
@@ -160,7 +163,8 @@ export function Header() {
             {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
 
-          <Popover>
+          {currentUser && (
+            <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
@@ -238,6 +242,7 @@ export function Header() {
               )}
             </PopoverContent>
           </Popover>
+          )}
         </div>
       </div>
 
