@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { VideoSlice } from "@/data/mockData"
+import { VideoSlice } from "@/apis/video"
 
 interface VideoSliceCarouselProps {
   slices: VideoSlice[]

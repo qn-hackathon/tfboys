@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,8 +12,9 @@ import {
   Trash2,
   RefreshCw,
 } from "lucide-react"
-import { mockTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+import { getTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/apis/task"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
+import { toast } from "sonner"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 
@@ -21,8 +22,30 @@ export function MyTasksPage() {
   const [filter, setFilter] = useState<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const filteredTasks = mockTasks.filter((task) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setIsLoading(true)
+        const response = await getTasks()
+        if (response.code === 0 && response.data) {
+          setTasks(response.data)
+        } else {
+          toast.error(response.message || "获取任务列表失败")
+        }
+      } catch (error) {
+        toast.error("获取任务列表时发生错误")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTasks()
+  }, [])
+
+  const filteredTasks = tasks.filter((task) => {
     if (filter === "in-progress") {
       return ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
     }
@@ -79,7 +102,7 @@ export function MyTasksPage() {
     return "🔄"
   }
 
-  const inProgressCount = mockTasks.filter((task) =>
+  const inProgressCount = tasks.filter((task) =>
     ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
   ).length
 
@@ -117,7 +140,13 @@ export function MyTasksPage() {
         </div>
 
         <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
+          {isLoading ? (
+            <Card className="p-12">
+              <div className="text-center text-muted-foreground">
+                <p>加载中...</p>
+              </div>
+            </Card>
+          ) : filteredTasks.length === 0 ? (
             <Card className="p-12">
               <div className="text-center text-muted-foreground">
                 <p>暂无任务</p>
