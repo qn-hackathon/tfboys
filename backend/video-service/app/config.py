@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     temp_dir: str = "/tmp/video-service"
+    local_storage_dir: str = "/tmp/tfboys"  # 本地存储目录
     ffmpeg_threads: int = 4
     chinese_font_path: str = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"
     ai_service_callback_url: str = ""
