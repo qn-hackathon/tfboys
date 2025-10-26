@@ -6,14 +6,24 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Search,
   Play,
   Download,
   Trash2,
   RefreshCw,
+  Share2,
 } from "lucide-react"
 import { getTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/apis/task"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
+import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
@@ -24,6 +34,9 @@ export function MyTasksPage() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -71,8 +84,18 @@ export function MyTasksPage() {
   }
 
   const handleDelete = (task: Task) => {
-    // TODO: 实现删除功能
-    console.log("删除任务:", task.id)
+    setTaskToDelete(task)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (taskToDelete) {
+      // TODO: 实现删除功能
+      console.log("删除任务:", taskToDelete.id)
+      toast.success("任务已删除")
+      setDeleteDialogOpen(false)
+      setTaskToDelete(null)
+    }
   }
 
   const handleRetry = (task: Task) => {
@@ -90,9 +113,11 @@ export function MyTasksPage() {
     console.log("查看详情:", task.id)
   }
 
-  const handleShare = () => {
-    // TODO: 实现分享功能
-    console.log("分享视频:", selectedTask?.id)
+  const handleShare = (task?: Task) => {
+    if (task) {
+      setSelectedTask(task)
+    }
+    setShareDialogOpen(true)
   }
 
 
@@ -253,6 +278,10 @@ export function MyTasksPage() {
                       <Download className="mr-2 h-4 w-4" />
                       下载
                     </Button>
+                    <Button variant="outline" onClick={() => handleShare(task)}>
+                      <Share2 className="mr-2 h-4 w-4" />
+                      分享
+                    </Button>
                     <Button variant="outline" onClick={() => handleDelete(task)}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       删除
@@ -279,12 +308,36 @@ export function MyTasksPage() {
 
       <VideoPreviewDialog
         task={selectedTask}
-        open={!!selectedTask}
+        open={!!selectedTask && !shareDialogOpen}
         onOpenChange={() => setSelectedTask(null)}
         onDownload={handleDownload}
-        onShare={handleShare}
+        onShare={() => handleShare()}
         onDelete={handleDelete}
       />
+
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+      />
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+            <DialogDescription>
+              确定要删除任务 "{taskToDelete?.title}" 吗?此操作不可恢复。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              确认删除
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
