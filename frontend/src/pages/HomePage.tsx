@@ -20,18 +20,18 @@ export function HomePage() {
   }
 
   const videoTemplates = [
-    { id: 1, title: '模板 1', thumbnail: 'https://placehold.co/320x180/3b82f6/white?text=模板+1' },
-    { id: 2, title: '模板 2', thumbnail: 'https://placehold.co/320x180/8b5cf6/white?text=模板+2' },
-    { id: 3, title: '模板 3', thumbnail: 'https://placehold.co/320x180/ec4899/white?text=模板+3' },
-    { id: 4, title: '模板 4', thumbnail: 'https://placehold.co/320x180/f59e0b/white?text=模板+4' },
-    { id: 5, title: '模板 5', thumbnail: 'https://placehold.co/320x180/10b981/white?text=模板+5' },
+    { id: 1, title: '模板 1', thumbnail: 'https://placehold.co/320x180/3b82f6/white?text=模板+1', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4' },
+    { id: 2, title: '模板 2', thumbnail: 'https://placehold.co/320x180/8b5cf6/white?text=模板+2', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4' },
+    { id: 3, title: '模板 3', thumbnail: 'https://placehold.co/320x180/ec4899/white?text=模板+3', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4' },
+    { id: 4, title: '模板 4', thumbnail: 'https://placehold.co/320x180/f59e0b/white?text=模板+4', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4' },
+    { id: 5, title: '模板 5', thumbnail: 'https://placehold.co/320x180/10b981/white?text=模板+5', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4' },
   ]
 
   const textToVideos = [
-    { id: 1, title: '示例视频 1', thumbnail: 'https://placehold.co/320x180/3b82f6/white?text=示例+1' },
-    { id: 2, title: '示例视频 2', thumbnail: 'https://placehold.co/320x180/8b5cf6/white?text=示例+2' },
-    { id: 3, title: '示例视频 3', thumbnail: 'https://placehold.co/320x180/ec4899/white?text=示例+3' },
-    { id: 4, title: '示例视频 4', thumbnail: 'https://placehold.co/320x180/f59e0b/white?text=示例+4' },
+    { id: 1, title: '示例视频 1', thumbnail: 'https://placehold.co/320x180/3b82f6/white?text=示例+1', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' },
+    { id: 2, title: '示例视频 2', thumbnail: 'https://placehold.co/320x180/8b5cf6/white?text=示例+2', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
+    { id: 3, title: '示例视频 3', thumbnail: 'https://placehold.co/320x180/ec4899/white?text=示例+3', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' },
+    { id: 4, title: '示例视频 4', thumbnail: 'https://placehold.co/320x180/f59e0b/white?text=示例+4', videoSrc: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
   ]
 
   const faqItems = [
@@ -77,14 +77,14 @@ export function HomePage() {
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold mb-2">文创速推</h1>
           <h2 className="text-3xl md:text-4xl font-semibold mb-8">文字内容的短视频传播加速平台</h2>
-          <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
+          <div className="w-32 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
           <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
             只需简单的提示词,就能将您的文本、小说或链接转化为高质量视频。无需任何技术技能。
           </p>
-          <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
+          <div className="w-32 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-8" />
           <Button 
             size="lg" 
-            className="text-lg px-12 py-6 h-auto bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
+            className="text-lg px-12 py-4 h-auto rounded-2xl bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
             onClick={handleNavigateToApp}
           >
             立即制作
@@ -95,7 +95,7 @@ export function HomePage() {
       <section className="py-20 px-4 md:px-8 bg-background">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">文生视频</h2>
+            <h2 className="text-4xl font-bold mb-4 tracking-wide">文生视频</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               轻松将书面内容转化为引人入胜的视频。只需输入您的文字提示,让人工智能生成一个完整的视频,让您的文字变得生动起来。
             </p>
@@ -115,12 +115,9 @@ export function HomePage() {
                           className="w-full h-full object-cover"
                           poster={video.thumbnail}
                         >
-                          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" type="video/mp4" />
+                          <source src={video.videoSrc} type="video/mp4" />
                         </video>
                       </div>
-                      <CardContent className="p-4">
-                        <p className="font-medium">{video.title}</p>
-                      </CardContent>
                     </Card>
                   </div>
                 </CarouselItem>
@@ -135,7 +132,7 @@ export function HomePage() {
       <section className="py-20 px-4 md:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">热门视频模板</h2>
+            <h2 className="text-4xl font-bold mb-4 tracking-wide">热门视频模板</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               一系列有趣又吸引人的视频模板等你来探索。从人工智能生成的亲吻或拥抱等温馨时刻,到人工智能圣诞老人视频等节日祝福,你都能轻松为受众创作令人难忘的内容。
             </p>
@@ -155,12 +152,9 @@ export function HomePage() {
                           className="w-full h-full object-cover"
                           poster={template.thumbnail}
                         >
-                          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
+                          <source src={template.videoSrc} type="video/mp4" />
                         </video>
                       </div>
-                      <CardContent className="p-4">
-                        <p className="font-medium">{template.title}</p>
-                      </CardContent>
                     </Card>
                   </div>
                 </CarouselItem>
@@ -176,7 +170,7 @@ export function HomePage() {
         <div className="max-w-6xl mx-auto">
           <Card>
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl md:text-4xl mb-2">
+              <CardTitle className="text-3xl md:text-4xl mb-2 tracking-wide">
                 超级大语言模型打造最佳的人工智能视频生成器
               </CardTitle>
             </CardHeader>
@@ -216,7 +210,7 @@ export function HomePage() {
                   </div>
                   <Button 
                     size="lg" 
-                    className="w-full text-lg py-6 h-auto bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700"
+                    className="w-full text-lg py-6 h-auto rounded-2xl bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 animate-gradient bg-[length:200%_auto]"
                     onClick={handleNavigateToApp}
                   >
                     立即制作
@@ -230,7 +224,7 @@ export function HomePage() {
 
       <section className="py-20 px-4 md:px-8 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-12">FAQ</h2>
+          <h2 className="text-4xl font-bold text-center mb-12 tracking-wide">FAQ</h2>
           <Accordion type="single" collapsible className="w-full">
             {faqItems.map((item, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
