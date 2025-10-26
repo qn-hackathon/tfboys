@@ -33,7 +33,6 @@ export interface VideoTemplate {
 export interface VideoGenerationParams {
   templateId: string
   novelText: string
-  voiceType?: "女声" | "男声" | "童声"
 }
 
 export interface VideoGenerationResponse {
@@ -353,6 +352,7 @@ export const getVideoTemplates = async (): Promise<
 }
 
 export const generateVideo = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _params: VideoGenerationParams
 ): Promise<ApiResponse<VideoGenerationResponse>> => {
   await new Promise((resolve) => setTimeout(resolve, 500))
