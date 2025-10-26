@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { getTemplateVideos, getGeneratedVideo, getVideoSlices, type VideoSlice, type TemplateVideo } from "@/apis/video"
+import { getVideoTemplates, type VideoSlice, type VideoTemplate } from "@/apis/video"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
@@ -50,35 +50,23 @@ export function VideoGenerationPage() {
   const [statusText, setStatusText] = useState("")
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
-  const [templateVideos, setTemplateVideos] = useState<TemplateVideo[]>([])
+  const [templateVideos, setTemplateVideos] = useState<VideoTemplate[]>([])
   const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string>("")
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [slicesResponse, templatesResponse, videoResponse] = await Promise.all([
-          getVideoSlices(),
-          getTemplateVideos(),
-          getGeneratedVideo(),
-        ])
-
-        if (slicesResponse.code === 0 && slicesResponse.data) {
-          setVideoSlices(slicesResponse.data)
-        } else {
-          toast.error(slicesResponse.message || "获取视频切片失败")
-        }
+        const templatesResponse = await getVideoTemplates()
 
         if (templatesResponse.code === 0 && templatesResponse.data) {
           setTemplateVideos(templatesResponse.data)
+          if (templatesResponse.data.length > 0) {
+            setVideoSlices(templatesResponse.data[0].video.slices)
+            setGeneratedVideoUrl(templatesResponse.data[0].video.videoUrl)
+          }
         } else {
-          toast.error(templatesResponse.message || "获取模板视频失败")
-        }
-
-        if (videoResponse.code === 0 && videoResponse.data) {
-          setGeneratedVideoUrl(videoResponse.data.url)
-        } else {
-          toast.error(videoResponse.message || "获取生成视频失败")
+          toast.error(templatesResponse.message || "获取视频模板失败")
         }
       } catch (error) {
         toast.error("加载数据时发生错误")
@@ -166,11 +154,10 @@ export function VideoGenerationPage() {
   const handleTemplateClick = (templateId: string) => {
     const template = templateVideos.find(t => t.id === templateId)
     if (template) {
-      setNovelText(template.novelText)
-      setSelectedStyle(template.style as VideoStyle)
-      setVoiceType(template.voiceType)
-      setResolution(template.resolution as Resolution)
-      setVideoSlices(template.slices)
+      setNovelText(template.video.novelPrompt)
+      setSelectedStyle(template.video.style as VideoStyle)
+      setResolution(template.video.resolution as Resolution)
+      setVideoSlices(template.video.slices)
       setStatus("completed")
       toast.success(`已应用模板: ${template.name}`)
     }
@@ -458,7 +445,7 @@ export function VideoGenerationPage() {
                       >
                         <div className="aspect-video bg-muted">
                           <img
-                            src={template.thumbnailUrl}
+                            src={template.video.thumbnailUrl}
                             alt={template.name}
                             className="w-full h-full object-cover"
                           />
@@ -466,7 +453,7 @@ export function VideoGenerationPage() {
                         <div className="p-3 bg-background">
                           <p className="text-sm font-medium">{template.name}</p>
                           <Badge variant="secondary" className="mt-1 text-xs">
-                            {template.style}
+                            {template.video.style}
                           </Badge>
                         </div>
                       </button>

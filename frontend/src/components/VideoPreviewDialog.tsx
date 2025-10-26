@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react"
+import { useRef } from "react"
 import {
   Dialog,
   DialogContent,
@@ -8,22 +8,20 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Download, Share2, Trash2, Clock, Monitor, Maximize, Film, HardDrive } from "lucide-react"
-import { Task } from "@/apis/task"
-import { getVideoSlices, type VideoSlice } from "@/apis/video"
+import { Video } from "@/apis/video"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
-import { toast } from "sonner"
 
 interface VideoPreviewDialogProps {
-  task: Task | null
+  video: Video | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  onDownload: (task: Task) => void
-  onShare: () => void
-  onDelete: (task: Task) => void
+  onDownload?: () => void
+  onShare?: () => void
+  onDelete?: () => void
 }
 
 export function VideoPreviewDialog({
-  task,
+  video,
   open,
   onOpenChange,
   onDownload,
@@ -31,26 +29,6 @@ export function VideoPreviewDialog({
   onDelete,
 }: VideoPreviewDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
-
-  useEffect(() => {
-    if (open) {
-      const fetchSlices = async () => {
-        try {
-          const response = await getVideoSlices()
-          if (response.code === 0 && response.data) {
-            setVideoSlices(response.data)
-          } else {
-            toast.error(response.message || "获取视频切片失败")
-          }
-        } catch (error) {
-          toast.error("获取视频切片时发生错误")
-        }
-      }
-
-      fetchSlices()
-    }
-  }, [open])
 
   const handleSliceClick = (timeInSeconds: number) => {
     if (videoRef.current) {
@@ -59,7 +37,7 @@ export function VideoPreviewDialog({
     }
   }
 
-  if (!task) return null
+  if (!video) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -73,7 +51,7 @@ export function VideoPreviewDialog({
             <div className="aspect-video bg-black rounded-lg overflow-hidden flex-shrink-0">
               <video
                 ref={videoRef}
-                src={task.videoUrl}
+                src={video.videoUrl}
                 controls
                 className="w-full h-full"
               >
@@ -82,21 +60,27 @@ export function VideoPreviewDialog({
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="icon" onClick={() => onDownload(task)}>
-                <Download className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={onShare}>
-                <Share2 className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(task)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {onDownload && (
+                <Button variant="ghost" size="icon" onClick={onDownload}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              )}
+              {onShare && (
+                <Button variant="ghost" size="icon" onClick={onShare}>
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button variant="ghost" size="icon" onClick={onDelete}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
 
-            {videoSlices.length > 0 && (
+            {video.slices && video.slices.length > 0 && (
               <div className="flex-1 min-h-0">
                 <VideoSliceCarousel
-                  slices={videoSlices}
+                  slices={video.slices}
                   onSliceClick={handleSliceClick}
                 />
               </div>
@@ -110,7 +94,7 @@ export function VideoPreviewDialog({
               </h3>
               <Card className="p-4 min-h-[160px]">
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {task.novelPrompt}
+                  {video.novelPrompt}
                 </p>
               </Card>
             </div>
@@ -118,23 +102,23 @@ export function VideoPreviewDialog({
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4 flex-shrink-0" />
-                <span>时长: {task.duration}</span>
+                <span>时长: {video.duration}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Monitor className="h-4 w-4 flex-shrink-0" />
-                <span>分辨率: {task.resolution}</span>
+                <span>分辨率: {video.resolution}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Maximize className="h-4 w-4 flex-shrink-0" />
-                <span>视频横纵比: {task.aspectRatio}</span>
+                <span>视频横纵比: {video.aspectRatio}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Film className="h-4 w-4 flex-shrink-0" />
-                <span>场景数: {task.totalScenes}</span>
+                <span>场景数: {video.totalScenes}</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <HardDrive className="h-4 w-4 flex-shrink-0" />
-                <span>文件大小: {task.fileSize}</span>
+                <span>文件大小: {video.fileSize}</span>
               </div>
             </div>
           </div>

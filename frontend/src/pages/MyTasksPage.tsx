@@ -13,6 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react"
 import { getTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/apis/task"
+import { Video } from "@/apis/video"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
 import { toast } from "sonner"
 
@@ -21,7 +22,7 @@ type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 export function MyTasksPage() {
   const [filter, setFilter] = useState<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
   const [tasks, setTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -62,37 +63,33 @@ export function MyTasksPage() {
   })
 
   const handlePreview = (task: Task) => {
-    setSelectedTask(task)
+    if (task.video) {
+      setSelectedVideo(task.video)
+    }
   }
 
-  const handleDownload = (task: Task) => {
-    // TODO: 实现下载功能
-    console.log("下载视频:", task.id)
+  const handleDownload = () => {
+    console.log("下载视频")
   }
 
-  const handleDelete = (task: Task) => {
-    // TODO: 实现删除功能
-    console.log("删除任务:", task.id)
+  const handleDelete = () => {
+    console.log("删除视频")
   }
 
   const handleRetry = (task: Task) => {
-    // TODO: 实现重试功能
     console.log("重试任务:", task.id)
   }
 
   const handleCancel = (task: Task) => {
-    // TODO: 实现取消功能
     console.log("取消任务:", task.id)
   }
 
   const handleViewDetails = (task: Task) => {
-    // TODO: 实现查看详情功能
     console.log("查看详情:", task.id)
   }
 
   const handleShare = () => {
-    // TODO: 实现分享功能
-    console.log("分享视频:", selectedTask?.id)
+    console.log("分享视频")
   }
 
 
@@ -156,10 +153,10 @@ export function MyTasksPage() {
             filteredTasks.map((task) => (
               <Card key={task.id} className="p-6">
                 <div className="flex items-start gap-4">
-                  {task.thumbnailUrl && task.status === "completed" && (
+                  {task.video?.thumbnailUrl && task.status === "completed" && (
                     <div className="w-32 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
                       <img
-                        src={task.thumbnailUrl}
+                        src={task.video.thumbnailUrl}
                         alt={task.title}
                         className="w-full h-full object-cover"
                       />
@@ -201,10 +198,10 @@ export function MyTasksPage() {
                       </div>
                     )}
 
-                    {task.status === "completed" && (
+                    {task.status === "completed" && task.video && (
                       <div className="mb-4">
                         <p className="text-sm text-muted-foreground">
-                          时长: {task.duration} | {task.totalScenes} 个场景 | {task.fileSize}
+                          时长: {task.video.duration} | {task.video.totalScenes} 个场景 | {task.video.fileSize}
                         </p>
                       </div>
                     )}
@@ -234,7 +231,7 @@ export function MyTasksPage() {
                           <RefreshCw className="mr-2 h-4 w-4" />
                           重试
                         </Button>
-                        <Button variant="outline" onClick={() => handleDelete(task)}>
+                        <Button variant="outline" onClick={handleDelete}>
                           <Trash2 className="mr-2 h-4 w-4" />
                           删除
                         </Button>
@@ -249,11 +246,11 @@ export function MyTasksPage() {
                       <Play className="mr-2 h-4 w-4" />
                       预览
                     </Button>
-                    <Button variant="outline" onClick={() => handleDownload(task)}>
+                    <Button variant="outline" onClick={handleDownload}>
                       <Download className="mr-2 h-4 w-4" />
                       下载
                     </Button>
-                    <Button variant="outline" onClick={() => handleDelete(task)}>
+                    <Button variant="outline" onClick={handleDelete}>
                       <Trash2 className="mr-2 h-4 w-4" />
                       删除
                     </Button>
@@ -278,9 +275,9 @@ export function MyTasksPage() {
       </div>
 
       <VideoPreviewDialog
-        task={selectedTask}
-        open={!!selectedTask}
-        onOpenChange={() => setSelectedTask(null)}
+        video={selectedVideo}
+        open={!!selectedVideo}
+        onOpenChange={() => setSelectedVideo(null)}
         onDownload={handleDownload}
         onShare={handleShare}
         onDelete={handleDelete}
