@@ -18,7 +18,9 @@
       "Bash(curl -s -X POST http://localhost:8002/internal/tasks -H \"Content-Type: application/json\" -d '{\"\"\"\"task_id\"\"\"\": \"\"\"\"test_manual_002\"\"\"\", \"\"\"\"novel_text\"\"\"\": \"\"\"\"小明是一个活泼开朗的男孩。\"\"\"\"}')",
       "Bash(curl:*)",
       "Bash(./test_e2e.sh:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Read(//private/tmp/tfboys/audio/**)",
+      "Read(//private/tmp/tfboys/generated/**)"
     ],
     "deny": [],
     "ask": []

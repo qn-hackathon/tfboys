@@ -9,7 +9,7 @@ from shared.models import Scene
 
 class TaskCreateRequest(BaseModel):
     """任务创建请求"""
-    task_id: str = Field(..., description="任务ID")
+    task_id: Optional[str] = Field(None, description="任务ID，如果不提供则自动生成")
     novel_text: str = Field(..., description="小说文本")
 
 

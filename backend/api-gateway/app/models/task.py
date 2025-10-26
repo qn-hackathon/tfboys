@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import Optional, Literal
+from typing import Optional
+from shared.enums import TaskStatus
 
 
 class CreateTaskRequest(BaseModel):
@@ -17,7 +18,7 @@ class TaskResult(BaseModel):
 
 class TaskResponse(BaseModel):
     task_id: str
-    status: Literal["pending", "processing", "completed", "failed"]
+    status: TaskStatus  # 使用 shared 的 TaskStatus 枚举
     novel_text: str
     created_at: str
     progress: Optional[TaskProgress] = None

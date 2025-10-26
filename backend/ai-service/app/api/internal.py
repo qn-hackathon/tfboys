@@ -38,7 +38,8 @@ async def create_task(request: TaskCreateRequest, background_tasks: BackgroundTa
 
     try:
         await redis_client.save_task(task_id, task_data)
-        background_tasks.add_task(process_novel_task.delay, task_id, request.novel_text)
+        # 提交 Celery 异步任务
+        process_novel_task.delay(task_id, request.novel_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create task: {str(e)}")
     
