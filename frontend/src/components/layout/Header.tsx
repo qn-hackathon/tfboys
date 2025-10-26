@@ -116,10 +116,14 @@ export function Header() {
     setCurrentUser(null)
   }
 
+  const handleNavigateToHome = () => {
+    window.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'home' } }))
+  }
+
   return (
     <header className="border-b bg-background">
       <div className="flex h-16 items-center justify-between px-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={handleNavigateToHome}>
           <ShimmeringText 
             text="文创速推 - 文字内容的短视频传播加速平台" 
             className="text-xl font-semibold"
