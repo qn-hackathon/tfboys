@@ -95,7 +95,7 @@ export function VideoPreviewDialog({
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4 flex-shrink-0" />
-                <span>时长: {video.duration}</span>
+                <span>时长: {video.result?.duration} 秒</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Monitor className="h-4 w-4 flex-shrink-0" />

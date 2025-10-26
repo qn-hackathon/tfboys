@@ -221,7 +221,7 @@ export function MyTasksPage() {
                     {task.status === "completed" && task.result && (
                       <div className="mb-4">
                         <p className="text-sm text-muted-foreground">
-                          时长: {task.duration} | {task.progress?.total_scenes ?? 0} 个场景 | {task.result.file_size}
+                          时长: {task.result?.duration}秒 | {task.progress?.total_scenes ?? 0} 个场景 | {task.result.file_size}
                         </p>
                       </div>
                     )}

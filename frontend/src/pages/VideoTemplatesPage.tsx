@@ -264,7 +264,7 @@ function TemplateCard({ template, onPreview, onEdit }: TemplateCardProps) {
           <Badge variant="secondary" className="text-xs">
             {template.task.style}
           </Badge>
-          <span className="text-xs text-muted-foreground">{template.task.duration}</span>
+          <span className="text-xs text-muted-foreground">{template.task.result?.duration ?? '--'}</span>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
