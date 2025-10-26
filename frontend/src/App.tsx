@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { MainLayout } from '@/components/layout/MainLayout'
 import { HomeLayout } from '@/components/layout/HomeLayout'
-import { Toaster } from 'sonner'
+import { Toaster } from '@/components/ui/toaster'
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState<'home' | 'app'>(() => {
@@ -22,7 +22,7 @@ function App() {
   return (
     <>
       {currentRoute === 'home' ? <HomeLayout /> : <MainLayout />}
-      <Toaster position="top-center" richColors />
+      <Toaster />
     </>
   )
 }

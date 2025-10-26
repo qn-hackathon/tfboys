@@ -16,9 +16,11 @@ import {
 } from "@/components/ui/carousel"
 import { Input } from "@/components/ui/input"
 import { Upload, Link as LinkIcon, Play, Download, Share2, RefreshCw, Check } from "lucide-react"
-import { mockTemplateVideos, mockGeneratedVideo, mockVideoSlices, type VideoSlice } from "@/data/mockData"
 import { VideoSliceCarousel } from "@/components/VideoSliceCarousel"
 import { ShareDialog } from "@/components/ShareDialog"
+import { getTemplateVideos, getGeneratedVideo, type TemplateVideo, type VideoSlice } from "@/apis/video"
+import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from "react"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
 type VoiceType = "女声" | "男声" | "童声"
@@ -41,6 +43,7 @@ export function VideoGenerationPage() {
   const [inputMethod, setInputMethod] = useState<"text" | "file" | "url">("text")
   const [novelText, setNovelText] = useState("")
   const [urlInput, setUrlInput] = useState("")
+  const [chapterPageInput, setChapterPageInput] = useState("")
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>("古风")
   const [voiceType, setVoiceType] = useState<VoiceType>("男声")
   const [resolution, setResolution] = useState<Resolution>("1080p")
@@ -48,12 +51,40 @@ export function VideoGenerationPage() {
   const [progress, setProgress] = useState(0)
   const [statusText, setStatusText] = useState("")
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
-  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>(mockVideoSlices)
+  const [videoSlices, setVideoSlices] = useState<VideoSlice[]>([])
+  const [templateVideos, setTemplateVideos] = useState<TemplateVideo[]>([])
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState("")
   const videoRef = useRef<HTMLVideoElement>(null)
+  const { toast } = useToast()
 
   const charCount = novelText.length
   const isOverLimit = charCount > MAX_CHARS
   const estimatedTime = Math.ceil(charCount / 200)
+
+  useEffect(() => {
+    const loadTemplateVideos = async () => {
+      try {
+        const response = await getTemplateVideos()
+        if (response.code === 0 && response.data) {
+          setTemplateVideos(response.data)
+        } else {
+          toast({
+            variant: "destructive",
+            title: "加载失败",
+            description: response.message || "无法加载模板视频",
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: "加载模板视频时发生错误",
+        })
+      }
+    }
+    
+    loadTemplateVideos()
+  }, [toast])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -72,37 +103,66 @@ export function VideoGenerationPage() {
     console.log("抓取 URL:", urlInput)
   }
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!novelText || isOverLimit) return
 
     setStatus("generating")
     setProgress(0)
     setStatusText("文本分析中...")
 
-    // 模拟生成进度
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setStatus("completed")
-          setStatusText("生成完成")
-          // 生成完成后设置视频切片
-          setVideoSlices(mockVideoSlices)
-          return 100
-        }
+    try {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setStatus("completed")
+            setStatusText("生成完成")
+            loadGeneratedVideo()
+            return 100
+          }
 
-        const next = prev + 10
-        if (next >= 25 && next < 35) {
-          setStatusText("图像生成中...")
-        } else if (next >= 50 && next < 60) {
-          setStatusText("配音生成中...")
-        } else if (next >= 75 && next < 85) {
-          setStatusText("视频合成中...")
-        }
+          const next = prev + 10
+          if (next >= 25 && next < 35) {
+            setStatusText("图像生成中...")
+          } else if (next >= 50 && next < 60) {
+            setStatusText("配音生成中...")
+          } else if (next >= 75 && next < 85) {
+            setStatusText("视频合成中...")
+          }
 
-        return next
+          return next
+        })
+      }, 500)
+    } catch (error) {
+      setStatus("failed")
+      toast({
+        variant: "destructive",
+        title: "生成失败",
+        description: "视频生成过程中发生错误",
       })
-    }, 500)
+    }
+  }
+  
+  const loadGeneratedVideo = async () => {
+    try {
+      const response = await getGeneratedVideo("video-1")
+      if (response.code === 0 && response.data) {
+        setGeneratedVideoUrl(response.data.url)
+        setVideoSlices(response.data.slices)
+      } else {
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: response.message || "无法加载生成的视频",
+        })
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "加载失败",
+        description: "加载视频时发生错误",
+      })
+    }
   }
 
   const handleRegenerate = () => {
@@ -112,8 +172,9 @@ export function VideoGenerationPage() {
   }
 
   const handleDownload = () => {
-    // TODO: 实现下载功能
-    console.log("下载视频:", mockGeneratedVideo.url)
+    if (generatedVideoUrl) {
+      console.log("下载视频:", generatedVideoUrl)
+    }
   }
 
   const handleShare = () => {
@@ -127,15 +188,14 @@ export function VideoGenerationPage() {
     }
   }
 
-  const handleTemplateClick = (templateId: string) => {
-    const template = mockTemplateVideos.find(t => t.id === templateId)
+  const handleTemplateClick = async (templateId: string) => {
+    const template = templateVideos.find(t => t.id === templateId)
     if (template) {
       setNovelText(template.novelText)
       setSelectedStyle(template.style as VideoStyle)
       setVoiceType(template.voiceType)
       setResolution(template.resolution)
       setVideoSlices(template.slices)
-      // 模拟已完成状态以显示视频切片
       setStatus("completed")
     }
   }
@@ -205,6 +265,13 @@ export function VideoGenerationPage() {
                       <LinkIcon className="mr-2 h-4 w-4" />
                       抓取
                     </Button>
+                  </div>
+                  <div>
+                    <Input
+                      placeholder="章节和页码(可选,如:第1章 1-10页)"
+                      value={chapterPageInput}
+                      onChange={(e) => setChapterPageInput(e.target.value)}
+                    />
                   </div>
                   {novelText && (
                     <Textarea
@@ -337,10 +404,10 @@ export function VideoGenerationPage() {
             {/* 视频预览播放器 */}
             <Card className="p-6">
               <div className="aspect-video bg-black rounded-lg overflow-hidden mb-4 flex items-center justify-center">
-                {status === "completed" ? (
+                {status === "completed" && generatedVideoUrl ? (
                   <video
                     ref={videoRef}
-                    src={mockGeneratedVideo.url}
+                    src={generatedVideoUrl}
                     controls
                     className="w-full h-full"
                   >
@@ -414,7 +481,7 @@ export function VideoGenerationPage() {
                 className="w-full"
               >
                 <CarouselContent>
-                  {mockTemplateVideos.map((template) => (
+                  {templateVideos.map((template) => (
                     <CarouselItem key={template.id} className="basis-1/2 lg:basis-1/3">
                       <button
                         onClick={() => handleTemplateClick(template.id)}

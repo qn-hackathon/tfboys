@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,8 +12,9 @@ import {
   Trash2,
   RefreshCw,
 } from "lucide-react"
-import { mockTasks, getTaskStatusText, getTaskStatusVariant, Task } from "@/data/mockData"
+import { getTasks, deleteTask, getTaskStatusText, getTaskStatusVariant, type Task } from "@/apis/task"
 import { VideoPreviewDialog } from "@/components/VideoPreviewDialog"
+import { useToast } from "@/components/ui/use-toast"
 
 type FilterStatus = "all" | "in-progress" | "completed" | "failed"
 
@@ -21,8 +22,39 @@ export function MyTasksPage() {
   const [filter, setFilter] = useState<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
 
-  const filteredTasks = mockTasks.filter((task) => {
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        setLoading(true)
+        const response = await getTasks()
+        if (response.code === 0 && response.data) {
+          setTasks(response.data)
+        } else {
+          toast({
+            variant: "destructive",
+            title: "加载失败",
+            description: response.message || "无法加载任务列表",
+          })
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: "加载任务列表时发生错误",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadTasks()
+  }, [toast])
+
+  const filteredTasks = tasks.filter((task) => {
     if (filter === "in-progress") {
       return ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
     }
@@ -47,9 +79,29 @@ export function MyTasksPage() {
     console.log("下载视频:", task.id)
   }
 
-  const handleDelete = (task: Task) => {
-    // TODO: 实现删除功能
-    console.log("删除任务:", task.id)
+  const handleDelete = async (task: Task) => {
+    try {
+      const response = await deleteTask(task.id)
+      if (response.code === 0) {
+        setTasks(tasks.filter(t => t.id !== task.id))
+        toast({
+          title: "删除成功",
+          description: "任务已成功删除",
+        })
+      } else {
+        toast({
+          variant: "destructive",
+          title: "删除失败",
+          description: response.message || "无法删除任务",
+        })
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "删除失败",
+        description: "删除任务时发生错误",
+      })
+    }
   }
 
   const handleRetry = (task: Task) => {
@@ -79,7 +131,7 @@ export function MyTasksPage() {
     return "🔄"
   }
 
-  const inProgressCount = mockTasks.filter((task) =>
+  const inProgressCount = tasks.filter((task) =>
     ["pending", "analyzing", "generating_images", "generating_audio", "synthesizing_video"].includes(task.status)
   ).length
 
