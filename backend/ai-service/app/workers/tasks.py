@@ -116,6 +116,7 @@ async def _process_novel_task_async(task_id: str, novel_text: str) -> dict:
                 scene_index=idx,
                 description=scene_data["description"],
                 narration=scene_data["narration"],
+                subtitle_text=scene_data["narration"],  # 使用旁白作为字幕
                 image_url=scene_image_url,
                 audio_url=audio_url,
                 duration=audio_duration

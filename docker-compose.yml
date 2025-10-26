@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   redis:
     image: redis:7-alpine
@@ -27,6 +25,8 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
       - AI_SERVICE_URL=http://ai-service:8002
+    volumes:
+      - ./shared:/app/shared:ro
     depends_on:
       redis:
         condition: service_healthy

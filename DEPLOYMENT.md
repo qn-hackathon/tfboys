@@ -25,6 +25,7 @@
 ## 🔧 服务说明
 
 ### 1. API Gateway (端口 8001)
+
 - **功能**: 用户请求入口，转发请求到后端服务
 - **路由**:
   - `POST /api/tasks` - 创建视频生成任务
@@ -34,6 +35,7 @@
   - `GET /health` - 健康检查
 
 ### 2. AI Service (端口 8002)
+
 - **功能**: AI 处理服务（文本分析、图像生成、配音生成）
 - **内部路由**:
   - `POST /internal/tasks` - 创建 AI 处理任务
@@ -42,28 +44,34 @@
   - `GET /health` - 健康检查
 
 ### 3. Video Service (端口 8003)
+
 - **功能**: 视频合成服务
 - **内部路由**:
-  - `POST /internal/synthesize` - 提交视频合成任务
+  - `POST /internal/video-synthesis/jobs` - 提交视频合成任务
   - `GET /internal/status/{task_id}` - 获取合成状态
 
 ### 4. Redis (端口 6379)
+
 - **功能**: 任务状态管理、消息队列
 
 ### 5. Celery Worker
+
 - **功能**: 异步任务处理
 - **任务**: `process_novel_task` - 处理小说生成视频的完整流程
 
 ## 📦 前置要求
 
 ### 系统要求
+
 - Python 3.9+
 - Redis
 - Node.js 16+ (前端)
 - 至少 4GB RAM
 
 ### Python 依赖
+
 所有后端服务共享以下核心依赖：
+
 - FastAPI
 - Celery
 - Redis (Python 客户端)
@@ -95,6 +103,7 @@ redis-cli ping  # 应该返回 PONG
 ### 步骤 3: 启动 AI Service
 
 **终端 1 - AI Service API**:
+
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 export PYTHONPATH="/Users/jiangzhi/repo/tfboys"
@@ -111,6 +120,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8002
 ```
 
 **终端 2 - Celery Worker**:
+
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 export PYTHONPATH="/Users/jiangzhi/repo/tfboys"
@@ -120,6 +130,7 @@ celery -A app.workers.celery_app worker --loglevel=info
 ```
 
 **验证**:
+
 ```bash
 # 检查 AI Service
 curl http://localhost:8002/health
@@ -130,6 +141,7 @@ curl http://localhost:8002/health
 ### 步骤 4: 启动 API Gateway
 
 **终端 3 - API Gateway**:
+
 ```bash
 cd /Users/jiangzhi/repo/tfboys/backend/api-gateway
 export PYTHONPATH="/Users/jiangzhi/repo/tfboys"
@@ -142,6 +154,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 **验证**:
+
 ```bash
 # 检查 API Gateway
 curl http://localhost:8001/health
@@ -174,6 +187,7 @@ cd /Users/jiangzhi/repo/tfboys/backend/ai-service
 ```
 
 **预期结果**:
+
 - ✅ AI Service 健康检查通过
 - ✅ 任务创建成功
 - ✅ 文本分析完成
@@ -189,6 +203,7 @@ cd /Users/jiangzhi/repo/tfboys/backend/api-gateway
 ```
 
 **预期结果**:
+
 - ✅ API Gateway 健康检查通过
 - ✅ AI Service 健康检查通过
 - ✅ 任务创建成功（通过 Gateway）
@@ -220,6 +235,7 @@ curl http://localhost:8001/api/tasks
 ### 1. Celery Worker 报错: "wrong number of arguments for 'ping' command"
 
 **解决方案**:
+
 ```bash
 # 检查 Redis 库版本
 pip show redis
@@ -236,6 +252,7 @@ cd /Users/jiangzhi/repo/tfboys/shared && pip install -e .
 **原因**: FastAPI 应用未正确初始化 Redis 客户端
 
 **检查**:
+
 ```bash
 # 查看服务启动日志
 # 应该看到: "Redis client initialized"
@@ -244,10 +261,12 @@ cd /Users/jiangzhi/repo/tfboys/shared && pip install -e .
 ### 3. 任务一直处于 pending 状态
 
 **可能原因**:
+
 - Celery Worker 未启动
 - Worker 未注册任务
 
 **检查**:
+
 ```bash
 # 查看 Worker 日志
 # 应该看到:
@@ -258,6 +277,7 @@ cd /Users/jiangzhi/repo/tfboys/shared && pip install -e .
 ### 4. API Gateway 无法连接 AI Service
 
 **检查配置**:
+
 ```bash
 # 确认 AI Service URL 配置正确
 # backend/api-gateway/app/config.py
@@ -267,6 +287,7 @@ cd /Users/jiangzhi/repo/tfboys/shared && pip install -e .
 ### 5. LocalStorageClient not initialized
 
 **解决方案**:
+
 - 确保 Celery Worker 已重启并加载最新代码
 - 检查 Worker 日志，确认 `task_prerun` 信号触发
 
@@ -339,22 +360,22 @@ AI_SERVICE_URL=http://localhost:8002
 
 ### API Gateway (用户端点)
 
-| 方法 | 端点 | 描述 |
-|------|------|------|
-| POST | `/api/tasks` | 创建视频生成任务 |
-| GET | `/api/tasks/{task_id}` | 获取任务详情 |
-| GET | `/api/tasks` | 获取任务列表 |
-| DELETE | `/api/tasks/{task_id}` | 删除任务 |
-| GET | `/health` | 健康检查 |
+| 方法   | 端点                   | 描述             |
+| ------ | ---------------------- | ---------------- |
+| POST   | `/api/tasks`           | 创建视频生成任务 |
+| GET    | `/api/tasks/{task_id}` | 获取任务详情     |
+| GET    | `/api/tasks`           | 获取任务列表     |
+| DELETE | `/api/tasks/{task_id}` | 删除任务         |
+| GET    | `/health`              | 健康检查         |
 
 ### AI Service (内部端点)
 
-| 方法 | 端点 | 描述 |
-|------|------|------|
-| POST | `/internal/tasks` | 创建 AI 处理任务 |
-| GET | `/internal/tasks/{task_id}` | 获取任务状态 |
-| POST | `/callbacks/video-completed` | 视频完成回调 |
-| GET | `/health` | 健康检查 |
+| 方法 | 端点                         | 描述             |
+| ---- | ---------------------------- | ---------------- |
+| POST | `/internal/tasks`            | 创建 AI 处理任务 |
+| GET  | `/internal/tasks/{task_id}`  | 获取任务状态     |
+| POST | `/callbacks/video-completed` | 视频完成回调     |
+| GET  | `/health`                    | 健康检查         |
 
 ## 🎯 性能优化
 
@@ -386,6 +407,7 @@ redis-cli CONFIG SET maxmemory-policy allkeys-lru
 ## 🆘 获取帮助
 
 如果遇到问题：
+
 1. 查看相关服务的日志
 2. 检查 Redis 连接状态
 3. 验证环境变量配置
