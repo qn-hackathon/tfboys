@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -22,7 +21,6 @@ import { ShareDialog } from "@/components/ShareDialog"
 import { toast } from "sonner"
 
 type VideoStyle = "古风" | "现代" | "动漫" | "奇幻" | "3D卡通"
-type VoiceType = "女声" | "男声" | "童声"
 type Resolution = "1080p" | "720p"
 type GenerationStatus = "idle" | "generating" | "completed" | "failed"
 
@@ -43,7 +41,6 @@ export function VideoGenerationPage() {
   const [novelText, setNovelText] = useState("")
   const [urlInput, setUrlInput] = useState("")
   const [selectedStyle, setSelectedStyle] = useState<VideoStyle>("古风")
-  const [voiceType, setVoiceType] = useState<VoiceType>("男声")
   const [resolution, setResolution] = useState<Resolution>("1080p")
   const [status, setStatus] = useState<GenerationStatus>("idle")
   const [progress, setProgress] = useState(0)
@@ -206,13 +203,12 @@ export function VideoGenerationPage() {
                       onChange={handleFileUpload}
                     />
                   </div>
-                  {novelText && (
-                    <Textarea
-                      value={novelText}
-                      onChange={(e) => setNovelText(e.target.value)}
-                      className="min-h-[120px] resize-none"
-                    />
-                  )}
+                  <Textarea
+                    placeholder="输入关键章节或者页码"
+                    value={novelText}
+                    onChange={(e) => setNovelText(e.target.value)}
+                    className="min-h-[120px] resize-none"
+                  />
                 </TabsContent>
 
                 <TabsContent value="url" className="space-y-4">
@@ -229,13 +225,12 @@ export function VideoGenerationPage() {
                       抓取
                     </Button>
                   </div>
-                  {novelText && (
-                    <Textarea
-                      value={novelText}
-                      onChange={(e) => setNovelText(e.target.value)}
-                      className="min-h-[120px] resize-none"
-                    />
-                  )}
+                  <Textarea
+                    placeholder="输入关键章节或者页码"
+                    value={novelText}
+                    onChange={(e) => setNovelText(e.target.value)}
+                    className="min-h-[120px] resize-none"
+                  />
                 </TabsContent>
               </Tabs>
 
@@ -283,33 +278,6 @@ export function VideoGenerationPage() {
                       </button>
                     ))}
                   </div>
-                </div>
-
-                {/* 配音类型 */}
-                <div>
-                  <Label className="text-base mb-3 block">配音类型</Label>
-                  <RadioGroup value={voiceType} onValueChange={(v) => setVoiceType(v as VoiceType)}>
-                    <div className="flex gap-6">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="女声" id="voice-female" />
-                        <Label htmlFor="voice-female" className="cursor-pointer">
-                          女声
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="男声" id="voice-male" />
-                        <Label htmlFor="voice-male" className="cursor-pointer">
-                          男声
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="童声" id="voice-child" />
-                        <Label htmlFor="voice-child" className="cursor-pointer">
-                          童声
-                        </Label>
-                      </div>
-                    </div>
-                  </RadioGroup>
                 </div>
 
                 {/* 视频分辨率 */}
