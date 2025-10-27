@@ -136,10 +136,6 @@ make clean     # 清理临时文件
 # 七牛 AI Token API 配置
 QINIU_API_KEY=your-qiniu-ai-token-api-key
 
-# 七牛 TTS 服务配置
-QINIU_ACCESS_KEY=your-qiniu-access-key
-QINIU_SECRET_KEY=your-qiniu-secret-key
-
 # Redis 配置
 REDIS_URL=redis://localhost:6379/0
 ```
