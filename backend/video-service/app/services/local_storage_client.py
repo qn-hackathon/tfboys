@@ -18,13 +18,16 @@ class LocalStorageClient:
             object_key: 目标对象键
             
         Returns:
-            目标文件路径
+            HTTP访问URL
         """
         dest_path = os.path.join(self.base_dir, object_key)
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)
         
         shutil.copy2(local_path, dest_path)
-        return dest_path
+        
+        # 返回HTTP URL格式
+        filename = os.path.basename(object_key)
+        return f"http://100.100.21.31:8004/{filename}"
     
     async def download_file(self, url_or_path: str, local_path: str):
         """
