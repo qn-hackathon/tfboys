@@ -100,17 +100,21 @@ def process_video_job(self, job_data: dict):
         
         import asyncio
         try:
-            # 检查是否有运行中的事件循环
-            loop = asyncio.get_event_loop()
-            if loop.is_closed():
-                # 如果事件循环已关闭，创建新的事件循环
-                asyncio.set_event_loop(asyncio.new_event_loop())
+            # 在Celery worker中，直接使用asyncio.run()创建新的事件循环
             video_url = asyncio.run(video_composer.compose_video(job))
         except RuntimeError as e:
             if "cannot be called from a running event loop" in str(e):
-                # 如果已经在事件循环中，使用 create_task
+                # 如果已经在事件循环中，使用 run_until_complete
                 loop = asyncio.get_event_loop()
                 video_url = loop.run_until_complete(video_composer.compose_video(job))
+            elif "no current event loop" in str(e):
+                # 如果没有事件循环，创建新的
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    video_url = loop.run_until_complete(video_composer.compose_video(job))
+                finally:
+                    loop.close()
             else:
                 raise
         
@@ -140,6 +144,18 @@ def process_video_job(self, job_data: dict):
                     duration,
                     "success"
                 ))
+            elif "no current event loop" in str(e):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(send_completion_callback(
+                        job.task_id,
+                        video_url,
+                        duration,
+                        "success"
+                    ))
+                finally:
+                    loop.close()
             else:
                 raise
         
@@ -169,6 +185,19 @@ def process_video_job(self, job_data: dict):
                     "failed",
                     error_msg
                 ))
+            elif "no current event loop" in str(e):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(send_completion_callback(
+                        job.task_id,
+                        "",
+                        0.0,
+                        "failed",
+                        error_msg
+                    ))
+                finally:
+                    loop.close()
             else:
                 raise
         
